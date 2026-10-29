@@ -732,7 +732,7 @@ function redrawAll(){requestAnimationFrame(()=>{drawVisibleMotifs();drawTorus()}
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{redrawAll();$$('canvas[data-photo]').forEach(cv=>{if(cv.offsetParent)drawPhoto(cv,PHOTOS.find(p=>p.id===cv.dataset.photo))})},150)});
 const fmt=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Argentina/Buenos_Aires',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
 setInterval(()=>$('#clock').textContent=fmt.format(new Date())+' ART',1000);$('#clock').textContent=fmt.format(new Date())+' ART';
-$('#copyMail').addEventListener('click',()=>{const t='kmylo6@dot.com';navigator.clipboard.writeText(t).then(()=>toast('Email copied')).catch(()=>{const r=document.createRange();r.selectNodeContents($('#mailTxt'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Selected, press Ctrl+C')})});
+$('#copyMail').addEventListener('click',()=>{const t='kmylo6@hotmail.com';navigator.clipboard.writeText(t).then(()=>toast('Email copied')).catch(()=>{const r=document.createRange();r.selectNodeContents($('#mailTxt'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Selected, press Ctrl+C')})});
 
 route();drawTorus();if(!RM)requestAnimationFrame(loop);
 if(document.fonts)document.fonts.ready.then(redrawAll);
