@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>On the Measurement of the Circle — Archimedes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Space+Mono:wght@400;700&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:#0B0B0B;color:#F5F5F0;font-family:'Space Mono',monospace;min-height:100vh;position:relative}
+a{color:#FF5500;text-decoration:none}
+a:hover{color:#F5F5F0}
+::selection{background:#FF5500;color:#0B0B0B}
+input[type=range]{-webkit-appearance:none;appearance:none;height:2px;background:#2E2E2E;outline:none;width:100%}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:#FF5500;cursor:pointer;border:none}
+input[type=range]::-moz-range-thumb{width:14px;height:14px;background:#FF5500;border:none;border-radius:0;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #FF5500;outline-offset:3px}
+button{font-family:'Space Mono',monospace}
+
+.grid{position:fixed;inset:0;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(255,85,0,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,85,0,.045) 1px,transparent 1px);background-size:40px 40px}
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+
+/* language toggle */
+.lang{display:inline-flex;border:1px solid #2E2E2E;flex:none}
+.lang button{font-size:10px;font-weight:700;letter-spacing:.14em;padding:5px 10px;background:transparent;color:#AEAEAE;border:0;cursor:pointer}
+.lang button:hover{color:#F5F5F0}
+.lang button[aria-pressed=true]{background:#FF5500;color:#0B0B0B}
+
+.top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;align-items:center;border-top:2px solid #FF5500;border-bottom:1px solid #2E2E2E;padding:10px 0;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#AEAEAE;margin-top:clamp(20px,4vw,40px)}
+.top .c{color:#FF5500;font-weight:700;letter-spacing:.2em}
+
+.hero{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:clamp(40px,6vw,72px) clamp(20px,4vw,40px) clamp(40px,6vw,64px);display:flex;flex-wrap:wrap;gap:48px;align-items:center}
+.hero .l{flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:20px}
+.kicker{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#FF5500}
+h1{font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:clamp(52px,8vw,112px);line-height:.9;letter-spacing:-.01em;text-transform:uppercase}
+h1 span{color:#FF5500}
+.greek{font-size:13px;color:#AEAEAE;letter-spacing:.06em}
+.claim{margin-top:12px;font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:clamp(24px,2.6vw,32px);line-height:1.15;max-width:22ch;text-wrap:pretty}
+.eq{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:16px 0;border-top:1px solid #2E2E2E;border-bottom:1px solid #2E2E2E}
+.eq .sign{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;color:#AEAEAE}
+.eq .meta{display:flex;flex-direction:column;gap:2px;font-size:11px;color:#AEAEAE;letter-spacing:.06em}
+.eq .meta b,.m{color:#F5F5F0;font-family:'STIX Two Text',serif;font-size:15px;font-style:italic;font-weight:600}
+.eq .res{font-family:'STIX Two Text',serif;font-size:36px;font-weight:600;font-style:italic;color:#FF5500;margin-left:auto}
+.cta{display:flex;flex-wrap:wrap;gap:24px;align-items:center}
+.cta a{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:10px 20px;border:1px solid #FF5500;color:#FF5500}
+.cta a:hover{background:#FF5500;color:#0B0B0B}
+.cta span{font-size:11px;color:#AEAEAE;line-height:1.6}
+figure{flex:1 1 440px;min-width:0;display:flex;flex-direction:column;gap:10px}
+canvas{display:block;width:100%}
+figcaption{display:flex;gap:12px;font-size:10px;line-height:1.6;color:#AEAEAE;letter-spacing:.04em}
+figcaption b{color:#FF5500;white-space:nowrap;font-weight:400}
+
+nav.sticky{position:sticky;top:0;z-index:20;background:rgba(11,11,11,.92);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid #2E2E2E;border-bottom:1px solid #2E2E2E}
+nav.sticky .in{max-width:1200px;margin:0 auto;padding:0 clamp(20px,4vw,40px);display:flex;gap:28px;align-items:center;overflow-x:auto}
+nav.sticky .brand{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#F5F5F0;white-space:nowrap;padding:12px 0}
+nav.sticky .sp{flex:1}
+nav.sticky a.nl{display:flex;gap:8px;padding:14px 0 12px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;color:#AEAEAE;border-bottom:2px solid transparent}
+nav.sticky a.nl.on{color:#FF5500;border-bottom-color:#FF5500}
+
+section.sec{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:clamp(56px,8vw,96px) clamp(20px,4vw,40px) 0;scroll-margin-top:52px;display:flex;flex-direction:column;gap:28px}
+section.sec.big{padding-top:clamp(72px,9vw,120px)}
+.tagrow{display:flex;align-items:center;gap:12px}
+.tagrow .tg{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#FF5500;background:rgba(255,85,0,.1);border:1px solid #FF5500;padding:4px 10px;white-space:nowrap}
+.tagrow .ln{flex:1;height:1px;background:#2E2E2E}
+.tagrow .rt{font-size:10px;color:#AEAEAE;letter-spacing:.1em;white-space:nowrap}
+h2{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(36px,5vw,64px);line-height:.95;text-transform:uppercase;max-width:18ch;text-wrap:balance}
+h3{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(28px,3.4vw,40px);line-height:1;text-transform:uppercase;max-width:22ch}
+.lead{font-size:13px;line-height:1.8;color:#AEAEAE;max-width:62ch;text-wrap:pretty}
+.small{font-size:11px;line-height:1.8;color:#AEAEAE;max-width:70ch}
+.small b.acc,.acc{color:#FF5500;font-weight:400}
+
+.panel{background:#1A1A1A;border:1px solid #2E2E2E;border-top:3px solid #FF5500;display:flex;flex-wrap:wrap}
+.pad{padding:24px}
+.col{display:flex;flex-direction:column}
+.side{border-left:1px solid #2E2E2E}
+@media(max-width:720px){.side{border-left:0;border-top:1px solid #2E2E2E}}
+.ctrl{display:flex;flex-wrap:wrap;align-items:center;gap:16px 24px;padding-top:16px;border-top:1px solid #2E2E2E}
+.btn{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:9px 18px;border:1px solid #FF5500;background:transparent;color:#FF5500;cursor:pointer}
+.btn:hover:not(:disabled){background:#FF5500;color:#0B0B0B}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.ghost{font-weight:400;padding:9px 14px;border-color:#2E2E2E;color:#AEAEAE}
+.btn.ghost:hover{border-color:#FF5500;color:#FF5500;background:transparent}
+.rl{display:flex;align-items:center;gap:12px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#AEAEAE}
+.rl .v{color:#F5F5F0;font-weight:700;min-width:36px;text-align:right}
+.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#AEAEAE}
+.callout{padding:14px 16px;border:1px solid rgba(255,85,0,.35);background:rgba(255,85,0,.06);display:flex;flex-direction:column;gap:6px}
+.callout .k{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#FF5500}
+.callout .f{font-family:'STIX Two Text',serif;font-size:20px;font-style:italic}
+.callout .t{font-size:10px;line-height:1.6;color:#AEAEAE}
+
+.step{display:flex;gap:14px;padding-left:14px;border-left:2px solid #2E2E2E;opacity:.4;transition:opacity .3s,border-color .3s}
+.step.on{opacity:1;border-left-color:#FF5500}
+.step .n{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:28px;line-height:1;color:#AEAEAE}
+.step.on .n{color:#FF5500}
+.step .ti{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:19px;text-transform:uppercase;letter-spacing:.02em;line-height:1.1}
+.step .bo{font-size:11px;line-height:1.7;color:#AEAEAE;margin-top:6px}
+
+.big-n{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:44px;line-height:1}
+.big-n small{font-size:18px;color:#AEAEAE;letter-spacing:.04em}
+.legend{display:flex;flex-direction:column;gap:4px;font-size:10px;color:#AEAEAE;letter-spacing:.06em;text-align:right}
+.legend b{display:inline-block;width:14px;height:2px;vertical-align:middle;margin-right:6px}
+.range{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:clamp(28px,3.2vw,40px);line-height:1;display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline}
+.range .lt{color:#AEAEAE;font-size:.8em;font-family:'STIX Two Text',serif;font-weight:400;font-style:italic}
+.axis{position:relative;height:64px;margin:0 6px}
+.axis .tick{position:absolute;top:40px;transform:translateX(-50%);font-size:9px;color:#AEAEAE}
+.trow{display:grid;grid-template-columns:56px minmax(0,1fr) minmax(0,1fr);gap:8px;padding:9px 10px;font-size:12px;text-align:left;border:none;border-bottom:1px solid #2E2E2E;background:transparent;color:#6E6E6E;cursor:pointer;transition:background .3s,color .3s;width:100%}
+.trow:hover{background:rgba(255,85,0,.08)}
+.trow.cur{background:rgba(255,85,0,.14);color:#FF5500}
+.trow.past{color:#F5F5F0}
+.trow.cur.past{color:#FF5500}
+.trow span:first-child{font-weight:700}
+.thead{display:grid;grid-template-columns:56px minmax(0,1fr) minmax(0,1fr);gap:8px;padding:8px 10px;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#AEAEAE;border-bottom:1px solid #2E2E2E}
+.drow{display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;padding-bottom:16px;border-bottom:1px solid #2E2E2E}
+.drow .n{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;line-height:1;color:#FF5500}
+.drow .ti{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;text-transform:uppercase;letter-spacing:.02em}
+.drow .fo{font-family:'STIX Two Text',serif;font-size:19px;font-style:italic;overflow-wrap:anywhere;margin-top:6px}
+.drow .lv{font-size:11px;color:#AEAEAE;overflow-wrap:anywhere;margin-top:6px}
+.note{display:flex;flex-wrap:wrap;gap:20px;align-items:center;padding:18px 20px;border:1px solid #2E2E2E}
+
+.tl{position:relative;height:84px;margin:8px 8px 0}
+.tl .dot{position:absolute;top:36px;width:9px;height:9px;margin-left:-4px;background:#AEAEAE}
+.tl .yr{position:absolute;top:56px;font-size:9px;color:#AEAEAE;letter-spacing:.1em}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1px;background:#2E2E2E;border:1px solid #2E2E2E}
+.card{background:#1A1A1A;padding:20px;display:flex;flex-direction:column;gap:8px}
+.card .y{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;color:#AEAEAE}
+.card .nm{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:17px;text-transform:uppercase}
+.card .bd{font-size:11px;line-height:1.7;color:#AEAEAE}
+.card .bd b{color:#F5F5F0}
+.card.hl{box-shadow:inset 0 3px 0 #FF5500}
+.card.hl .y{color:#FF5500}
+.card.nw .y{color:#F5F5F0}
+blockquote{margin-top:24px;padding-top:clamp(24px,4vw,48px);border-top:2px solid #FF5500;display:flex;flex-direction:column;gap:16px}
+blockquote p{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-style:italic;font-size:clamp(24px,3vw,38px);line-height:1.2;max-width:30ch;text-wrap:pretty}
+footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;border-top:1px solid #2E2E2E;border-bottom:2px solid #FF5500;padding:10px 0;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#AEAEAE}
+</style>
+</head>
+<body>
+<div class="grid" aria-hidden="true"></div>
+
+<div class="wrap" id="inicio">
+  <header class="top">
+    <div data-i18n="hdrL"></div>
+    <div class="c" data-i18n="hdrC"></div>
+    <div>Ref: ARCH-01 · DRS-π</div>
+    <div class="lang" role="group" aria-label="Language / Idioma">
+      <button data-lang="en" aria-pressed="true">EN</button><button data-lang="es" aria-pressed="false">ES</button>
+    </div>
+  </header>
+</div>
+
+<section class="hero">
+  <div class="l">
+    <div class="kicker" data-i18n="kicker"></div>
+    <h1 data-i18n-html="h1"></h1>
+    <div class="greek" data-i18n="greek"></div>
+    <p class="claim" data-i18n="claim"></p>
+    <div class="eq">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="#FF5500"/></svg>
+      <span class="sign">=</span>
+      <svg width="96" height="40" viewBox="0 0 96 40" aria-hidden="true"><path d="M2 2 L2 38 L94 38 Z" fill="#FF5500"/></svg>
+      <div class="meta">
+        <span><b>2πr</b> · <span data-i18n="eqBase"></span></span>
+        <span><b>r</b> · <span data-i18n="eqH"></span></span>
+      </div>
+      <span class="res">= πr²</span>
+    </div>
+    <div class="cta">
+      <a href="#idea" data-i18n="cta"></a>
+      <span data-i18n-html="ctaNote"></span>
+    </div>
+  </div>
+  <figure>
+    <canvas id="cHero" style="aspect-ratio:3/2"></canvas>
+    <figcaption><b>[ Prop. I ]</b><span data-i18n="heroCap"></span></figcaption>
+  </figure>
+</section>
+
+<nav class="sticky">
+  <div class="in">
+    <a href="#inicio" class="brand" data-i18n="brand"></a>
+    <div class="sp"></div>
+    <a class="nl" href="#idea" data-sec="idea"><span>01</span><span data-i18n="nav1"></span></a>
+    <a class="nl" href="#numero" data-sec="numero"><span>02</span><span data-i18n="nav2"></span></a>
+    <a class="nl" href="#legado" data-sec="legado"><span>03</span><span data-i18n="nav3"></span></a>
+    <div class="lang" role="group" aria-label="Language / Idioma">
+      <button data-lang="en" aria-pressed="true">EN</button><button data-lang="es" aria-pressed="false">ES</button>
+    </div>
+  </div>
+</nav>
+
+<!-- 01 -->
+<section id="idea" class="sec">
+  <div class="tagrow"><span class="tg" data-i18n="s1tag"></span><span class="ln"></span><span class="rt" data-i18n="s1rt"></span></div>
+  <h2 style="max-width:16ch" data-i18n="s1h"></h2>
+  <p class="lead" data-i18n="s1p"></p>
+  <div class="panel">
+    <div class="pad col" style="flex:1.7 1 520px;min-width:0;gap:18px">
+      <canvas id="cUnroll" style="aspect-ratio:3/2"></canvas>
+      <div class="ctrl">
+        <button class="btn" id="bPlay" style="min-width:190px"></button>
+        <label class="rl" style="flex:1 1 200px"><span data-i18n="progress"></span><input id="rT" type="range" min="0" max="100" step="1" value="0"><span class="v" id="vT">0%</span></label>
+        <label class="rl" style="flex:1 1 160px"><span data-i18n="rings"></span><input id="rR" type="range" min="3" max="40" step="1" value="12"><span class="v" id="vR" style="min-width:22px">12</span></label>
+      </div>
+    </div>
+    <div class="pad col side" style="flex:1 1 280px;min-width:0;gap:22px">
+      <div class="eyebrow" data-i18n="stepsT"></div>
+      <div class="step" id="st0"><span class="n">01</span><div><div class="ti" data-i18n="st1t"></div><div class="bo" data-i18n="st1b"></div></div></div>
+      <div class="step" id="st1"><span class="n">02</span><div><div class="ti" data-i18n="st2t"></div><div class="bo" data-i18n="st2b"></div></div></div>
+      <div class="step" id="st2"><span class="n">03</span><div><div class="ti" data-i18n="st3t"></div><div class="bo" data-i18n="st3b"></div></div></div>
+      <div class="callout" style="margin-top:auto">
+        <div class="k" data-i18n="result"></div>
+        <div class="f">A = ½ · 2πr · r = πr²</div>
+        <div class="t" data-i18n="resultB"></div>
+      </div>
+    </div>
+  </div>
+  <p class="small" data-i18n-html="proof"></p>
+</section>
+
+<!-- 02 -->
+<section id="numero" class="sec big">
+  <div class="tagrow"><span class="tg" data-i18n="s2tag"></span><span class="ln"></span><span class="rt" data-i18n="s2rt"></span></div>
+  <h2 data-i18n="s2h"></h2>
+  <p class="lead" data-i18n="s2p"></p>
+  <div class="panel">
+    <div class="pad col" style="flex:1 1 440px;min-width:0;gap:18px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+        <div class="big-n"><span id="nVal">6</span> <small data-i18n="sides"></small></div>
+        <div class="legend">
+          <span><b style="background:#FF5500"></b><span data-i18n="legIn"></span></span>
+          <span><b style="background:#AEAEAE"></b><span data-i18n="legOut"></span></span>
+        </div>
+      </div>
+      <canvas id="cPoly" style="aspect-ratio:1/1;max-height:560px"></canvas>
+      <div class="ctrl" style="gap:12px">
+        <button class="btn" id="bDouble"></button>
+        <button class="btn ghost" id="bReset" data-i18n="hexa"></button>
+        <label class="rl" style="flex:1 1 180px"><span data-i18n="sidesL"></span><input id="rN" type="range" min="4" max="96" step="1" value="6"></label>
+      </div>
+    </div>
+    <div class="pad col side" style="flex:1 1 340px;min-width:0;gap:24px">
+      <div class="col" style="gap:8px">
+        <div class="eyebrow" data-i18n="rangeT"></div>
+        <div class="range"><span id="loS" style="color:#FF5500"></span><span class="lt">&lt; π &lt;</span><span id="hiS"></span></div>
+        <div style="font-size:11px;color:#AEAEAE"><span data-i18n="width"></span> · <b style="color:#F5F5F0" id="wS"></b></div>
+      </div>
+      <div class="axis">
+        <div style="position:absolute;left:0;right:0;top:26px;height:1px;background:#2E2E2E"></div>
+        <div id="band" style="position:absolute;top:18px;height:16px;background:rgba(255,85,0,.28);border-left:2px solid #FF5500;border-right:2px solid #AEAEAE"></div>
+        <div style="position:absolute;top:8px;bottom:22px;left:31.93%;width:1px;background:#F5F5F0"></div>
+        <div style="position:absolute;top:-6px;left:31.93%;transform:translateX(-50%);font-family:'STIX Two Text',serif;font-size:15px;font-style:italic;line-height:1">π</div>
+        <div class="tick" style="left:8.33%">3.0</div><div class="tick" style="left:25%">3.1</div><div class="tick" style="left:41.67%">3.2</div>
+        <div class="tick" style="left:58.33%">3.3</div><div class="tick" style="left:75%">3.4</div><div class="tick" style="left:91.67%">3.5</div>
+      </div>
+      <div class="col">
+        <div class="thead"><span data-i18n="tSides"></span><span data-i18n="tLo"></span><span data-i18n="tHi"></span></div>
+        <div id="table"></div>
+      </div>
+      <div class="callout">
+        <div class="k" data-i18n="archK"></div>
+        <div style="font-family:'STIX Two Text',serif;font-size:20px">3 + <sup style="font-size:.65em">10</sup>⁄<sub style="font-size:.65em">71</sub> &lt; <i>π</i> &lt; 3 + <sup style="font-size:.65em">1</sup>⁄<sub style="font-size:.65em">7</sub></div>
+        <div class="t" data-i18n="archT"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col" style="gap:20px;padding-top:24px">
+    <h3 data-i18n="dH"></h3>
+    <p style="font-size:12px;line-height:1.8;color:#AEAEAE;max-width:64ch;text-wrap:pretty" data-i18n-html="dP"></p>
+    <div class="panel">
+      <div class="pad col" style="flex:1 1 340px;min-width:0;gap:12px">
+        <div class="eyebrow" id="sliceT"></div>
+        <svg viewBox="0 0 340 236" style="display:block;width:100%;height:auto" role="img" aria-label="Slice of the polygon: angle θ, inscribed side a, circumscribed side b">
+          <path id="sArc" fill="none" stroke="rgba(245,245,240,0.85)" stroke-width="1.25"/>
+          <path id="sOut" fill="none" stroke="#AEAEAE" stroke-width="1.5"/>
+          <path id="sIn" fill="rgba(255,85,0,0.16)" stroke="#FF5500" stroke-width="2"/>
+          <line x1="170" y1="210" x2="170" y2="50" stroke="rgba(245,245,240,0.35)" stroke-width="1" stroke-dasharray="3 4"/>
+          <path id="sAng" fill="none" stroke="#FF5500" stroke-width="1.5"/>
+          <circle cx="170" cy="210" r="3" fill="#F5F5F0"/>
+          <text id="tCenter" x="170" y="228" fill="#AEAEAE" font-family="Space Mono" font-size="10" text-anchor="middle"></text>
+          <text id="tTh" fill="#FF5500" font-family="STIX Two Text, serif" font-size="17" font-style="italic">θ</text>
+          <text id="tR" fill="#F5F5F0" font-family="Space Mono" font-size="11" text-anchor="end">r = 1</text>
+          <text id="tA" fill="#FF5500" font-family="Space Mono" font-size="12" font-weight="700" text-anchor="start">a/2</text>
+          <text id="tB" y="40" fill="#AEAEAE" font-family="Space Mono" font-size="12" font-weight="700" text-anchor="start">b/2</text>
+        </svg>
+        <div style="font-size:10px;line-height:1.6;color:#AEAEAE" data-i18n="sliceCap"></div>
+      </div>
+      <div class="pad col side" style="flex:1.3 1 380px;min-width:0;gap:18px">
+        <div id="derive" class="col" style="gap:18px"></div>
+        <div class="callout" style="gap:8px">
+          <div class="k" data-i18n="limK"></div>
+          <div class="f" style="font-size:19px" data-i18n-html="limF"></div>
+          <div class="t" data-i18n="limT"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="note">
+    <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><rect x="1" y="1" width="54" height="54" fill="none" stroke="#AEAEAE"/><circle cx="28" cy="28" r="27" fill="rgba(255,85,0,.25)" stroke="#FF5500" stroke-width="1.5"/></svg>
+    <div class="col" style="flex:1 1 320px;gap:6px">
+      <div style="font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#FF5500" data-i18n="noteK"></div>
+      <div style="font-size:11px;line-height:1.7;color:#AEAEAE;max-width:72ch" data-i18n-html="noteT"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 -->
+<section id="legado" class="sec big">
+  <div class="tagrow"><span class="tg" data-i18n="s3tag"></span><span class="ln"></span><span class="rt" data-i18n="s3rt"></span></div>
+  <h2 data-i18n="s3h"></h2>
+  <div class="tl">
+    <div style="position:absolute;left:0;right:0;top:40px;height:1px;background:#2E2E2E"></div>
+    <div style="position:absolute;top:14px;left:6.38%;width:81.7%;height:14px;border:1px solid #FF5500;border-bottom:none"></div>
+    <div style="position:absolute;top:-4px;left:47.2%;transform:translateX(-50%);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#FF5500;white-space:nowrap;background:#0B0B0B;padding:0 8px" data-i18n="tlSpan"></div>
+    <div class="dot" style="left:1.28%"></div>
+    <div class="dot" style="left:6.38%;top:33px;width:15px;height:15px;margin-left:-7px;background:#FF5500"></div>
+    <div class="dot" style="left:57.4%"></div><div class="dot" style="left:69.3%"></div>
+    <div class="dot" style="left:88.1%;background:#F5F5F0"></div>
+    <div class="dot" style="left:92%"></div><div class="dot" style="left:97.1%"></div><div class="dot" style="left:98.1%"></div>
+    <div class="yr" style="left:0" data-i18n="y400"></div>
+    <div class="yr" style="left:31.4%">0</div>
+    <div class="yr" style="right:0">1950</div>
+  </div>
+  <div class="cards" id="cards"></div>
+  <blockquote>
+    <div class="kicker" data-i18n="qK"></div>
+    <p data-i18n="qT"></p>
+    <div style="font-size:10px;color:#AEAEAE;letter-spacing:.08em" data-i18n="qA"></div>
+  </blockquote>
+</section>
+
+<div class="wrap" style="padding-top:clamp(56px,8vw,96px);padding-bottom:clamp(20px,4vw,40px)">
+  <footer>
+    <div data-i18n="ftL"></div>
+    <div style="color:#FF5500">[ ARCH-01 · DRS-π ]</div>
+    <div>The Polymath Manifesto</div>
+  </footer>
+</div>
+
+<script>
+/* ============ i18n ============ */
+const I18N = {
+en: {
+  title:'On the Measurement of the Circle — Archimedes',
+  hdrL:'Κύκλου μέτρησις · ~250 BC · Syracuse', hdrC:'[ Teaching unit ]',
+  kicker:'[ The problem · how big is a circle? ]',
+  h1:'On the measure of the <span>circle</span>', greek:'Κύκλου μέτρησις — Archimedes',
+  claim:'A circle has exactly the same area as a triangle.',
+  eqBase:'the circumference', eqH:'the radius',
+  cta:'See how ↓', ctaNote:'No algebra, no calculus.<br>1,900 years before Newton.',
+  heroCap:'The circle’s rings unroll and stack into a triangle.',
+  brand:'Measure of the circle', nav1:'The idea', nav2:'The number', nav3:'Legacy',
+  s1tag:'[ 01 ] Proposition I', s1rt:'The idea', s1h:'Why is a circle a triangle?',
+  s1p:'Think of the circle as an onion: thin layers, one inside another. If you cut each layer and stretch it out, none loses any area. Drag the slider or tap unroll.',
+  unroll:'▸ Unroll', pause:'❚❚ Pause', back:'↺ Back to circle', progress:'Progress', rings:'Rings',
+  stepsT:'[ Step by step ]',
+  st1t:'Cut into rings', st1b:'Divide the circle into thin rings, one inside another.',
+  st2t:'Unroll each one', st2b:'Each ring, stretched out, is a strip of length 2π × its radius. The outer ones are longer.',
+  st3t:'Stack them', st3b:'The strips form a triangle: base 2πr (the circumference), height r (the radius).',
+  result:'[ Result ]', resultB:'More rings → straighter strips. In the limit, the equality is exact.',
+  proof:'<span class="acc">[ The proof ]</span> Archimedes doesn’t actually “unroll” anything: he argues by contradiction. If the circle were larger than the triangle, an inscribed polygon would be enough to contradict it; if smaller, a circumscribed one. This is Eudoxus’s method of exhaustion.',
+  s2tag:'[ 02 ] Proposition III', s2rt:'The number', s2h:'What is π worth? Trap it between two polygons.',
+  s2p:'A polygon inside the circle gives a smaller perimeter; one outside, a larger one. π sits in between. Archimedes started with a hexagon and doubled the sides four times: 6, 12, 24, 48, 96.',
+  sides:'sides', legIn:'inscribed · lower bound', legOut:'circumscribed · upper bound',
+  dbl:(a,b)=>`× 2 sides · ${a} → ${b}`, dblPlain:'× 2 sides', hexa:'↺ Hexagon', sidesL:'Sides',
+  rangeT:'[ Range for π ]', width:'interval width', tSides:'Sides', tLo:'Lower', tHi:'Upper',
+  archK:'[ Archimedes’ result · 96 sides ]',
+  archT:'3.14085 < π < 3.14286 — a bit looser than the table: he rounded every square root toward the safe side.',
+  dH:'Where does each number come from?',
+  dP:'Just look at <b style="color:#F5F5F0">a single slice</b> of the polygon: a triangle with its apex at the center. We take radius r = 1, so the diameter is 2. Change the number of sides above and everything recalculates.',
+  slice:n=>`[ One slice of ${n} ]`, center:'center',
+  sliceCap:'θ is half the central angle. Each time you double the sides, θ is cut in half.',
+  d1:'The angle', d2:'One side', d3:'The perimeter', d4:'Divide by the diameter (D = 2)',
+  f2:'a = 2 · sin θ   |   b = 2 · tan θ', f3:'P(in) = n · a   |   P(out) = n · b', f4:'n · sin θ  <  π  <  n · tan θ',
+  live2:(a,b)=>`inscribed a = ${a} · circumscribed b = ${b}`,
+  limK:'[ In the limit ]',
+  limF:'π = lim<sub style="font-size:9px">n→∞</sub> n · sin(180°/n) = lim<sub style="font-size:9px">n→∞</sub> n · tan(180°/n)',
+  limT:'Both bounds squeeze toward the same number. Archimedes had no sines or tangents: he reached the same values by doubling sides with square roots, by hand.',
+  noteK:'[ Note · Proposition II ]',
+  noteT:'The circle is to the square of its diameter as <b style="color:#F5F5F0">11 to 14</b> (0.7857 vs. π/4 = 0.7854). It relies on the result of III, so it was probably added by a later copyist.',
+  s3tag:'[ 03 ] Legacy', s3rt:'2,300 years', s3h:'How long the world took to catch up',
+  tlSpan:'≈ 1,900 years until calculus', y400:'400 BC',
+  cards:[
+    ['~370 BC','Eudoxus of Cnidus','Invents the method of exhaustion: approximating a figure with others until the difference is used up.'],
+    ['~250 BC','Archimedes','Writes the treatise: <b>A = πr²</b> and π trapped between 3 10/71 and 3 1/7.'],
+    ['10th c.','A Byzantine copy','A scribe in Constantinople copies several Archimedes treatises onto parchment.'],
+    ['1229','Text over text','That parchment is scraped and reused as a prayer book. Archimedes lies underneath.'],
+    ['~1670','Newton and Leibniz','They formalize calculus. The method of exhaustion was its direct ancestor: the idea of a limit.'],
+    ['1761','Lambert','π is irrational: no fraction captures it exactly. Archimedes never knew.'],
+    ['1882','Lindemann','π is transcendental: squaring the circle with compass and straightedge is impossible.'],
+    ['1906','Heiberg','Reads the text beneath the prayers. <i>The Method</i> appears: how Archimedes intuited his results with levers.']
+  ],
+  qK:'[ Quote · Proposition I ]',
+  qT:'“The area of a circle equals that of a right triangle in which one of the sides forming the right angle equals the radius, and the other the circumference.”',
+  qA:'— Archimedes, On the Measurement of the Circle (~250 BC)',
+  ftL:'Κύκλου μέτρησις · Archimedes · Syracuse ~250 BC', areaQ:'AREA = ?'
+},
+es: {
+  title:'Sobre la medida del círculo — Arquímedes',
+  hdrL:'Κύκλου μέτρησις · ~250 a.C. · Siracusa', hdrC:'[ Unidad didáctica ]',
+  kicker:'[ El problema · ¿cuánto mide un círculo? ]',
+  h1:'Sobre la medida del <span>círculo</span>', greek:'Κύκλου μέτρησις — Arquímedes',
+  claim:'Un círculo tiene exactamente la misma área que un triángulo.',
+  eqBase:'la circunferencia', eqH:'el radio',
+  cta:'Ver cómo ↓', ctaNote:'Sin álgebra ni cálculo.<br>1900 años antes de Newton.',
+  heroCap:'Los anillos del círculo se desenrollan y se apilan en un triángulo.',
+  brand:'Medida del círculo', nav1:'La idea', nav2:'El número', nav3:'Legado',
+  s1tag:'[ 01 ] Proposición I', s1rt:'La idea', s1h:'¿Por qué un círculo es un triángulo?',
+  s1p:'Pensá el círculo como una cebolla: capas finas, una dentro de otra. Si cortás cada capa y la estirás, ninguna pierde área. Arrastrá el control o tocá desenrollar.',
+  unroll:'▸ Desenrollar', pause:'❚❚ Pausar', back:'↺ Volver al círculo', progress:'Progreso', rings:'Anillos',
+  stepsT:'[ Paso a paso ]',
+  st1t:'Cortá en anillos', st1b:'Dividí el círculo en anillos finos, uno dentro de otro.',
+  st2t:'Desenrollá cada uno', st2b:'Cada anillo, estirado, es una tira de largo 2π × su radio. Las de afuera, más largas.',
+  st3t:'Apilalos', st3b:'Las tiras forman un triángulo: base 2πr (la circunferencia), altura r (el radio).',
+  result:'[ Resultado ]', resultB:'Más anillos → tiras más rectas. En el límite, la igualdad es exacta.',
+  proof:'<span class="acc">[ La prueba ]</span> Arquímedes no “desenrolla”: razona por el absurdo. Si el círculo fuera mayor que el triángulo, un polígono inscripto bastaría para contradecirlo; si fuera menor, uno circunscripto. Es el método exhaustivo de Eudoxo.',
+  s2tag:'[ 02 ] Proposición III', s2rt:'El número', s2h:'¿Cuánto vale π? Atrapalo entre dos polígonos.',
+  s2p:'Un polígono adentro del círculo da un perímetro menor; uno afuera, mayor. π queda en el medio. Arquímedes empezó con un hexágono y duplicó los lados cuatro veces: 6, 12, 24, 48, 96.',
+  sides:'lados', legIn:'interior · cota inferior', legOut:'exterior · cota superior',
+  dbl:(a,b)=>`× 2 lados · ${a} → ${b}`, dblPlain:'× 2 lados', hexa:'↺ Hexágono', sidesL:'Lados',
+  rangeT:'[ Intervalo de π ]', width:'ancho del intervalo', tSides:'Lados', tLo:'Inferior', tHi:'Superior',
+  archK:'[ Resultado de Arquímedes · 96 lados ]',
+  archT:'3.14085 < π < 3.14286 — un poco más holgado que la tabla: redondeó cada raíz cuadrada hacia el lado seguro.',
+  dH:'¿De dónde sale cada número?',
+  dP:'Basta con mirar <b style="color:#F5F5F0">una sola porción</b> del polígono: un triángulo con vértice en el centro. Tomamos radio r = 1, así el diámetro vale 2. Cambiá los lados arriba y todo se recalcula.',
+  slice:n=>`[ Una porción de ${n} ]`, center:'centro',
+  sliceCap:'θ es la mitad del ángulo central. Cada vez que duplicás los lados, θ se parte a la mitad.',
+  d1:'El ángulo', d2:'Un lado', d3:'El perímetro', d4:'Dividí por el diámetro (D = 2)',
+  f2:'a = 2 · sen θ   |   b = 2 · tan θ', f3:'P(int) = n · a   |   P(ext) = n · b', f4:'n · sen θ  <  π  <  n · tan θ',
+  live2:(a,b)=>`interior a = ${a} · exterior b = ${b}`,
+  limK:'[ En el límite ]',
+  limF:'π = lím<sub style="font-size:9px">n→∞</sub> n · sen(180°/n) = lím<sub style="font-size:9px">n→∞</sub> n · tan(180°/n)',
+  limT:'Las dos cotas se aprietan contra el mismo número. Arquímedes no tenía senos ni tangentes: llegó a los mismos valores duplicando lados con raíces cuadradas, a mano.',
+  noteK:'[ Nota · Proposición II ]',
+  noteT:'El círculo es al cuadrado de su diámetro como <b style="color:#F5F5F0">11 a 14</b> (0.7857 vs. π/4 = 0.7854). Usa el resultado de la III, así que probablemente la agregó un copista posterior.',
+  s3tag:'[ 03 ] Legado', s3rt:'2 300 años', s3h:'Lo que tardó el mundo en alcanzarlo',
+  tlSpan:'≈ 1 900 años hasta el cálculo', y400:'400 a.C.',
+  cards:[
+    ['~370 a.C.','Eudoxo de Cnido','Inventa el método exhaustivo: aproximar una figura con otras hasta agotar la diferencia.'],
+    ['~250 a.C.','Arquímedes','Escribe el tratado: <b>A = πr²</b> y π atrapado entre 3 10/71 y 3 1/7.'],
+    ['s. X','Una copia bizantina','Un escriba de Constantinopla copia varios tratados de Arquímedes en pergamino.'],
+    ['1229','Texto sobre texto','Ese pergamino se raspa y se reutiliza como libro de oraciones. Arquímedes queda debajo.'],
+    ['~1670','Newton y Leibniz','Formalizan el cálculo. El método exhaustivo era su antecedente directo: la idea de límite.'],
+    ['1761','Lambert','π es irracional: ninguna fracción lo atrapa exactamente. Arquímedes nunca lo supo.'],
+    ['1882','Lindemann','π es trascendente: cuadrar el círculo con regla y compás es imposible.'],
+    ['1906','Heiberg','Lee el texto bajo las oraciones. Aparece <i>El Método</i>: cómo Arquímedes intuía sus resultados con palancas.']
+  ],
+  qK:'[ Cita · Proposición I ]',
+  qT:'“El área de un círculo es igual a un triángulo rectángulo en el que uno de los lados que comprenden el ángulo recto es igual al radio, y el otro a la circunferencia.”',
+  qA:'— Arquímedes, Sobre la medida del círculo (~250 a.C.)',
+  ftL:'Κύκλου μέτρησις · Arquímedes · Siracusa ~250 a.C.', areaQ:'ÁREA = ?'
+}};
+
+let lang = 'en';
+try { const s = localStorage.getItem('arch-lang'); if (s === 'en' || s === 'es') lang = s; } catch (e) {}
+const T = k => I18N[lang][k];
+const $ = id => document.getElementById(id);
+
+/* ============ state ============ */
+const S = { t:0, rings:12, playing:false, dir:1, n:6, from:null, p:1, active:'' };
+const P = Math.PI;
+const ease = x => { x = Math.max(0, Math.min(1, x)); return x < .5 ? 2*x*x : 1 - Math.pow(-2*x + 2, 2) / 2; };
+const lo = n => n * Math.sin(P / n), hi = n => n * Math.tan(P / n);
+
+/* ============ canvas ============ */
+function setup(c) {
+  const r = c.getBoundingClientRect(); if (!r.width) return null;
+  const d = window.devicePixelRatio || 1, W = Math.round(r.width*d), H = Math.round(r.height*d);
+  if (c.width !== W || c.height !== H) { c.width = W; c.height = H; }
+  const ctx = c.getContext('2d'); ctx.setTransform(d,0,0,d,0,0); ctx.clearRect(0,0,r.width,r.height);
+  return { ctx, w:r.width, h:r.height };
+}
+function scene(ctx, w, h, t, N) {
+  const pad = 24, fs = Math.max(10, Math.min(13, w/50));
+  const R = Math.max(8, Math.min((w-2*pad)/(2*P), (h-2*pad-30)/3.6));
+  const x0 = (w-2*P*R)/2, cx = x0+R, cy = pad+R, base = pad+3.6*R, C = 2*P*R;
+  ctx.save();
+  ctx.setLineDash([4,5]); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(245,245,240,0.22)';
+  ctx.beginPath(); ctx.moveTo(x0, base-R); ctx.lineTo(x0, base); ctx.lineTo(x0+C, base); ctx.closePath(); ctx.stroke();
+  if (t > .02) { ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*P); ctx.stroke(); }
+  ctx.setLineDash([]);
+  const SEG = 90, k = .7;
+  for (let i = 0; i < N; i++) {
+    const r0 = R*i/N, r1 = R*(i+1)/N;
+    const delay = (N-1-i)/N*.35, p = Math.max(0, Math.min(1, (t-delay)/.65));
+    const outer = [], inner = [];
+    for (let s = 0; s <= SEG; s++) {
+      const f = s/SEG, q = ease(p*(1+k) - f*k), th = P/2 - f*2*P;
+      const pt = r => [cx + r*Math.cos(th) + (x0 + f*2*P*r - cx - r*Math.cos(th))*q,
+                       cy + r*Math.sin(th) + (base - (R-r) - cy - r*Math.sin(th))*q];
+      outer.push(pt(r1)); inner.push(pt(r0));
+    }
+    ctx.beginPath(); ctx.moveTo(outer[0][0], outer[0][1]);
+    for (let s = 1; s <= SEG; s++) ctx.lineTo(outer[s][0], outer[s][1]);
+    for (let s = SEG; s >= 0; s--) ctx.lineTo(inner[s][0], inner[s][1]);
+    ctx.closePath();
+    ctx.fillStyle = i % 2 ? 'rgba(255,85,0,0.95)' : 'rgba(255,85,0,0.55)'; ctx.fill();
+    ctx.strokeStyle = '#0B0B0B'; ctx.lineWidth = N > 24 ? .4 : .8; ctx.stroke();
+  }
+  ctx.font = `700 ${fs}px "Space Mono", monospace`; ctx.textBaseline = 'middle';
+  const a = 1 - Math.max(0, Math.min(1, t/.15));
+  if (a > 0) {
+    ctx.globalAlpha = a; ctx.strokeStyle = '#F5F5F0'; ctx.lineWidth = 1.5;
+    const ang = -P/6; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + R*Math.cos(ang), cy + R*Math.sin(ang)); ctx.stroke();
+    ctx.fillStyle = '#F5F5F0'; ctx.textAlign = 'center';
+    ctx.fillText('r', cx + R*.5*Math.cos(ang) + 2, cy + R*.5*Math.sin(ang) - fs);
+    ctx.fillStyle = '#AEAEAE'; ctx.textAlign = 'right';
+    ctx.font = `800 ${fs*2.6}px "Barlow Condensed", sans-serif`;
+    ctx.fillText(T('areaQ'), x0+C, cy);
+    ctx.globalAlpha = 1;
+  }
+  const b = Math.max(0, Math.min(1, (t-.85)/.15));
+  if (b > 0) {
+    ctx.globalAlpha = b; ctx.strokeStyle = '#F5F5F0'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x0, base-R); ctx.lineTo(x0+C, base); ctx.stroke();
+    ctx.lineWidth = 1; ctx.strokeStyle = '#AEAEAE';
+    ctx.beginPath(); ctx.moveTo(x0, base+6); ctx.lineTo(x0, base+12); ctx.lineTo(x0+C, base+12); ctx.lineTo(x0+C, base+6); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x0-6, base-R); ctx.lineTo(x0-12, base-R); ctx.lineTo(x0-12, base); ctx.lineTo(x0-6, base); ctx.stroke();
+    ctx.fillStyle = '#F5F5F0'; ctx.font = `italic 600 ${fs*1.4}px "STIX Two Text", serif`;
+    ctx.textAlign = 'center'; ctx.fillText('2πr', x0+C/2, base+26);
+    ctx.textAlign = 'right'; ctx.fillText('r', x0-16, base-R/2);
+    ctx.fillStyle = '#FF5500'; ctx.font = `italic 600 ${fs*2.8}px "STIX Two Text", serif`;
+    ctx.fillText('A = πr²', x0+C, cy);
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
+}
+function drawHero(now) {
+  const S_ = setup($('cHero')); if (!S_) return;
+  const c = (now/1000) % 8;
+  const t = c < 1 ? 0 : c < 4.2 ? (c-1)/3.2 : c < 6.6 ? 1 : 1 - (c-6.6)/1.4;
+  scene(S_.ctx, S_.w, S_.h, t, 14);
+}
+function geom(ctx, cx, cy, R, n, from, p, lw) {
+  const e = ease(p);
+  const poly = pts => { ctx.beginPath(); pts.forEach(([x,y],i) => i ? ctx.lineTo(x,y) : ctx.moveTo(x,y)); ctx.closePath(); };
+  const reg = (m, r) => Array.from({length:m}, (_,k) => { const a = -P/2 + k*2*P/m; return [cx + r*Math.cos(a), cy + r*Math.sin(a)]; });
+  ctx.strokeStyle = '#AEAEAE'; ctx.lineWidth = 1.5*lw;
+  if (from) {
+    ctx.globalAlpha = 1-e; poly(reg(from, R/Math.cos(P/from))); ctx.stroke();
+    ctx.globalAlpha = e; poly(reg(n, R/Math.cos(P/n))); ctx.stroke(); ctx.globalAlpha = 1;
+  } else { poly(reg(n, R/Math.cos(P/n))); ctx.stroke(); }
+  ctx.beginPath(); ctx.arc(cx, cy, R, 0, 2*P); ctx.strokeStyle = 'rgba(245,245,240,0.85)'; ctx.lineWidth = 1.25*lw; ctx.stroke();
+  let pts;
+  if (from) {
+    const c = Math.cos(P/from);
+    pts = Array.from({length:2*from}, (_,k) => { const a = -P/2 + k*P/from, r = k%2 ? R*c + (R-R*c)*e : R; return [cx + r*Math.cos(a), cy + r*Math.sin(a)]; });
+  } else pts = reg(n, R);
+  poly(pts); ctx.fillStyle = 'rgba(255,85,0,0.16)'; ctx.fill();
+  ctx.strokeStyle = '#FF5500'; ctx.lineWidth = 2*lw; ctx.stroke();
+}
+function drawPoly() {
+  const S_ = setup($('cPoly')); if (!S_) return;
+  const { ctx, w, h } = S_, s = S;
+  const m = Math.min(w,h), cx = w*.42, cy = h*.56, R = m*.5/1.5;
+  geom(ctx, cx, cy, R, s.n, s.from, s.p, 1);
+  const ri = m*.16, ix = w-ri-6, iy = ri+6;
+  const band = R*(1/Math.cos(P/s.n) - 1), z = Math.max(1.5, Math.min(5000, ri*.5/band));
+  const fx = cx, fy = cy-R-band/2;
+  ctx.strokeStyle = 'rgba(174,174,174,0.4)'; ctx.lineWidth = 1; ctx.setLineDash([3,4]);
+  const dx = ix-fx, dy = iy-fy, dl = Math.hypot(dx,dy);
+  ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(ix - dx/dl*ri, iy - dy/dl*ri); ctx.stroke(); ctx.setLineDash([]);
+  ctx.save();
+  ctx.beginPath(); ctx.arc(ix, iy, ri, 0, 2*P); ctx.fillStyle = '#0B0B0B'; ctx.fill(); ctx.clip();
+  ctx.translate(ix, iy); ctx.scale(z,z); ctx.translate(-fx, -fy);
+  geom(ctx, cx, cy, R, s.n, s.from, s.p, 1/z);
+  ctx.restore();
+  ctx.beginPath(); ctx.arc(ix, iy, ri, 0, 2*P); ctx.strokeStyle = '#FF5500'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.font = '700 10px "Space Mono", monospace'; ctx.fillStyle = '#AEAEAE'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillText((lang === 'es' ? 'LUPA ×' : 'ZOOM ×') + Math.round(z), ix, iy+ri+8);
+}
+
+/* ============ derivation ============ */
+function derivation(n) {
+  const th = P/n, R = 160, ox = 170, oy = 210;
+  const sn = Math.sin(th), cs = Math.cos(th), tn = Math.tan(th);
+  const Ax = ox - R*sn, Bx = ox + R*sn, Ay = oy - R*cs;
+  const f = (x,d=1) => x.toFixed(d), deg = 180/n;
+  return {
+    arc:`M ${f(Ax)} ${f(Ay)} A ${R} ${R} 0 0 1 ${f(Bx)} ${f(Ay)}`,
+    inner:`M ${ox} ${oy} L ${f(Ax)} ${f(Ay)} L ${f(Bx)} ${f(Ay)} Z`,
+    outer:`M ${ox} ${oy} L ${f(ox-R*tn)} 50 L ${f(ox+R*tn)} 50 Z`,
+    angle:`M ${ox} ${oy-40} A 40 40 0 0 1 ${f(ox+40*sn)} ${f(oy-40*cs)}`,
+    thX: deg >= 12 ? f(ox + 60*Math.sin(th/2) - 4) : f(ox + 44*sn + 8),
+    thY: deg >= 12 ? f(oy - 60*Math.cos(th/2) + 4) : f(oy - 34),
+    rX: f(ox - R*sn/2 - 8), rY: f(oy - R*cs/2),
+    aX: f((ox+Bx)/2 + 4), aY: f(Ay + 16), bX: f(ox + R*tn/2 + 2),
+    deg, a: 2*sn, b: 2*tn, sn, tn
+  };
+}
+
+/* ============ updates ============ */
+function updateUnroll() {
+  const S_ = setup($('cUnroll'));
+  if (S_) scene(S_.ctx, S_.w, S_.h, S.t, S.rings);
+  const pl = $('bPlay'), txt = S.playing ? T('pause') : S.t >= 1 ? T('back') : T('unroll');
+  if (pl.textContent !== txt) pl.textContent = txt;
+  const v = Math.round(S.t*100);
+  if (+$('rT').value !== v) $('rT').value = v;
+  $('vT').textContent = v + '%';
+  const idx = S.t < .12 ? 0 : S.t < .85 ? 1 : 2;
+  for (let i = 0; i < 3; i++) $('st'+i).classList.toggle('on', i === idx);
+}
+
+function buildTable() {
+  const t = $('table'); t.innerHTML = '';
+  [6,12,24,48,96].forEach(n => {
+    const b = document.createElement('button'); b.className = 'trow'; b.dataset.n = n;
+    b.innerHTML = `<span>${n}</span><span>${lo(n).toFixed(5)}</span><span>${hi(n).toFixed(5)}</span>`;
+    b.onclick = () => { S.n = n; S.from = null; S.p = 1; updatePoly(); };
+    t.appendChild(b);
+  });
+}
+function buildDerive() {
+  const d = $('derive'); d.innerHTML = '';
+  for (let i = 1; i <= 4; i++) {
+    const r = document.createElement('div'); r.className = 'drow';
+    r.innerHTML = `<span class="n">0${i}</span><div style="min-width:0"><div class="ti" id="dt${i}"></div><div class="fo" id="df${i}"></div><div class="lv" id="dl${i}"></div></div>`;
+    d.appendChild(r);
+  }
+}
+function updatePoly() {
+  const s = S;
+  let L = lo(s.n), H = hi(s.n);
+  if (s.from) { const e = ease(s.p); L = lo(s.from) + (L - lo(s.from))*e; H = hi(s.from) + (H - hi(s.from))*e; }
+  const pct = x => Math.max(0, Math.min(100, (x-2.95)/.6*100));
+  $('nVal').textContent = s.n;
+  if (+$('rN').value !== s.n) $('rN').value = s.n;
+  $('loS').textContent = L.toFixed(5); $('hiS').textContent = H.toFixed(5); $('wS').textContent = (H-L).toFixed(5);
+  $('band').style.left = pct(L) + '%'; $('band').style.width = Math.max(.3, pct(H)-pct(L)) + '%';
+  const canDouble = s.n*2 <= 96 && s.from === null;
+  const bd = $('bDouble'); bd.disabled = !canDouble;
+  bd.textContent = canDouble ? T('dbl')(s.n, s.n*2) : T('dblPlain');
+  document.querySelectorAll('.trow').forEach(b => {
+    const n = +b.dataset.n; b.classList.toggle('cur', n === s.n); b.classList.toggle('past', n < s.n);
+  });
+  const d = derivation(s.n);
+  $('sArc').setAttribute('d', d.arc); $('sIn').setAttribute('d', d.inner); $('sOut').setAttribute('d', d.outer); $('sAng').setAttribute('d', d.angle);
+  $('tTh').setAttribute('x', d.thX); $('tTh').setAttribute('y', d.thY);
+  $('tR').setAttribute('x', d.rX); $('tR').setAttribute('y', d.rY);
+  $('tA').setAttribute('x', d.aX); $('tA').setAttribute('y', d.aY); $('tB').setAttribute('x', d.bX);
+  $('sliceT').textContent = T('slice')(s.n);
+  const n = s.n;
+  $('dt1').textContent = T('d1'); $('df1').textContent = 'θ = 180° / n'; $('dl1').textContent = `n = ${n} → θ = ${+d.deg.toFixed(3)}°`;
+  $('dt2').textContent = T('d2'); $('df2').textContent = T('f2'); $('dl2').textContent = T('live2')(d.a.toFixed(5), d.b.toFixed(5));
+  $('dt3').textContent = T('d3'); $('df3').textContent = T('f3'); $('dl3').textContent = `${(n*d.a).toFixed(5)} · ${(n*d.b).toFixed(5)}`;
+  $('dt4').textContent = T('d4'); $('df4').textContent = T('f4'); $('dl4').textContent = `${(n*d.sn).toFixed(5)} < π < ${(n*d.tn).toFixed(5)}`;
+  drawPoly();
+}
+
+function buildCards() {
+  $('cards').innerHTML = T('cards').map((c,i) =>
+    `<div class="card${i===1?' hl':''}${i===4?' nw':''}"><div class="y">${c[0]}</div><div class="nm">${c[1]}</div><div class="bd">${c[2]}</div></div>`).join('');
+}
+
+/* ============ language ============ */
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.title = T('title');
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = T(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = T(el.dataset.i18nHtml); });
+  document.querySelectorAll('.lang button').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang));
+  $('tCenter').textContent = T('center');
+  buildCards(); updateUnroll(); updatePoly();
+}
+function setLang(l) {
+  lang = l;
+  try { localStorage.setItem('arch-lang', l); } catch (e) {}
+  applyLang();
+}
+document.querySelectorAll('.lang button').forEach(b => b.addEventListener('click', () => setLang(b.dataset.lang)));
+
+/* ============ controls ============ */
+$('bPlay').onclick = () => {
+  if (S.playing) { S.playing = false; updateUnroll(); return; }
+  S.dir = S.t >= 1 ? -1 : 1; S.playing = true;
+};
+$('rT').oninput = e => { S.t = +e.target.value/100; S.playing = false; updateUnroll(); };
+$('rR').oninput = e => { S.rings = +e.target.value; $('vR').textContent = S.rings; updateUnroll(); };
+$('bDouble').onclick = () => { if (S.n*2 <= 96 && S.from === null) { S.from = S.n; S.n *= 2; S.p = 0; updatePoly(); } };
+$('bReset').onclick = () => { S.n = 6; S.from = null; S.p = 1; updatePoly(); };
+$('rN').oninput = e => { S.n = +e.target.value; S.from = null; S.p = 1; updatePoly(); };
+
+window.addEventListener('scroll', () => {
+  let a = '';
+  ['idea','numero','legado'].forEach(id => { const el = $(id); if (el && el.getBoundingClientRect().top < 160) a = id; });
+  if (a !== S.active) { S.active = a; document.querySelectorAll('nav.sticky a.nl').forEach(x => x.classList.toggle('on', x.dataset.sec === a)); }
+}, { passive:true });
+
+/* ============ loop ============ */
+let last = 0;
+function loop(now) {
+  requestAnimationFrame(loop);
+  const dt = Math.min(.05, (now - (last || now))/1000); last = now;
+  drawHero(now);
+  if (S.playing) {
+    const t = S.t + S.dir*dt/3.5;
+    if (t >= 1 || t <= 0) { S.t = Math.max(0, Math.min(1, t)); S.playing = false; } else S.t = t;
+    updateUnroll();
+  }
+  if (S.from !== null) {
+    const p = S.p + dt/1.1;
+    if (p >= 1) { S.from = null; S.p = 1; } else S.p = p;
+    updatePoly();
+  }
+}
+
+buildTable(); buildDerive(); applyLang();
+const ro = new ResizeObserver(() => { updateUnroll(); updatePoly(); });
+ro.observe($('cUnroll')); ro.observe($('cPoly'));
+if (document.fonts) document.fonts.ready.then(() => { updateUnroll(); updatePoly(); });
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
