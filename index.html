@@ -1,483 +1,739 @@
-<!DOCTYPE html>
-<html lang="en">
+<title>Camilo Calderón</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an industrial spec sheet. 12-col grid with visible hairlines, orange signal blocks,
+   condensed display type that crops at the edges, departure-board tables for lists. */
+:root{
+  --paper:#CBCECA; --sheet:#DCDED9; --ink:#151615; --ink-2:#464A45; --ink-3:#747970;
+  --rule:rgba(21,22,21,.28); --hair:rgba(21,22,21,.12); --grid:rgba(21,22,21,.06);
+  --orange:#D24F1B; --on-orange:#151615; --mint:#BBD3BF; --on-mint:#151615;
+  --inverse:#151615; --on-inverse:#DCDED9;
+  --f-display:"Archivo","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --f-tech:"Chakra Petch","Eurostile","Bank Gothic","Courier New",monospace;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --f-body:"Archivo",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --s-xs:11px; --s-sm:13px; --s-md:16px; --s-lg:20px; --s-xl:clamp(28px,4.2vw,52px); --s-xxl:clamp(44px,8vw,120px);
+  --pad:clamp(16px,2.4vw,32px);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --paper:#181918; --sheet:#212321; --ink:#E3E5E0; --ink-2:#A6ABA3; --ink-3:#6F746C;
+  --rule:rgba(227,229,224,.24); --hair:rgba(227,229,224,.1); --grid:rgba(227,229,224,.045);
+  --orange:#E25D26; --on-orange:#111211; --mint:#2B3A2F; --on-mint:#D6E6D9;
+  --inverse:#0D0E0D; --on-inverse:#E3E5E0; color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --paper:#181918; --sheet:#212321; --ink:#E3E5E0; --ink-2:#A6ABA3; --ink-3:#6F746C;
+  --rule:rgba(227,229,224,.24); --hair:rgba(227,229,224,.1); --grid:rgba(227,229,224,.045);
+  --orange:#E25D26; --on-orange:#111211; --mint:#2B3A2F; --on-mint:#D6E6D9;
+  --inverse:#0D0E0D; --on-inverse:#E3E5E0; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:var(--s-md);line-height:1.55;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--paper)}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+.wrap{max-width:1360px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.ico{width:1em;height:1em;display:inline-block;vertical-align:-.12em;fill:none;stroke:currentColor;stroke-width:1.6}
+.ico.solid{fill:currentColor;stroke:none}
+.mono{font-family:var(--f-mono);font-size:var(--s-xs);letter-spacing:.04em;text-transform:uppercase}
+.tech{font-family:var(--f-tech);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.muted{color:var(--ink-3)}
+.num{font-variant-numeric:tabular-nums}
 
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible"
-          content="IE=edge">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description"
-          content="IMG">
-    <title>IMG</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+/* ---------- header ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--paper);border-bottom:1.5px solid var(--ink)}
+.top .wrap{display:flex;align-items:stretch;gap:20px;min-height:56px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;padding-block:8px}
+.brand svg{width:56px;height:24px;flex:none}
+.brand b{font-family:var(--f-tech);font-weight:700;font-size:var(--s-sm);letter-spacing:.08em;line-height:1.1}
+.brand small{display:block;font-family:var(--f-mono);font-size:10px;color:var(--ink-3);letter-spacing:.06em}
+.nav{display:flex;margin-left:auto;align-items:stretch}
+.nav a{display:flex;align-items:center;gap:6px;padding:0 16px;text-decoration:none;font-family:var(--f-tech);font-weight:600;font-size:var(--s-sm);letter-spacing:.08em;border-left:1px solid var(--hair)}
+.nav a sup{font-family:var(--f-mono);font-size:9px;color:var(--ink-3)}
+.nav a[aria-current="page"]{background:var(--orange);color:var(--on-orange)}
+.nav a[aria-current="page"] sup{color:var(--on-orange)}
+.nav a:hover:not([aria-current="page"]){background:var(--sheet)}
+.geo{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;padding-left:16px;border-left:1px solid var(--hair);line-height:1.35}
+.theme-btn{border:0;background:none;padding:0 0 0 14px;border-left:1px solid var(--hair);font-size:18px;display:flex;align-items:center}
+@media (max-width:900px){.geo{display:none}}
+@media (max-width:640px){
+  .top .wrap{flex-wrap:wrap;gap:0}
+  .brand{flex:1}
+  .nav{order:3;width:100%;margin:0;border-top:1px solid var(--hair)}
+  .nav a{flex:1;justify-content:center;padding:12px 4px;font-size:12px}
+  .nav a:first-child{border-left:0}
+}
 
-    <link href="css/app.css"
-          rel="stylesheet">
-</head>
+/* ---------- shared section head ---------- */
+.sec{padding-block:clamp(48px,7vw,96px)}
+.sec-head{display:grid;grid-template-columns:auto 1fr auto;align-items:end;gap:16px;margin-bottom:clamp(24px,3vw,40px)}
+.sec-head .code{display:inline-flex;align-items:center;gap:8px;background:var(--orange);color:var(--on-orange);padding:5px 10px 4px;font-family:var(--f-tech);font-weight:700;font-size:var(--s-sm);letter-spacing:.08em;clip-path:polygon(0 0,100% 0,100% 70%,calc(100% - 8px) 100%,0 100%)}
+.sec-head h2{margin:0;font-family:var(--f-display);font-stretch:68%;font-weight:850;font-size:var(--s-xl);line-height:.9;text-transform:uppercase;text-wrap:balance;letter-spacing:-.01em}
+.sec-head .meta{text-align:right}
+.sec-head .line{grid-column:1/-1;height:0;border-top:1.5px solid var(--ink);position:relative}
+.sec-head .line::after{content:"";position:absolute;right:0;top:-4px;width:56px;height:6px;background:repeating-linear-gradient(-45deg,var(--ink) 0 2px,transparent 2px 6px)}
+@media (max-width:640px){.sec-head{grid-template-columns:1fr}.sec-head .meta{text-align:left}}
 
-<body>
+.btn{display:inline-flex;align-items:center;gap:10px;padding:12px 18px 11px;border:1.5px solid var(--ink);background:transparent;text-decoration:none;font-family:var(--f-tech);font-weight:700;font-size:var(--s-sm);letter-spacing:.08em;text-transform:uppercase}
+.btn:hover{background:var(--ink);color:var(--paper)}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:var(--on-orange)}
+.btn.primary:hover{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 8px 2px;border:1px solid var(--rule);font-family:var(--f-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;white-space:nowrap}
+.chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--orange);display:inline-block}
+.blink{animation:blink 1.6s steps(2) infinite}
+@keyframes blink{50%{opacity:.15}}
 
-    <header role="banner">
-        <nav class="navbar navbar-expand-md navbar-light bg-white absolute-top">
-            <div class="container">
+/* ---------- views ---------- */
+[data-view]{display:block}
 
-                <button class="navbar-toggler order-2 order-md-1"
-                        type="button"
-                        data-toggle="collapse"
-                        data-target="#navbar"
-                        aria-controls="navbar"
-                        aria-expanded="false"
-                        aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+/* ---------- hero ---------- */
+.hero{position:relative;padding-block:clamp(24px,4vw,48px) 0;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:0 var(--pad);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px}
+.hero-meta{grid-column:1/6;display:grid;gap:4px;align-content:start;padding-top:8px}
+.hero-meta .row{display:grid;grid-template-columns:96px 1fr;gap:12px;border-bottom:1px solid var(--hair);padding-block:6px}
+.hero-meta .k{color:var(--ink-3)}
+.punct{margin-top:28px;font-family:var(--f-tech);font-weight:700;font-size:clamp(28px,3.4vw,46px);letter-spacing:.08em;line-height:1}
+.punct .tag{display:inline-flex;margin-top:12px;font-size:var(--s-sm);background:var(--orange);color:var(--on-orange);padding:4px 10px 3px;gap:8px;align-items:center;transform:scaleX(-1)}
+.punct .tag span{transform:scaleX(-1);display:inline-flex;gap:8px;align-items:center}
+.hero-fig{grid-column:7/13;margin:0;position:relative;border:1.5px solid var(--ink);background:var(--sheet);aspect-ratio:5/4;max-width:100%}
+.hero-fig canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero-fig .corner{position:absolute;width:14px;height:14px;border:0 solid var(--orange)}
+.hero-fig .c1{top:8px;left:8px;border-top-width:2px;border-left-width:2px}
+.hero-fig .c2{top:8px;right:8px;border-top-width:2px;border-right-width:2px}
+.hero-fig .c3{bottom:8px;left:8px;border-bottom-width:2px;border-left-width:2px}
+.hero-fig .c4{bottom:8px;right:8px;border-bottom-width:2px;border-right-width:2px}
+.hero-fig figcaption{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;gap:12px;padding:8px 30px;border-top:1px solid var(--rule);background:var(--sheet)}
+.hero-fig .fig-top{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:8px 30px}
+.hero-name{grid-column:1/-1;margin:clamp(16px,2vw,28px) 0 0;font-family:var(--f-display);font-weight:900;font-stretch:62%;font-size:clamp(84px,21vw,300px);line-height:.8;letter-spacing:-.02em;text-transform:uppercase;display:flex;flex-direction:column}
+.hero-name .l2{display:flex;align-items:flex-start;gap:.08em}
+.hero-name .l2 sup{font-family:var(--f-tech);font-size:clamp(12px,1.3vw,18px);font-weight:700;letter-spacing:.08em;line-height:1;margin-top:.6em;background:var(--ink);color:var(--paper);padding:4px 8px 3px}
+.hero-name .l1{color:var(--orange)}
+.hero-foot{grid-column:1/-1;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--pad);padding-block:28px 40px;border-top:1.5px solid var(--ink);margin-top:clamp(12px,2vw,24px)}
+.hero-thesis{grid-column:1/8;margin:0;font-family:var(--f-display);font-stretch:85%;font-weight:600;font-size:clamp(22px,2.4vw,32px);line-height:1.15;text-wrap:balance;max-width:28ch}
+.hero-thesis em{font-style:normal;background:var(--orange);color:var(--on-orange);padding:0 .18em}
+.hero-cta{grid-column:8/13;display:flex;flex-wrap:wrap;gap:10px;align-content:end;justify-content:flex-end}
+@media (max-width:860px){
+  .hero-meta{grid-column:1/-1}
+  .hero-fig{grid-column:1/-1;margin-top:20px}
+  .hero-thesis,.hero-cta{grid-column:1/-1}
+  .hero-cta{justify-content:flex-start}
+}
 
-                <div class="collapse navbar-collapse order-3 order-md-2"
-                     id="navbar">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item dropdown active">
-                            <a class="nav-link dropdown-toggle"
-                               href="#"
-                               id="dropdown02"
-                               data-toggle="dropdown"
-                               aria-haspopup="true"
-                               aria-expanded="false">Home</a>
-                            <div class="dropdown-menu"
-                                 aria-labelledby="dropdown02">
-                                <a class="dropdown-item"
-                                   href="home-onecolumn.html">One column</a>
-                                <a class="dropdown-item"
-                                   href="home-twocolumn.html">Two column</a>
-                                <a class="dropdown-item"
-                                   href="home-threecolumn.html">Three column</a>
-                                <a class="dropdown-item"
-                                   href="home-fourcolumn.html">Four column</a>
-                                <a class="dropdown-item"
-                                   href="home-featured.html">Featured posts</a>
-                                <a class="dropdown-item"
-                                   href="home-fullwidth.html">Full width</a>
-                            </div>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle"
-                               href="#"
-                               id="dropdown02"
-                               data-toggle="dropdown"
-                               aria-haspopup="true"
-                               aria-expanded="false">Posts</a>
-                            <div class="dropdown-menu"
-                                 aria-labelledby="dropdown02">
-                                <a class="dropdown-item"
-                                   href="post-image.html">Image</a>
-                                <a class="dropdown-item"
-                                   href="post-video.html">Video</a>
-                                <a class="dropdown-item"
-                                   href="post-new.html">New story</a>
-                            </div>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle"
-                               href="#"
-                               id="dropdown03"
-                               data-toggle="dropdown"
-                               aria-haspopup="true"
-                               aria-expanded="false">Components</a>
-                            <div class="dropdown-menu"
-                                 aria-labelledby="dropdown03">
-                                <a class="dropdown-item"
-                                   href="doc-typography.html">Typography</a>
-                                <a class="dropdown-item"
-                                   href="doc-buttons.html">Buttons</a>
-                                <a class="dropdown-item"
-                                   href="doc-tables.html">Tables</a>
-                                <a class="dropdown-item"
-                                   href="doc-forms.html">Forms</a>
-                                <a class="dropdown-item"
-                                   href="doc-cards.html">Cards</a>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+/* ---------- marquee band ---------- */
+.band{background:var(--inverse);color:var(--on-inverse);overflow:hidden;border-block:1.5px solid var(--inverse)}
+.band .track{display:flex;width:max-content;animation:slide 38s linear infinite}
+.band .track span{font-family:var(--f-display);font-weight:900;font-stretch:112%;font-size:clamp(34px,5.6vw,72px);line-height:1;padding:14px 0 10px;text-transform:uppercase;white-space:nowrap;display:flex;align-items:center;gap:.35em;padding-right:.35em}
+.band .track span i{font-style:normal;color:var(--orange)}
+.band .sub{display:flex;justify-content:space-between;gap:20px;border-top:1px solid rgba(255,255,255,.14);padding-block:6px}
+@keyframes slide{to{transform:translateX(-50%)}}
 
-                <a class="navbar-brand mx-auto order-1 order-md-3"
-                   href="index.html">k-ø</a>
+/* ---------- about ---------- */
+.about{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--pad)}
+.about-copy{grid-column:1/7;min-width:0}
+.about-copy p{margin:0 0 1em;max-width:62ch;font-size:clamp(16px,1.2vw,18px)}
+.about-copy p.lead{font-family:var(--f-display);font-stretch:80%;font-weight:700;font-size:clamp(24px,2.6vw,36px);line-height:1.1;text-wrap:balance;max-width:24ch}
+.spec{grid-column:8/13;border:1.5px solid var(--ink);background:var(--sheet);align-self:start;min-width:0}
+.spec h3{margin:0;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;border-bottom:1.5px solid var(--ink);font-family:var(--f-tech);font-size:var(--s-sm);letter-spacing:.08em}
+.spec dl{margin:0;display:grid;grid-template-columns:auto 1fr}
+.spec dt,.spec dd{margin:0;padding:9px 14px;border-bottom:1px solid var(--hair)}
+.spec dt{font-family:var(--f-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink-3);padding-top:11px}
+.spec dd{font-family:var(--f-tech);font-weight:600;font-size:var(--s-sm);letter-spacing:.03em}
+.spec .bar{height:10px;background:repeating-linear-gradient(90deg,var(--ink) 0 2px,transparent 2px 5px)}
+@media (max-width:860px){.about-copy,.spec{grid-column:1/-1}}
 
-                <div class="collapse navbar-collapse order-4 order-md-4"
-                     id="navbar">
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               href="page-about.html">About</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link"
-                               href="page-contact.html">Contact</a>
-                        </li>
-                    </ul>
-                    <form class="form-inline"
-                          role="search">
-                        <input class="search js-search form-control form-control-rounded mr-sm-2"
-                               type="text"
-                               title="Enter search query here.."
-                               placeholder="Search.."
-                               aria-label="Search">
-                    </form>
-                </div>
-            </div>
-        </nav>
-    </header>
+.disc{margin-top:clamp(40px,5vw,64px);border-top:1.5px solid var(--ink)}
+.disc-row{display:grid;grid-template-columns:90px minmax(0,1.2fr) minmax(0,1fr) 40px;gap:20px;align-items:center;padding-block:12px;border-bottom:1px solid var(--rule)}
+.disc-row .n{font-family:var(--f-display);font-stretch:70%;font-weight:800;font-size:clamp(26px,3vw,40px);line-height:1}
+.disc-row .n span{color:var(--orange)}
+.disc-row h4{margin:0;font-family:var(--f-display);font-stretch:112%;font-weight:850;font-size:clamp(22px,3vw,40px);text-transform:uppercase;line-height:1;letter-spacing:-.01em}
+.disc-row p{margin:0;font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.03em;line-height:1.5;color:var(--ink-2)}
+.disc-row .plus{width:28px;height:28px;border:1.5px solid var(--ink);border-radius:50%;display:grid;place-items:center;justify-self:end}
+@media (max-width:760px){.disc-row{grid-template-columns:56px 1fr 28px}.disc-row p{grid-column:2/3}.disc-row .plus{grid-row:1;grid-column:3}}
 
-    <main class="main pt-4"
-          role="main">
+/* ---------- departure board ---------- */
+.board{display:grid;gap:0}
+.board-row{display:grid;grid-template-columns:minmax(0,1.1fr) 24px minmax(0,1.6fr) 60px 140px;gap:12px;align-items:center;padding-block:9px;border-bottom:1.5px solid var(--ink)}
+.board-row .org,.board-row .role{font-family:var(--f-tech);font-weight:600;font-size:clamp(14px,1.4vw,19px);letter-spacing:.07em;text-transform:uppercase;min-width:0;overflow-wrap:anywhere}
+.board-row .arrow{font-family:var(--f-tech);font-weight:700}
+.board-row .reg{font-family:var(--f-mono);font-size:11px;color:var(--ink-3)}
+.board-row .when{justify-self:end;background:var(--orange);color:var(--on-orange);font-family:var(--f-tech);font-weight:700;font-size:clamp(13px,1.3vw,17px);letter-spacing:.06em;padding:4px 10px 2px;min-width:132px;text-align:center}
+.board-row.now .when{background:var(--ink);color:var(--paper)}
+.board-row.old .org,.board-row.old .role{color:var(--ink-2)}
+.board-head{border-bottom:1.5px solid var(--ink)}
+.board-head > *{font-family:var(--f-mono);font-size:10px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+@media (max-width:720px){
+  .board-row{grid-template-columns:1fr auto;row-gap:4px}
+  .board-row .arrow,.board-head{display:none}
+  .board-row .role{grid-column:1/2;font-size:13px;color:var(--ink-2)}
+  .board-row .reg{grid-column:2;grid-row:1;justify-self:end}
+  .board-row .when{grid-column:2;grid-row:2;min-width:0}
+}
 
-        <div class="container">
+/* ---------- ticket ---------- */
+.ticket{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:clamp(12px,2vw,28px);align-items:center;margin-top:clamp(32px,4vw,56px)}
+.ticket .big{font-family:var(--f-display);font-weight:900;font-stretch:70%;font-size:clamp(90px,11vw,150px);line-height:.75}
+.ticket .box{border:1.5px solid var(--ink);padding:14px 18px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 20px;align-items:center;min-width:0}
+.ticket .box svg.bc{width:100%;max-width:260px;height:38px;color:var(--ink)}
+.ticket .box .small{grid-column:1/-1;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
+.ticket .ast{font-size:clamp(48px,6vw,80px);color:var(--ink)}
+@media (max-width:640px){.ticket{grid-template-columns:auto minmax(0,1fr)}.ticket .ast{display:none}}
 
-            <div class="row">
-                <div class="col-md-9">
+/* ---------- project cards ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:24px}
+.filters .lbl{margin-right:6px}
+.seg{display:inline-flex;border:1.5px solid var(--ink)}
+.seg button{border:0;background:transparent;padding:7px 12px 6px;font-family:var(--f-tech);font-weight:600;font-size:12px;letter-spacing:.07em;text-transform:uppercase;border-left:1px solid var(--rule)}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.grid-p{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,300px),1fr));gap:var(--pad)}
+.p-card{position:relative;display:flex;flex-direction:column;border:1.5px solid var(--ink);background:var(--sheet);text-align:left;padding:0;min-width:0}
+.p-card:hover .p-thumb::after{opacity:1}
+.p-thumb{position:relative;aspect-ratio:4/3;border-bottom:1.5px solid var(--ink);max-width:100%}
+.p-thumb canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.p-thumb::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent 0 10px,color-mix(in srgb,var(--orange) 22%,transparent) 10px 12px);opacity:0;transition:opacity .2s}
+.p-thumb .code{position:absolute;top:10px;left:10px;background:var(--paper);border:1px solid var(--ink);padding:3px 7px 2px}
+.p-thumb .st{position:absolute;top:10px;right:10px}
+.p-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.p-body h3{margin:0;font-family:var(--f-display);font-stretch:75%;font-weight:850;font-size:clamp(26px,2.4vw,34px);line-height:.95;text-transform:uppercase;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.p-body h3 .ico{font-size:22px;flex:none;color:var(--orange)}
+.p-body p{margin:0;font-size:14.5px;color:var(--ink-2);line-height:1.5}
+.p-body .stack{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:6px}
+.st-live{background:var(--mint);color:var(--on-mint);border-color:transparent}
+.st-wip{background:var(--orange);color:var(--on-orange);border-color:transparent}
+.st-concept{background:var(--paper)}
 
-                    <div class="row">
-                        <div class="col-md-6">
+/* ---------- photos ---------- */
+.ph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));grid-auto-flow:dense;gap:10px}
+.ph{position:relative;border:0;padding:0;background:var(--inverse);overflow:hidden;aspect-ratio:4/5;max-width:100%;display:block}
+.ph.land{grid-column:span 2;aspect-ratio:8/5}
+@media (max-width:520px){.ph.land{grid-column:span 1;aspect-ratio:4/5}}
+.ph canvas,.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.ph .cap{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;gap:8px;padding:8px 10px;background:linear-gradient(transparent,rgba(0,0,0,.6));color:#E9EAE6;font-family:var(--f-mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;opacity:0;transition:opacity .2s}
+.ph:hover .cap,.ph:focus-visible .cap{opacity:1}
+.ph .ph-tag{position:absolute;top:8px;left:8px;background:var(--orange);color:var(--on-orange);font-family:var(--f-mono);font-size:9.5px;padding:2px 6px;letter-spacing:.05em}
+/* contact sheet */
+.ph-grid.sheet{grid-template-columns:repeat(auto-fill,minmax(min(100%,140px),1fr));gap:0;background:var(--inverse);padding:22px 10px;position:relative}
+.ph-grid.sheet::before,.ph-grid.sheet::after{content:"";position:absolute;left:0;right:0;height:10px;background:radial-gradient(circle at 8px 5px,var(--paper) 3px,transparent 3.5px) 0 0/22px 10px repeat-x}
+.ph-grid.sheet::before{top:6px}.ph-grid.sheet::after{bottom:6px}
+.ph-grid.sheet .ph{aspect-ratio:3/2;grid-column:auto;border:5px solid var(--inverse)}
+.ph-grid.sheet .ph .cap{opacity:1;background:none;padding:2px 4px;top:auto;color:#F28A55}
+.ph-grid.sheet .ph-tag{display:none}
+/* index list */
+.ph-grid.index{display:block;border-top:1.5px solid var(--ink)}
+.ph-grid.index .ph{display:grid;grid-template-columns:64px 80px minmax(0,1fr) auto 36px;gap:14px;align-items:center;width:100%;aspect-ratio:auto;background:transparent;border-bottom:1px solid var(--rule);padding-block:8px;text-align:left}
+.ph-grid.index .ph canvas,.ph-grid.index .ph img{position:static;width:64px;height:48px}
+.ph-grid.index .ph .cap,.ph-grid.index .ph-tag{display:none}
+.ph-row-meta{display:none}
+.ph-grid.index .ph-row-meta{display:contents}
+.ph-row-meta .t{font-family:var(--f-tech);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-size:14px}
+.ph-row-meta .sw{width:28px;height:28px;border:1px solid var(--rule);justify-self:end}
+@media (max-width:600px){.ph-grid.index .ph{grid-template-columns:64px minmax(0,1fr) 28px}.ph-grid.index .ph .tg,.ph-grid.index .ph .fr{display:none}}
+.hues{display:flex;gap:6px;flex-wrap:wrap}
+.hue{width:26px;height:26px;border:1.5px solid var(--rule);padding:0;position:relative}
+.hue[aria-pressed="true"]{border-color:var(--ink);box-shadow:0 0 0 2px var(--paper),0 0 0 3.5px var(--ink)}
+.upload{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px;padding:14px 16px;border:1.5px dashed var(--rule)}
+.upload input{position:absolute;opacity:0;width:1px;height:1px}
+.upload label{cursor:pointer}
 
-                            <article class="card mb-4">
-                                <header class="card-header">
-                                    <div class="card-meta">
-                                        <a href="#"><time class="timeago"
-                                                  datetime="2017-10-26 20:00">26 october 2017</time></a> in <a
-                                           href="page-category.html">Journey</a>
-                                    </div>
-                                    <a href="post-image.html">
-                                        <h4 class="card-title">How can we sing about love?</h4>
-                                    </a>
-                                </header>
-                                <a href="post-image.html">
-                                    <img class="card-img"
-                                         src="img/articles/22.jpg"
-                                         alt="" />
-                                </a>
-                                <div class="card-body">
-                                    <p class="card-text">Etiam rhoncus. Maecenas tempus, tellus eget condimentum
-                                        rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. </p>
-                                </div>
-                            </article><!-- /.card -->
+/* ---------- blog ---------- */
+.posts{border-top:1.5px solid var(--ink)}
+.post{display:grid;grid-template-columns:120px minmax(0,1fr) 170px 90px;gap:20px;align-items:baseline;padding-block:18px;border-bottom:1px solid var(--rule);text-decoration:none}
+.post:hover h3{color:var(--orange)}
+.post .k{font-family:var(--f-tech);font-weight:700;font-size:12px;letter-spacing:.08em}
+.post h3{margin:0 0 6px;font-family:var(--f-display);font-stretch:80%;font-weight:800;font-size:clamp(22px,2.4vw,32px);line-height:1;text-transform:uppercase;text-wrap:balance;transition:color .15s}
+.post p{margin:0;color:var(--ink-2);font-size:15px;max-width:62ch}
+.post .tags{display:flex;flex-wrap:wrap;gap:6px}
+.post .rt{text-align:right}
+.post.draft h3{color:var(--ink-2)}
+@media (max-width:760px){.post{grid-template-columns:1fr}.post .rt{text-align:left}}
+.reader{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--pad)}
+.reader aside{grid-column:1/4;display:grid;gap:12px;align-content:start}
+.reader article{grid-column:4/11;min-width:0}
+.reader article h1{margin:0 0 20px;font-family:var(--f-display);font-stretch:68%;font-weight:900;font-size:var(--s-xxl);line-height:.86;text-transform:uppercase;text-wrap:balance;letter-spacing:-.01em}
+.reader article p{font-size:19px;line-height:1.6;max-width:62ch;margin:0 0 1em}
+.reader article p.dek{font-family:var(--f-display);font-stretch:85%;font-weight:600;font-size:clamp(20px,1.8vw,24px);line-height:1.3}
+.note{border-left:4px solid var(--orange);background:var(--sheet);padding:14px 18px;max-width:62ch;font-size:15px}
+@media (max-width:860px){.reader aside,.reader article{grid-column:1/-1}}
 
-                            <article class="card mb-4">
-                                <header class="card-header">
-                                    <div class="card-meta">
-                                        <a href="#"><time class="timeago"
-                                                  datetime="2017-10-03 20:00">3 october 2017</time></a> in <a
-                                           href="page-category.html">Lifestyle</a>
-                                    </div>
-                                    <a href="post-image.html">
-                                        <h4 class="card-title">Oh, I guess they have the blues</h4>
-                                    </a>
-                                </header>
-                                <a href="post-image.html">
-                                    <img class="card-img"
-                                         src="img/articles/18.jpg"
-                                         alt="" />
-                                </a>
-                                <div class="card-body">
-                                    <p class="card-text">Etiam rhoncus. Maecenas tempus, tellus eget condimentum
-                                        rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. </p>
-                                </div>
-                            </article><!-- /.card -->
+/* ---------- home previews ---------- */
+.split{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--pad)}
+.strip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.strip .ph{aspect-ratio:3/4}
+@media (max-width:760px){.strip{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.more{display:flex;justify-content:flex-end;margin-top:20px}
 
-                            <article class="card mb-4">
-                                <header class="card-header">
-                                    <div class="card-meta">
-                                        <a href="#"><time class="timeago"
-                                                  datetime="2017-07-16 20:00">16 july 2017</time></a> in <a
-                                           href="page-category.html">Work</a>
-                                    </div>
-                                    <a href="post-image.html">
-                                        <h4 class="card-title">How can we, how can we sing about ourselves?</h4>
-                                    </a>
-                                </header>
-                                <a href="post-image.html">
-                                    <img class="card-img"
-                                         src="img/articles/12.jpg"
-                                         alt="" />
-                                </a>
-                                <div class="card-body">
-                                    <p class="card-text">Etiam rhoncus. Maecenas tempus, tellus eget condimentum
-                                        rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. </p>
-                                </div>
-                            </article><!-- /.card -->
+/* ---------- CTA / contact ---------- */
+.cta{background:var(--sheet);border-top:1.5px solid var(--ink)}
+.cta .wrap{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:var(--pad);padding-block:clamp(48px,7vw,96px)}
+.cta h2{grid-column:1/9;margin:0;font-family:var(--f-display);font-weight:900;font-stretch:62%;font-size:clamp(64px,11vw,170px);line-height:.82;text-transform:uppercase;letter-spacing:-.02em}
+.cta h2 span{color:var(--orange)}
+.cta .contact{grid-column:9/13;align-self:end;display:grid;gap:12px;min-width:0}
+.mail{display:flex;border:1.5px solid var(--ink);background:var(--paper)}
+.mail code{flex:1;min-width:0;padding:12px 14px;font-family:var(--f-mono);font-size:14px;overflow-wrap:anywhere;user-select:all}
+.mail button{border:0;border-left:1.5px solid var(--ink);background:var(--orange);color:var(--on-orange);padding:0 14px;font-family:var(--f-tech);font-weight:700;font-size:12px;letter-spacing:.08em}
+.links{display:grid;grid-template-columns:1fr 1fr;border-top:1.5px solid var(--ink)}
+.links a{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--rule);text-decoration:none;font-family:var(--f-tech);font-weight:600;font-size:13px;letter-spacing:.07em;text-transform:uppercase}
+.links a:nth-child(odd){padding-right:14px;border-right:1px solid var(--rule)}
+.links a:nth-child(even){padding-left:14px}
+.links a:hover{color:var(--orange)}
+@media (max-width:860px){.cta h2,.cta .contact{grid-column:1/-1}}
+footer{background:var(--inverse);color:var(--on-inverse)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;padding-block:16px}
 
-                        </div>
-                        <div class="col-md-6">
+/* ---------- dialog ---------- */
+dialog{border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);padding:0;width:min(900px,calc(100vw - 32px));max-height:calc(100vh - 48px)}
+dialog::backdrop{background:rgba(10,10,10,.6)}
+.dlg-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1.5px solid var(--ink);background:var(--sheet)}
+.dlg-head button{border:1.5px solid var(--ink);background:var(--paper);width:32px;height:32px;display:grid;place-items:center}
+.dlg-body{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}
+.dlg-media{position:relative;aspect-ratio:4/3;border-right:1.5px solid var(--ink);background:var(--inverse);max-width:100%}
+.dlg-media canvas,.dlg-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.dlg-info{padding:20px;display:grid;gap:14px;align-content:start;min-width:0}
+.dlg-info h3{margin:0;font-family:var(--f-display);font-stretch:70%;font-weight:900;font-size:clamp(34px,4vw,54px);line-height:.9;text-transform:uppercase}
+.dlg-info p{margin:0;color:var(--ink-2)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;border-top:1px solid var(--rule);padding-top:12px}
+.kv dt{font-family:var(--f-mono);font-size:10.5px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.05em;padding-top:2px}
+.kv dd{margin:0;font-family:var(--f-tech);font-weight:600;font-size:13px;letter-spacing:.04em}
+@media (max-width:720px){.dlg-body{grid-template-columns:1fr}.dlg-media{border-right:0;border-bottom:1.5px solid var(--ink)}}
 
-                            <article class="card mb-4">
-                                <header class="card-header">
-                                    <div class="card-meta">
-                                        <a href="#"><time class="timeago"
-                                                  datetime="2017-10-15 20:00">15 october 2017</time></a> in <a
-                                           href="page-category.html">Lifestyle</a>
-                                    </div>
-                                    <a href="post-image.html">
-                                        <h4 class="card-title">The king is made of paper</h4>
-                                    </a>
-                                </header>
-                                <a href="post-image.html">
-                                    <img class="card-img"
-                                         src="img/articles/5.jpg"
-                                         alt="" />
-                                </a>
-                                <div class="card-body">
-                                    <p class="card-text">Etiam rhoncus. Maecenas tempus, tellus eget condimentum
-                                        rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. </p>
-                                </div>
-                            </article><!-- /.card -->
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;font-family:var(--f-tech);font-weight:600;font-size:13px;letter-spacing:.06em;z-index:80}
 
-                            <article class="card mb-4">
-                                <header class="card-header">
-                                    <div class="card-meta">
-                                        <a href="#"><time class="timeago"
-                                                  datetime="2017-08-24 20:00">24 august 2017</time></a> in <a
-                                           href="page-category.html">Work</a>
-                                    </div>
-                                    <a href="post-image.html">
-                                        <h4 class="card-title">Crying on the news</h4>
-                                    </a>
-                                </header>
-                                <a href="post-image.html">
-                                    <img class="card-img"
-                                         src="img/articles/13.jpg"
-                                         alt="" />
-                                </a>
-                                <div class="card-body">
-                                    <p class="card-text">Etiam rhoncus. Maecenas tempus, tellus eget condimentum
-                                        rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. </p>
-                                </div>
-                            </article><!-- /.card -->
+@media (prefers-reduced-motion: reduce){
+  .band .track,.blink{animation:none}
+  html{scroll-behavior:auto}
+}
+</style>
 
-                            <article class="card mb-4">
-                                <header class="card-header">
-                                    <div class="card-meta">
-                                        <a href="#"><time class="timeago"
-                                                  datetime="2017-05-08 20:00">8 may 2017</time></a> in <a
-                                           href="page-category.html">Journey</a>
-                                    </div>
-                                    <a href="post-image.html">
-                                        <h4 class="card-title">How can you not sing about love?</h4>
-                                    </a>
-                                </header>
-                                <a href="post-image.html">
-                                    <img class="card-img"
-                                         src="img/articles/1.jpg"
-                                         alt="" />
-                                </a>
-                                <div class="card-body">
-                                    <p class="card-text">Etiam rhoncus. Maecenas tempus, tellus eget condimentum
-                                        rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. </p>
-                                </div>
-                            </article><!-- /.card -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-xbox" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18"/><path d="M3 3l18 18M21 3L3 21"/></symbol>
+  <symbol id="i-ne" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8"/></symbol>
+  <symbol id="i-sw" viewBox="0 0 24 24"><path d="M17 7L7 17M15 17H7V9"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.2 3 14.8 0 18M12 3c-3 3.2-3 14.8 0 18"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5zM3 13l9 5 9-5"/></symbol>
+  <symbol id="i-ast" viewBox="0 0 24 24"><path class="solid" d="M10.4 2h3.2l-.5 7.3 6.4-3.6 1.6 2.8-6.6 3.5 6.6 3.5-1.6 2.8-6.4-3.6.5 7.3h-3.2l.5-7.3-6.4 3.6-1.6-2.8 6.6-3.5-6.6-3.5 1.6-2.8 6.4 3.6z"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1L7 17M17 7l2.1-2.1"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></symbol>
+</svg>
 
-                        </div>
-                    </div>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#index" aria-label="Camilo Calderón, home">
+      <svg viewBox="0 0 70 30" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="square">
+        <path d="M9 7L3 15l6 8"/><path d="M19 4h-3v9l-3 2 3 2v9h3"/>
+        <path d="M29 6v18M29 15l7-9M31.5 12l5 12" stroke="var(--orange)"/>
+        <path d="M45 4h3v9l3 2-3 2v9h-3"/><path d="M58 7l6 8-6 8"/></g></svg>
+      <span><b>CAMILO CALDERÓN</b><small>KMYLO-06 / DESIGN + CODE</small></span>
+    </a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#index" data-nav="index">Index</a>
+      <a href="#projects" data-nav="projects">Projects<sup id="cnt-p"></sup></a>
+      <a href="#photos" data-nav="photos">Photos<sup id="cnt-ph"></sup></a>
+      <a href="#blog" data-nav="blog">Blog<sup id="cnt-b"></sup></a>
+    </nav>
+    <div class="geo mono"><span>BUE 34.60°S 58.38°W</span><span class="num" id="clock">--:--:-- ART</span></div>
+    <button class="theme-btn" id="themeBtn" aria-label="Switch light or dark theme"><svg class="ico"><use href="#i-sun"/></svg></button>
+  </div>
+</header>
 
-                </div>
-                <div class="col-md-3 ml-auto">
-
-                    <aside class="sidebar">
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h4 class="card-title">About</h4>
-                                <p class="card-text">Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus,
-                                    sem quam <a href="#">semper libero</a>, sit amet adipiscing sem neque sed ipsum.
-                                </p>
-                            </div>
-                        </div><!-- /.card -->
-                    </aside>
-
-                    <aside class="sidebar sidebar-sticky">
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h4 class="card-title">Tags</h4>
-                                <a class="btn btn-light btn-sm mb-1"
-                                   href="page-category.html">Journey</a>
-                                <a class="btn btn-light btn-sm mb-1"
-                                   href="page-category.html">Work</a>
-                                <a class="btn btn-light btn-sm mb-1"
-                                   href="page-category.html">Lifestype</a>
-                                <a class="btn btn-light btn-sm mb-1"
-                                   href="page-category.html">Photography</a>
-                                <a class="btn btn-light btn-sm mb-1"
-                                   href="page-category.html">Food & Drinks</a>
-                            </div>
-                        </div><!-- /.card -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <h4 class="card-title">Popular stories</h4>
-
-                                <a href="post-image.html"
-                                   class="d-inline-block">
-                                    <h4 class="h6">The blind man</h4>
-                                    <img class="card-img"
-                                         src="img/articles/2.jpg"
-                                         alt="" />
-                                </a>
-                                <time class="timeago"
-                                      datetime="2017-10-03 20:00">3 october 2017</time> in Lifestyle
-
-                                <a href="post-image.html"
-                                   class="d-inline-block mt-3">
-                                    <h4 class="h6">Crying on the news</h4>
-                                    <img class="card-img"
-                                         src="img/articles/3.jpg"
-                                         alt="" />
-                                </a>
-                                <time class="timeago"
-                                      datetime="2017-07-16 20:00">16 july 2017</time> in Work
-
-                            </div>
-                        </div><!-- /.card -->
-                    </aside>
-
-                </div>
-            </div>
+<main>
+<!-- ================= INDEX ================= -->
+<section data-view="index">
+  <div class="wrap">
+    <div class="hero">
+      <div class="hero-meta mono">
+        <div class="row"><span class="k">System</span><span>KMYLO-06 / Personal index</span></div>
+        <div class="row"><span class="k">Role</span><span>Software engineer + graphic designer</span></div>
+        <div class="row"><span class="k">Base</span><span>Buenos Aires, AR</span></div>
+        <div class="row"><span class="k">Active</span><span class="num">Since 2000 / 26 yrs</span></div>
+        <div class="row"><span class="k">Status</span><span><span class="dot blink"></span>&nbsp; Building</span></div>
+        <div class="punct" aria-hidden="true">&lt;{ { C } }&gt;
+          <div><span class="tag"><span><svg class="ico"><use href="#i-sw"/></svg> POLYMATH</span></span></div>
         </div>
-
-    </main>
-
-    <div class="site-newsletter">
-        <div class="container">
-            <div class="text-center">
-                <h3 class="h4 mb-2">Subscribe to our newsletter</h3>
-                <p class="text-muted">Join our monthly newsletter and never miss out on new stories and promotions.</p>
-
-                <div class="row">
-                    <div class="col-xs-12 col-sm-9 col-md-7 col-lg-5 ml-auto mr-auto">
-                        <div class="input-group mb-3 mt-3">
-                            <input type="text"
-                                   class="form-control"
-                                   placeholder="Email address"
-                                   aria-label="Email address">
-                            <span class="input-group-btn">
-                                <button class="btn btn-secondary"
-                                        type="button">Subscribe</button>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      </div>
+      <figure class="hero-fig">
+        <canvas id="torus" aria-label="Rotating point cloud of a torus with a trefoil knot drawn on its surface"></canvas>
+        <span class="corner c1"></span><span class="corner c2"></span><span class="corner c3"></span><span class="corner c4"></span>
+        <div class="fig-top mono"><span>FIG.01</span><span class="num" id="torusInfo">3,200 PTS</span></div>
+        <figcaption class="mono"><span>T² surface / trefoil as (2,3) torus knot</span><span><svg class="ico"><use href="#i-xbox"/></svg></span></figcaption>
+      </figure>
+      <h1 class="hero-name"><span class="l1">Camilo</span><span class="l2">Calderón<sup>[DSGN/ENG]</sup></span></h1>
+      <div class="hero-foot">
+        <p class="hero-thesis">I build interfaces where <em>design</em>, code and mathematics turn out to be the same problem.</p>
+        <div class="hero-cta">
+          <a class="btn primary" href="#projects">See projects <svg class="ico"><use href="#i-ne"/></svg></a>
+          <a class="btn" href="#photos">Photo archive</a>
+          <a class="btn" href="#blog">Read</a>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="band" aria-hidden="true">
+    <div class="track"><span>Design <i>/</i> Code <i>/</i> Mathematics <i>/</i> Photography <i>/</i> Writing <i>/</i></span><span>Design <i>/</i> Code <i>/</i> Mathematics <i>/</i> Photography <i>/</i> Writing <i>/</i></span></div>
+    <div class="wrap sub mono"><span>Index / services</span><span>Bogotá &gt; Buenos Aires</span><span>2000 / 2026</span></div>
+  </div>
+
+  <div class="wrap sec" id="about">
+    <div class="sec-head"><span class="code">SEC_01</span><h2>About</h2><span class="meta mono muted">Who is writing this</span><span class="line"></span></div>
+    <div class="about">
+      <div class="about-copy">
+        <p class="lead">Twenty-six years between the drawing board and the compiler.</p>
+        <p>I started in physics at the Universidad Nacional de Colombia, moved into graphic design at FADU/UBA, and have spent most of my working life on the frontend: TV streaming platforms, cloud point of sale, retail AI, and today the frontend team at Deel.</p>
+        <p>I care about the layer where design meets code. At Intuitivo I built a token-based design system from scratch; on my own time I build tools that blend mathematics with interactive visuals, from pitch detection to point clouds.</p>
+        <p>I also photograph, illustrate, and write <b>The Polymath Manifesto</b>, an essay series about the structural connections between mathematics, philosophy, design and culture.</p>
+      </div>
+      <aside class="spec" aria-label="Spec sheet">
+        <h3>SPEC SHEET <svg class="ico"><use href="#i-layers"/></svg></h3>
+        <dl>
+          <dt>Now</dt><dd>Frontend Engineer, Deel</dd>
+          <dt>Stack</dt><dd>React, Next.js, TypeScript, Node, Three.js</dd>
+          <dt>Design</dt><dd>Figma, Adobe suite, design tokens</dd>
+          <dt>Studied</dt><dd>Physics, UNAL / Graphic Design, UBA</dd>
+          <dt>Languages</dt><dd>Español / English</dd>
+          <dt>Also</dt><dd>Guitar, juggling, topology</dd>
+        </dl>
+        <div class="bar"></div>
+      </aside>
     </div>
 
-    <div class="site-instagram">
-        <div class="action">
-            <a class="btn btn-light"
-               href="#">
-                Follow us @ Instagram
-            </a>
-        </div>
-        <div class="row no-gutters">
-            <div class="col-sm-6">
-                <div class="row no-gutters">
-                    <div class="col-3">
-                        <a class="photo"
-                           href="#">
-                            <img class="img-fluid"
-                                 src="img/instagram/1.jpg"
-                                 alt="" />
-                        </a>
-                    </div>
-                    <div class="col-3">
-                        <a class="photo"
-                           href="#">
-                            <img class="img-fluid"
-                                 src="img/instagram/2.jpg"
-                                 alt="" />
-                        </a>
-                    </div>
-                    <div class="col-3">
-                        <a class="photo"
-                           href="#">
-                            <img class="img-fluid"
-                                 src="img/instagram/3.jpg"
-                                 alt="" />
-                        </a>
-                    </div>
-                    <div class="col-3">
-                        <a class="photo"
-                           href="#">
-                            <img class="img-fluid"
-                                 src="img/instagram/4.jpg"
-                                 alt="" />
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6">
-                <div class="row no-gutters">
-                    <div class="col-3">
-                        <a class="photo"
-                           href="#">
-                            <img class="img-fluid"
-                                 src="img/instagram/5.jpg"
-                                 alt="" />
-                        </a>
-                    </div>
-                    <div class="col-3">
-                        <a class="photo"
-                           href="#">
-                            <img class="img-fluid"
-                                 src="img/instagram/6.jpg"
-                                 alt="" />
-                        </a>
-                    </div>
-                    <div class="col-3">
-                        <a class="photo"
-                           href="#">
-                            <img class="img-fluid"
-                                 src="img/instagram/7.jpg"
-                                 alt="" />
-                        </a>
-                    </div>
-                    <div class="col-3">
-                        <a class="photo"
-                           href="#">
-                            <img class="img-fluid"
-                                 src="img/instagram/8.jpg"
-                                 alt="" />
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="disc" role="list" id="disc"></div>
+  </div>
+
+  <div class="wrap sec" style="padding-top:0">
+    <div class="sec-head"><span class="code">SEC_02</span><h2>Career log</h2><span class="meta mono muted">Departures, newest first</span><span class="line"></span></div>
+    <div class="board" id="board"></div>
+    <div class="ticket">
+      <div class="big" aria-hidden="true">C</div>
+      <div class="box">
+        <svg class="bc" id="barcode" viewBox="0 0 260 38" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <span class="mono muted">(06)KMYLO-2000-2026</span>
+        <span class="small">Present this pass for one portfolio entry. Valid for design, code and long conversations.</span>
+      </div>
+      <svg class="ico solid ast" aria-hidden="true"><use href="#i-ast"/></svg>
     </div>
+  </div>
 
-    <footer class="site-footer bg-darkest"
-            role="contentinfo">
-        <div class="container">
+  <div class="wrap sec" style="padding-top:0">
+    <div class="sec-head"><span class="code">SEC_03</span><h2>Selected projects</h2><span class="meta mono muted">3 of <span id="pTotal"></span></span><span class="line"></span></div>
+    <div class="grid-p" id="homeProjects"></div>
+    <div class="more"><a class="btn" href="#projects">All projects <svg class="ico"><use href="#i-ne"/></svg></a></div>
+  </div>
 
-            <ul class="nav justify-content-center">
-                <li class="nav-item">
-                    <a class="nav-link"
-                       href="#">Privacy policy</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link"
-                       href="#">Terms</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link"
-                       href="#">Feedback</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link"
-                       href="#">Advertise</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link"
-                       href="page-contact.html">Contact</a>
-                </li>
-            </ul>
+  <div class="wrap sec" style="padding-top:0">
+    <div class="sec-head"><span class="code">SEC_04</span><h2>From the archive</h2><span class="meta mono muted">Photography, many cameras</span><span class="line"></span></div>
+    <div class="strip" id="homePhotos"></div>
+    <div class="more"><a class="btn" href="#photos">Open archive <svg class="ico"><use href="#i-ne"/></svg></a></div>
+  </div>
 
-        </div>
-    </footer>
+  <div class="wrap sec" style="padding-top:0">
+    <div class="sec-head"><span class="code">SEC_05</span><h2>Latest writing</h2><span class="meta mono muted">The Polymath Manifesto + tech notes</span><span class="line"></span></div>
+    <div class="posts" id="homePosts"></div>
+    <div class="more"><a class="btn" href="#blog">All writing <svg class="ico"><use href="#i-ne"/></svg></a></div>
+  </div>
+</section>
 
-    <script src="js/app.js"></script>
-</body>
+<!-- ================= PROJECTS ================= -->
+<section data-view="projects" hidden>
+  <div class="wrap sec">
+    <div class="sec-head"><span class="code">PRJ</span><h2>Projects</h2><span class="meta mono muted">Code, design systems, creative code</span><span class="line"></span></div>
+    <div class="filters">
+      <span class="mono muted lbl">Filter</span>
+      <div class="seg" id="pFilter" role="group" aria-label="Filter projects">
+        <button aria-pressed="true" data-k="all">All</button>
+        <button aria-pressed="false" data-k="code">Code</button>
+        <button aria-pressed="false" data-k="design">Design</button>
+        <button aria-pressed="false" data-k="creative">Creative code</button>
+      </div>
+    </div>
+    <div class="grid-p" id="allProjects"></div>
+  </div>
+</section>
 
-</html>
+<!-- ================= PHOTOS ================= -->
+<section data-view="photos" hidden>
+  <div class="wrap sec">
+    <div class="sec-head"><span class="code">PHO</span><h2>Photo archive</h2><span class="meta mono muted num" id="phCount"></span><span class="line"></span></div>
+    <div class="filters">
+      <span class="mono muted lbl">Read as</span>
+      <div class="seg" id="phLayout" role="group" aria-label="Layout">
+        <button aria-pressed="true" data-k="grid">Grid</button>
+        <button aria-pressed="false" data-k="sheet">Contact sheet</button>
+        <button aria-pressed="false" data-k="index">Index</button>
+      </div>
+    </div>
+    <div class="filters" id="phTags"><span class="mono muted lbl">Tags</span></div>
+    <div class="filters"><span class="mono muted lbl">Color</span><div class="hues" id="phHues"></div></div>
+    <div class="ph-grid" id="phGrid"></div>
+    <div class="upload">
+      <input type="file" id="phUpload" accept="image/*" multiple>
+      <label for="phUpload" class="btn primary"><svg class="ico"><use href="#i-upload"/></svg> Preview your photos</label>
+      <span class="mono muted">Tiles marked PH are placeholders. Drop in real frames to see them tagged by dominant color. Nothing leaves your browser.</span>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BLOG ================= -->
+<section data-view="blog" hidden>
+  <div class="wrap sec" id="blogList">
+    <div class="sec-head"><span class="code">TXT</span><h2>Writing</h2><span class="meta mono muted">Essays and tech notes</span><span class="line"></span></div>
+    <div class="filters">
+      <span class="mono muted lbl">Shelf</span>
+      <div class="seg" id="bFilter" role="group" aria-label="Filter writing">
+        <button aria-pressed="true" data-k="all">All</button>
+        <button aria-pressed="false" data-k="essay">Manifesto</button>
+        <button aria-pressed="false" data-k="tech">Tech notes</button>
+      </div>
+    </div>
+    <div class="posts" id="allPosts"></div>
+  </div>
+  <div class="wrap sec" id="blogReader" hidden></div>
+</section>
+</main>
+
+<section class="cta" aria-labelledby="ctaH">
+  <div class="wrap">
+    <h2 id="ctaH">Have a system<br><span>to build?</span></h2>
+    <div class="contact">
+      <span class="mono muted">Write directly</span>
+      <!-- <div class="mail"><code id="mailTxt">kmylo6@hotmail.com</code><button id="copyMail">COPY</button></div> -->
+      <div class="links">
+        <a href="https://www.linkedin.com/in/ccalderonh" target="_blank" rel="noopener">LinkedIn <svg class="ico"><use href="#i-ne"/></svg></a>
+        <a href="https://www.behance.net/kmylo/" target="_blank" rel="noopener">Behance <svg class="ico"><use href="#i-ne"/></svg></a>
+        <a href="https://500px.com/kmylo" target="_blank" rel="noopener">500px <svg class="ico"><use href="#i-ne"/></svg></a>
+        <a href="https://www.instagram.com/kmylo6/" target="_blank" rel="noopener">Instagram <svg class="ico"><use href="#i-ne"/></svg></a>
+      </div>
+    </div>
+  </div>
+</section>
+<footer><div class="wrap mono"><span>© 2026 Camilo Calderón</span><span>Set in Archivo, Chakra Petch &amp; JetBrains Mono</span><span>BUE / ART UTC-3</span></div></footer>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <div class="dlg-head"><span class="mono" id="dlgCode"></span><button id="dlgClose" aria-label="Close"><svg class="ico"><use href="#i-x"/></svg></button></div>
+  <div class="dlg-body"><div class="dlg-media" id="dlgMedia"></div><div class="dlg-info" id="dlgInfo"></div></div>
+</dialog>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* =================== DATA =================== */
+const DISC=[
+  ['FRONTEND ENGINEERING','React, Next.js, TypeScript. Scalable apps, real-time UIs, micro-frontends.'],
+  ['DESIGN SYSTEMS','Tokens that link design and code, with per-client theming.'],
+  ['VISUAL & BRAND','Logos, editorial layouts, illustration, typography.'],
+  ['CREATIVE CODE','Canvas, WebGPU, computer vision, audio in the browser.'],
+  ['PHOTOGRAPHY','Color, black and white, portrait. Surrealismo tropical.'],
+  ['WRITING','The Polymath Manifesto: math, philosophy, design, culture.']
+];
+const CAREER=[
+  ['Deel','Frontend Engineer','RMT','2024.06 / NOW',1],
+  ['Intuitivo','Senior Software Developer','AR','2023.08 / 2024.04'],
+  ['Southteams','Software Developer','US','2021.11 / 2023.06'],
+  ['DataArt','ReactJS Tech Lead','AR','2020.06 / 2021.09'],
+  ['Globalhitss','Tech Lead, Frontend & Design','AR','2019.01 / 2020.01'],
+  ['DLA TV','Frontend Leader, Tech & Design','AR','2014.07 / 2018.12'],
+  ['DLA TV','Frontend Developer & Designer','AR','2012.01 / 2014.07'],
+  ['Claxson','Senior Designer','AR','2011'],
+  ['Wunderman','Web Designer & UI Engineer','AR','2010'],
+  ['Cabeza de Martillo','Art Director, Designer','CL','2006'],
+  ['ONU / Banco Mundial','Art Director, Designer','CO','2004',0,1]
+];
+const PROJECTS=[
+  {id:'blocky',code:'PRJ_BLK',title:'Blocky',kind:'code',status:'In progress',motif:'bricks',summary:'A 3D brick assembler on Three.js and WebGPU. Import a photo and Gemini proposes a buildable model; import and export LDraw or JSON.',stack:['Three.js','WebGPU','Gemini','LDraw']},
+  {id:'chromalab',code:'PRJ_CHL',title:'ChromaLab',kind:'code',status:'Built',motif:'swatches',summary:'Color analysis in the browser. Breaks an image into its palette and lets a photo archive be read by color.',stack:['Canvas','Color science','Vanilla JS']},
+  {id:'guitarsense',code:'PRJ_GTS',title:'GuitarSense',kind:'creative',status:'Built',motif:'wave',summary:'Real-time pitch detection and a karaoke mode for guitar, written in vanilla JavaScript with the Web Audio API.',stack:['Web Audio','DSP','Vanilla JS']},
+  {id:'threadgraph',code:'PRJ_TGR',title:'ThreadGraph',kind:'design',status:'Concept',motif:'graph',summary:'Chat where threads branch and connect as a graph, with an editorial reading view next to the conversation view.',stack:['Product design','PRD','Prototype']},
+  {id:'memoria',code:'PRJ_MEM',title:'Memoria',kind:'code',status:'Prototype',motif:'force',summary:'A local-first personal knowledge base inspired by Obsidian, with a D3 force graph of linked notes.',stack:['D3','Local-first','IndexedDB']},
+  {id:'juggling',code:'PRJ_JGL',title:'Juggling Tracker',kind:'creative',status:'Prototype',motif:'parabola',summary:'Computer vision that follows juggling balls in flight, using MediaPipe for detection and Kalman filters to smooth the arcs.',stack:['MediaPipe','Kalman filter','Canvas']},
+  {id:'pi',code:'PRJ_ARQ',title:'Archimedes & π',kind:'creative',status:'Built',motif:'polygon',summary:'A self-contained educational unit on how Archimedes squeezed π between inscribed and circumscribed polygons.',stack:['Interactive essay','SVG','Math']},
+  {id:'gerry',code:'PRJ_MKV',title:'Gerrymander Lens',kind:'creative',status:'Built',motif:'chain',summary:'An interactive companion to an essay on detecting gerrymandering with Markov chains and Bayesian inference.',stack:['MCMC','Bayes','Canvas']},
+  {id:'lidar',code:'PRJ_LDR',title:'Webcam LiDAR',kind:'creative',status:'Experiment',motif:'depth',summary:'Renders the webcam as a LiDAR-style depth point cloud, a small homage to point-cloud music videos.',stack:['Depth estimation','WebGL']},
+  {id:'intuitivo',code:'DSN_INT',title:'Intuitivo DS',kind:'design',status:'Shipped 2023',motif:'tokens',summary:'A design system built from scratch on Mantine. The work was the middle layer: namespaced tokens linking design to code and allowing per-client customization.',stack:['Design tokens','Mantine','React']},
+  {id:'oaks',code:'DSN_OAK',title:'Oaks Valley',kind:'design',status:'Shipped 2020',motif:'coin',summary:'Rebrand and website for a financial services company. An oak drawn in negative space inside a gold coin, standing for the company’s foundation.',stack:['Logo','Brand strategy','Web']}
+];
+const POSTS=[
+  {slug:'archimedes-pi',cat:'essay',k:'MATH',title:'Archimedes and the patience of π',tags:['history','geometry'],ex:'How a man with a stylus and a 96-sided polygon pinned down a number we still cannot write out, and what that patience says about method.'},
+  {slug:'rope-memory',cat:'essay',k:'TECH',title:'Margaret Hamilton and rope memory',tags:['apollo','software'],ex:'Apollo 11 flew on software woven by hand into copper and ferrite. A look at the moment programming became engineering.'},
+  {slug:'susan-kare',cat:'essay',k:'DESIGN',title:'Susan Kare and the grammar of icons',tags:['icons','pixels'],ex:'Thirty-two by thirty-two pixels was enough to teach millions of people what a computer was. On constraint as a language.'},
+  {slug:'gerrymander',cat:'essay',k:'MATH',title:'Catching gerrymanders with Markov chains',tags:['mcmc','bayes'],ex:'Random walks through millions of possible maps reveal when one map is too unlikely to be innocent. Includes an interactive.'},
+  {slug:'pintori',cat:'essay',k:'DESIGN',title:'Pintori, Olivetti and the Lettera 22',tags:['posters','modernism'],ex:'A poster that sold a typewriter by never quite showing it. Reading Giovanni Pintori as a systems designer.'},
+  {slug:'voynich',cat:'essay',k:'CULTURE',title:'The Voynich Manuscript as artifact',tags:['codex','language'],ex:'What if the question is not what it says, but what it did to everyone who tried to read it?'},
+  {slug:'winamp',cat:'essay',k:'CULTURE',title:'Winamp skins and digital preservation',tags:['archives','ui'],ex:'An enormous folk archive of interface design, and the fragile formats that keep it alive.'},
+  {slug:'tokens-layer',cat:'tech',k:'NOTE',title:'Namespaced tokens: the layer between design and code',tags:['design systems'],ex:'Notes from building a token system on Mantine where each client could bend the brand without forking components.',draft:1},
+  {slug:'pitch-browser',cat:'tech',k:'NOTE',title:'Pitch detection without a framework',tags:['web audio','dsp'],ex:'Autocorrelation, noise floors and the small decisions behind GuitarSense.',draft:1},
+  {slug:'kalman-juggling',cat:'tech',k:'NOTE',title:'Kalman filters for flying objects',tags:['cv','mediapipe'],ex:'Why a ball in the air is the friendliest possible case for a Kalman filter, and where it still breaks.',draft:1}
+];
+const HUES={warm:{c:'#D8722E',n:'Warm'},magenta:{c:'#B8417A',n:'Magenta'},green:{c:'#4E8A5B',n:'Green'},cool:{c:'#3A7FA6',n:'Cool'},mono:{c:'#8D918B',n:'Black and white'}};
+const PAL={
+  warm:[['#F2A65A','#E0582C','#3B2418'],['#F6D28B','#D9733A','#4A2A1C'],['#FFB37A','#C2462A','#2A1A14']],
+  magenta:[['#F3A0C4','#B03A78','#2B1430'],['#D486E8','#E24E8B','#261233']],
+  green:[['#CFE3B4','#5C9C64','#1D2E22'],['#9ED6B4','#2F7A5C','#132219']],
+  cool:[['#A6D8EE','#3C7FB0','#14202B'],['#C3E7F2','#4AA0B8','#0F2530'],['#8FB7E8','#3557A6','#121A30']],
+};
+const TAGS=['Street','Portrait','Landscape','Travel','Night','Architecture'];
+const PHOTOS=[];
+(function(){
+  let s=7; const r=()=>(s=(s*16807)%2147483647)/2147483647;
+  const keys=['warm','cool','magenta','green','mono','warm','cool','mono','magenta','warm','green','cool','mono','warm','magenta','cool','mono','green'];
+  keys.forEach((h,i)=>{
+    const pal=h==='mono'?['#D9D9D9','#6B6B6B','#141414']:PAL[h][i%PAL[h].length];
+    const t=[TAGS[i%6],TAGS[(i*3+1)%6]].filter((v,j,a)=>a.indexOf(v)===j);
+    if(h==='mono') t.push('B&W'); else t.push('Color');
+    PHOTOS.push({id:'f'+String(i+1).padStart(3,'0'),title:'Frame '+String(i+1).padStart(3,'0'),hue:h,pal,tags:t,land:[2,5,9,14].includes(i),seed:Math.floor(r()*1e6)+1,ph:1});
+  });
+})();
+
+/* =================== HELPERS =================== */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function fitCanvas(cv){const r=cv.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);const w=Math.max(1,Math.round(r.width)),h=Math.max(1,Math.round(r.height));if(cv.width!==w*d||cv.height!==h*d){cv.width=w*d;cv.height=h*d}const c=cv.getContext('2d');c.setTransform(d,0,0,d,0,0);return [c,w,h]}
+function rng(seed){let s=seed%2147483647||1;return()=>(s=(s*16807)%2147483647)/2147483647}
+function toast(m){const t=$('#toast');t.textContent=m;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,1800)}
+
+/* =================== STATIC RENDER =================== */
+$('#disc').innerHTML=DISC.map((d,i)=>`<div class="disc-row" role="listitem"><span class="n"><span>SVC</span>_0${i+1}</span><h4>${d[0]}</h4><p>${d[1]}</p><span class="plus" aria-hidden="true"><svg class="ico"><use href="#i-plus"/></svg></span></div>`).join('');
+$('#board').innerHTML=`<div class="board-row board-head"><span>Org</span><span></span><span>Role</span><span>Reg</span><span style="justify-self:end">Period</span></div>`+
+  CAREER.map(c=>`<div class="board-row${c[4]?' now':''}${c[5]?' old':''}"><span class="org">${esc(c[0])}</span><span class="arrow">&gt;</span><span class="role">${esc(c[1])}</span><span class="reg">${c[2]}</span><span class="when num">${c[3]}</span></div>`).join('');
+(function barcode(){let x=0,o='',r=rng(2026);while(x<258){const w=r()<.5?1.2:r()<.7?2.4:3.6;if(r()>.35)o+=`<rect x="${x.toFixed(1)}" y="0" width="${w}" height="38" fill="currentColor"/>`;x+=w+(r()<.6?1.2:2.4)}$('#barcode').innerHTML=o})();
+$('#cnt-p').textContent=PROJECTS.length; $('#cnt-ph').textContent=PHOTOS.length; $('#cnt-b').textContent=POSTS.length; $('#pTotal').textContent=PROJECTS.length;
+
+/* =================== PROJECT MOTIFS =================== */
+function motif(cv,m){
+  const [c,w,h]=fitCanvas(cv); const ink=css('--ink'),or=css('--orange'),bg=css('--sheet'),mint=css('--mint'),hair=css('--hair');
+  c.fillStyle=bg;c.fillRect(0,0,w,h);
+  c.strokeStyle=hair;c.lineWidth=1;for(let x=0;x<w;x+=20){c.beginPath();c.moveTo(x+.5,0);c.lineTo(x+.5,h);c.stroke()}for(let y=0;y<h;y+=20){c.beginPath();c.moveTo(0,y+.5);c.lineTo(w,y+.5);c.stroke()}
+  const cx=w/2,cy=h/2+6,R=Math.min(w,h)*.32,r=rng(m.length*99+7);c.lineWidth=1.6;c.strokeStyle=ink;c.fillStyle=ink;
+  if(m==='polygon'){c.beginPath();c.arc(cx,cy,R,0,7);c.stroke();[6,12,24].forEach((n,k)=>{c.strokeStyle=k===2?or:ink;c.beginPath();for(let i=0;i<=n;i++){const a=i/n*Math.PI*2-Math.PI/2;const x=cx+R*Math.cos(a),y=cy+R*Math.sin(a);i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke()});c.font='600 12px "JetBrains Mono",monospace';c.fillStyle=ink;c.fillText('3.1408 < π < 3.1429',14,h-14)}
+  if(m==='wave'){c.beginPath();for(let x=0;x<w;x++){const t=x/w;const y=cy+Math.sin(t*38)*R*.55*Math.sin(t*Math.PI)*(.6+.4*Math.sin(t*7));x?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();c.strokeStyle=or;c.lineWidth=2.4;c.beginPath();c.moveTo(0,cy-R*.9);c.lineTo(w,cy-R*.9);c.stroke();c.font='700 26px "Chakra Petch",monospace';c.fillStyle=or;c.fillText('E2  82.41 Hz',14,40)}
+  if(m==='bricks'){const s=Math.min(w,h)/9;for(let row=0;row<4;row++)for(let col=0;col<4-row;col++){const x=cx+(col-row)*s*.87-s,y=cy+(col+row)*s*.5-s*2.2+row*-s*.1;const hl=(row+col)%3===0;c.fillStyle=hl?or:bg;c.beginPath();c.moveTo(x,y);c.lineTo(x+s*.87,y+s*.5);c.lineTo(x+s*.87,y+s*1.4);c.lineTo(x,y+s*.9);c.closePath();c.fill();c.stroke();c.fillStyle=hl?or:mint;c.beginPath();c.moveTo(x+s*.87,y+s*.5);c.lineTo(x+s*1.74,y);c.lineTo(x+s*1.74,y+s*.9);c.lineTo(x+s*.87,y+s*1.4);c.closePath();c.fill();c.stroke();c.fillStyle=bg;c.beginPath();c.moveTo(x,y);c.lineTo(x+s*.87,y-s*.5);c.lineTo(x+s*1.74,y);c.lineTo(x+s*.87,y+s*.5);c.closePath();c.fill();c.stroke()}}
+  if(m==='graph'||m==='force'){const n=m==='graph'?9:24,P=[];for(let i=0;i<n;i++){if(m==='graph'){P.push([w*.15+i*(w*.7/(n-1)),cy+(i%3-1)*R*.6*(i%2?1:-1)])}else{const a=r()*7,d=Math.sqrt(r())*R*1.25;P.push([cx+Math.cos(a)*d*1.3,cy+Math.sin(a)*d])}}c.strokeStyle=ink;c.lineWidth=1.1;P.forEach((p,i)=>{const j=m==='graph'?[i+1,i+2]:[Math.floor(r()*n),Math.floor(r()*n)];j.forEach(k=>{if(P[k]){c.beginPath();c.moveTo(p[0],p[1]);c.lineTo(P[k][0],P[k][1]);c.stroke()}})});P.forEach((p,i)=>{c.fillStyle=i%4===0?or:ink;c.beginPath();c.arc(p[0],p[1],m==='graph'?7:3+r()*4,0,7);c.fill()})}
+  if(m==='parabola'){[[.25,.9],[.5,1],[.75,.8]].forEach(([fx,k],i)=>{c.strokeStyle=i===1?or:ink;c.setLineDash(i===1?[]:[4,4]);c.beginPath();for(let t=0;t<=1;t+=.02){const x=w*.2+t*w*.6,y=h*.85-Math.sin(t*Math.PI)*h*.65*k;t?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();c.setLineDash([]);c.fillStyle=i===1?or:ink;const x=w*.2+fx*w*.6,y=h*.85-Math.sin(fx*Math.PI)*h*.65*k;c.beginPath();c.arc(x,y,7,0,7);c.fill();c.strokeRect(x-14,y-14,28,28)})}
+  if(m==='swatches'){const cols=['#E36A2C','#F2B544','#4E8A5B','#3A7FA6','#B8417A','#1E1E1E'];const bw=(w-28)/cols.length;cols.forEach((col,i)=>{const hh=h*.25+r()*h*.4;c.fillStyle=col;c.fillRect(14+i*bw,h-24-hh,bw-6,hh);c.strokeRect(14+i*bw,h-24-hh,bw-6,hh)});c.beginPath();c.arc(w-50,52,26,0,7);c.stroke();for(let i=0;i<12;i++){c.strokeStyle=`hsl(${i*30} 70% 50%)`;c.lineWidth=5;c.beginPath();c.arc(w-50,52,20,i/12*6.283,(i+1)/12*6.283);c.stroke()}}
+  if(m==='chain'){const g=7,s=Math.min(w,h)*.75/g,ox=cx-s*g/2,oy=cy-s*g/2-4;for(let i=0;i<g;i++)for(let j=0;j<g;j++){const v=Math.sin(i*1.3+j*.7)+Math.cos(j*1.9-i*.4);c.fillStyle=v>.6?or:v>-.3?mint:bg;c.fillRect(ox+i*s,oy+j*s,s,s);c.strokeRect(ox+i*s,oy+j*s,s,s)}c.lineWidth=3;c.strokeStyle=ink;c.strokeRect(ox+s*2,oy+s,s*3,s*4)}
+  if(m==='depth'){for(let y=10;y<h;y+=6)for(let x=10;x<w;x+=6){const d=Math.exp(-(((x-cx)/(R*1.1))**2+((y-cy)/(R*1.3))**2));if(d>.06){c.globalAlpha=Math.min(1,d*1.2);c.fillStyle=d>.75?or:ink;c.fillRect(x,y,1.6+d*1.6,1.6+d*1.6)}}c.globalAlpha=1}
+  if(m==='tokens'){const names=['color.brand','color.surface','space.4','radius.sm','type.label','client.accent'];c.font='500 11px "JetBrains Mono",monospace';names.forEach((n,i)=>{const y=26+i*((h-40)/names.length);c.fillStyle=i===5?or:i%2?mint:bg;c.fillRect(14,y,28,20);c.strokeRect(14,y,28,20);c.fillStyle=ink;c.fillText(n,52,y+14);c.beginPath();c.moveTo(w*.62,y+10);c.lineTo(w-20,y+10);c.stroke()})}
+  if(m==='coin'){c.fillStyle=or;c.beginPath();c.arc(cx,cy,R,0,7);c.fill();c.fillStyle=bg;c.beginPath();c.moveTo(cx-R*.08,cy+R*.75);c.lineTo(cx-R*.06,cy);c.lineTo(cx+R*.06,cy);c.lineTo(cx+R*.08,cy+R*.75);c.closePath();c.fill();[[0,-.25,.42],[-.28,-.05,.3],[.28,-.05,.3],[-.15,-.45,.25],[.15,-.45,.25]].forEach(([dx,dy,rr])=>{c.beginPath();c.arc(cx+dx*R,cy+dy*R,rr*R,0,7);c.fill()});c.strokeStyle=ink;c.lineWidth=1.6;c.beginPath();c.arc(cx,cy,R+8,0,7);c.stroke()}
+}
+function card(p){return `<button class="p-card" data-proj="${p.id}" data-kind="${p.kind}" aria-label="${esc(p.title)}, details"><div class="p-thumb"><canvas data-motif="${p.motif}"></canvas><span class="code mono">${p.code}</span><span class="st chip ${/In progress/.test(p.status)?'st-wip':/Concept|Prototype|Experiment/.test(p.status)?'st-concept':'st-live'}">${esc(p.status)}</span></div><div class="p-body"><h3>${esc(p.title)}<svg class="ico"><use href="#i-ne"/></svg></h3><p>${esc(p.summary)}</p><div class="stack">${p.stack.map(s=>`<span class="chip">${esc(s)}</span>`).join('')}</div></div></button>`}
+$('#homeProjects').innerHTML=['blocky','chromalab','guitarsense'].map(id=>card(PROJECTS.find(p=>p.id===id))).join('');
+$('#allProjects').innerHTML=PROJECTS.map(card).join('');
+function drawVisibleMotifs(){$$('canvas[data-motif]').forEach(cv=>{if(cv.offsetParent)motif(cv,cv.dataset.motif)})}
+$('#pFilter').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$$('#pFilter button').forEach(x=>x.setAttribute('aria-pressed',x===b));$$('#allProjects .p-card').forEach(c=>c.hidden=!(b.dataset.k==='all'||c.dataset.kind===b.dataset.k));drawVisibleMotifs()});
+
+/* =================== PHOTOS =================== */
+function shade(hex,bw){if(!bw)return hex;const n=parseInt(hex.slice(1),16),g=Math.round(((n>>16)&255)*.3+((n>>8)&255)*.59+(n&255)*.11);return `rgb(${g},${g},${g})`}
+function drawPhoto(cv,p){
+  if(p.src){return}
+  const [c,w,h]=fitCanvas(cv),r=rng(p.seed),bw=p.hue==='mono',[a,b,d]=p.pal;
+  const hz=h*(.45+r()*.25);let g=c.createLinearGradient(0,0,0,hz);g.addColorStop(0,shade(a,bw));g.addColorStop(1,shade(b,bw));c.fillStyle=g;c.fillRect(0,0,w,hz);
+  c.fillStyle=shade(a,bw);c.globalAlpha=.9;c.beginPath();c.arc(w*(.2+r()*.6),hz*(.35+r()*.4),Math.min(w,h)*(.06+r()*.1),0,7);c.fill();c.globalAlpha=1;
+  g=c.createLinearGradient(0,hz,0,h);g.addColorStop(0,shade(d,bw));g.addColorStop(1,'#050505');c.fillStyle=g;c.fillRect(0,hz,w,h-hz);
+  c.fillStyle=shade(d,bw);const kind=r();
+  for(let i=0;i<4+r()*6;i++){const x=r()*w,ww=w*(.02+r()*.08),hh=h*(.1+r()*.4);if(kind<.5){c.fillRect(x,hz-hh,ww,hh+2)}else{c.fillRect(x,hz-hh,2,hh);c.beginPath();for(let k=0;k<6;k++){const an=-Math.PI/2+(k-2.5)*.5;c.moveTo(x+1,hz-hh);c.quadraticCurveTo(x+Math.cos(an)*w*.06,hz-hh+Math.sin(an)*h*.03-6,x+Math.cos(an)*w*.1,hz-hh+h*.04)}c.lineWidth=2;c.strokeStyle=shade(d,bw);c.stroke()}}
+  const img=c.getImageData(0,0,cv.width,cv.height),px=img.data;for(let i=0;i<px.length;i+=4){const n=(r()-.5)*26;px[i]+=n;px[i+1]+=n;px[i+2]+=n}c.putImageData(img,0,0);
+}
+function tile(p,i,mode){const hue=HUES[p.hue].c;return `<button class="ph${p.land&&mode==='grid'?' land':''}" data-ph="${p.id}" aria-label="${esc(p.title)}, ${esc(p.tags.join(', '))}">${p.src?`<img src="${p.src}" alt="">`:`<canvas data-photo="${p.id}"></canvas>`}${p.ph?'<span class="ph-tag">PH</span>':''}<span class="cap"><span>${esc(p.title)}</span><span>${esc(p.tags[0])}</span></span><span class="ph-row-meta"><span class="mono fr">${p.id.toUpperCase()}</span><span class="t">${esc(p.title)}${p.ph?' <span class="mono muted">placeholder</span>':''}</span><span class="mono muted tg">${esc(p.tags.join(' / '))}</span><span class="sw" style="background:${hue}"></span></span></button>`}
+const PH={layout:'grid',tag:null,hue:null};
+$('#phTags').insertAdjacentHTML('beforeend',['B&W','Color',...TAGS,'Mine'].map(t=>`<button class="chip" data-tag="${t}" aria-pressed="false">${t}</button>`).join(''));
+$('#phHues').innerHTML=Object.entries(HUES).map(([k,v])=>`<button class="hue" data-hue="${k}" aria-pressed="false" style="background:${v.c}" aria-label="${v.n}" title="${v.n}"></button>`).join('');
+function renderPhotos(){
+  const list=PHOTOS.filter(p=>(!PH.tag||p.tags.includes(PH.tag))&&(!PH.hue||p.hue===PH.hue));
+  const g=$('#phGrid');g.className='ph-grid'+(PH.layout==='grid'?'':' '+PH.layout);
+  g.innerHTML=list.length?list.map((p,i)=>tile(p,i,PH.layout)).join(''):`<p class="mono muted">No frames match this combination. Clear a filter.</p>`;
+  $('#phCount').textContent=`${list.length} / ${PHOTOS.length} frames`;
+  requestAnimationFrame(()=>$$('#phGrid canvas[data-photo]').forEach(cv=>drawPhoto(cv,PHOTOS.find(p=>p.id===cv.dataset.photo))));
+}
+$('#phLayout').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$$('#phLayout button').forEach(x=>x.setAttribute('aria-pressed',x===b));PH.layout=b.dataset.k;renderPhotos()});
+$('#phTags').addEventListener('click',e=>{const b=e.target.closest('[data-tag]');if(!b)return;PH.tag=PH.tag===b.dataset.tag?null:b.dataset.tag;$$('#phTags [data-tag]').forEach(x=>{const on=x.dataset.tag===PH.tag;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on)});renderPhotos()});
+$('#phHues').addEventListener('click',e=>{const b=e.target.closest('[data-hue]');if(!b)return;PH.hue=PH.hue===b.dataset.hue?null:b.dataset.hue;$$('#phHues [data-hue]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.hue===PH.hue));renderPhotos()});
+$('#phUpload').addEventListener('change',e=>{
+  const files=[...e.target.files];let n=0;
+  files.forEach(f=>{const url=URL.createObjectURL(f),im=new Image();im.onload=()=>{
+    const cv=document.createElement('canvas');cv.width=cv.height=24;const c=cv.getContext('2d');c.drawImage(im,0,0,24,24);const d=c.getImageData(0,0,24,24).data;let R=0,G=0,B=0,S=0;
+    for(let i=0;i<d.length;i+=4){R+=d[i];G+=d[i+1];B+=d[i+2];const mx=Math.max(d[i],d[i+1],d[i+2]),mn=Math.min(d[i],d[i+1],d[i+2]);S+=mx?(mx-mn)/mx:0}
+    const k=d.length/4;R/=k;G/=k;B/=k;S/=k;const mx=Math.max(R,G,B),mn=Math.min(R,G,B);let hh=0;
+    if(mx!==mn){hh=mx===R?((G-B)/(mx-mn))%6:mx===G?(B-R)/(mx-mn)+2:(R-G)/(mx-mn)+4;hh=(hh*60+360)%360}
+    const hue=S<.12?'mono':hh<50||hh>=330?'warm':hh<160?'green':hh<260?'cool':'magenta';
+    PHOTOS.unshift({id:'u'+Date.now()+n,title:f.name.replace(/\.[^.]+$/,'').slice(0,28),hue,src:url,tags:['Mine',hue==='mono'?'B&W':'Color'],land:im.naturalWidth>im.naturalHeight*1.3});
+    if(++n===files.length){$('#cnt-ph').textContent=PHOTOS.length;renderPhotos();toast(`${n} photo${n>1?'s':''} added for this visit`)}
+  };im.src=url});
+});
+$('#homePhotos').innerHTML=PHOTOS.slice(0,6).map((p,i)=>tile({...p,land:0},i,'strip')).join('');
+
+/* =================== BLOG =================== */
+function postRow(p){return `<a class="post${p.draft?' draft':''}" href="#post-${p.slug}"><span class="k">${p.cat==='essay'?'PM':'TN'} / ${p.k}</span><span><h3>${esc(p.title)}</h3><p>${esc(p.ex)}</p></span><span class="tags">${p.tags.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</span><span class="rt mono ${p.draft?'':'muted'}">${p.draft?'<span class="chip st-wip">Draft</span>':'~3 min'}</span></a>`}
+$('#homePosts').innerHTML=POSTS.filter(p=>!p.draft).slice(0,3).map(postRow).join('');
+function renderPosts(k='all'){$('#allPosts').innerHTML=POSTS.filter(p=>k==='all'||p.cat===k).map(postRow).join('')}
+renderPosts();
+$('#bFilter').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$$('#bFilter button').forEach(x=>x.setAttribute('aria-pressed',x===b));renderPosts(b.dataset.k)});
+function renderReader(slug){
+  const i=POSTS.findIndex(p=>p.slug===slug),p=POSTS[i];if(!p)return false;const nx=POSTS[(i+1)%POSTS.length];
+  $('#blogReader').innerHTML=`<div class="sec-head"><span class="code">${p.cat==='essay'?'PM':'TN'} / ${p.k}</span><h2 class="mono" style="font-family:var(--f-mono);font-size:12px;letter-spacing:.06em">${p.cat==='essay'?'The Polymath Manifesto':'Tech notes'}</h2><a class="meta mono" href="#blog">&lt; Back to writing</a><span class="line"></span></div>
+  <div class="reader"><aside><div class="kv"><dt>Shelf</dt><dd>${p.cat==='essay'?'Manifesto':'Tech note'}</dd><dt>Status</dt><dd>${p.draft?'Draft':'Published on LinkedIn'}</dd><dt>Tags</dt><dd>${p.tags.join(', ')}</dd></div></aside>
+  <article><h1>${esc(p.title)}</h1><p class="dek">${esc(p.ex)}</p>
+  <div class="note">${p.draft?'This note is still being written. The full text will live here.':'Excerpt. The full essay lives on LinkedIn for now; this page is where it will be archived and extended.'}</div>
+  <p style="margin-top:28px;display:flex;gap:10px;flex-wrap:wrap">${p.draft?'':`<a class="btn primary" href="https://www.linkedin.com/in/ccalderonh" target="_blank" rel="noopener">Read on LinkedIn <svg class="ico"><use href="#i-ne"/></svg></a>`}<a class="btn" href="#post-${nx.slug}">Next: ${esc(nx.title)}</a></p></article></div>`;
+  return true;
+}
+
+/* =================== DIALOG =================== */
+const dlg=$('#dlg');
+function openProject(id){const p=PROJECTS.find(x=>x.id===id);$('#dlgCode').textContent=p.code+' / '+p.kind.toUpperCase();$('#dlgMedia').innerHTML=`<canvas data-motif="${p.motif}"></canvas>`;
+  $('#dlgInfo').innerHTML=`<h3 id="dlgTitle">${esc(p.title)}</h3><p>${esc(p.summary)}</p><dl class="kv"><dt>Status</dt><dd>${esc(p.status)}</dd><dt>Stack</dt><dd>${esc(p.stack.join(', '))}</dd><dt>Case study</dt><dd>Coming soon</dd></dl>`;
+  dlg.showModal();motif($('#dlgMedia canvas'),p.motif)}
+function openPhoto(id){const p=PHOTOS.find(x=>x.id===id);$('#dlgCode').textContent=p.id.toUpperCase()+' / '+HUES[p.hue].n.toUpperCase();$('#dlgMedia').innerHTML=p.src?`<img src="${p.src}" alt="${esc(p.title)}">`:`<canvas></canvas>`;
+  $('#dlgInfo').innerHTML=`<h3 id="dlgTitle">${esc(p.title)}</h3><p>${p.ph?'Placeholder frame. Replace with a real photograph and its metadata.':'Your photo, tagged by its dominant color.'}</p><dl class="kv"><dt>Tags</dt><dd>${esc(p.tags.join(', '))}</dd><dt>Color</dt><dd><span class="dot" style="background:${HUES[p.hue].c}"></span> ${HUES[p.hue].n}</dd><dt>Camera</dt><dd>${p.ph?'EXIF pending':'From file'}</dd></dl>`;
+  dlg.showModal();if(!p.src)drawPhoto($('#dlgMedia canvas'),p)}
+document.addEventListener('click',e=>{const pc=e.target.closest('[data-proj]');if(pc){openProject(pc.dataset.proj);return}const ph=e.target.closest('[data-ph]');if(ph)openPhoto(ph.dataset.ph)});
+$('#dlgClose').addEventListener('click',()=>dlg.close());
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+
+/* =================== ROUTER =================== */
+const VIEWS=['index','projects','photos','blog'];
+function route(){
+  const h=(location.hash||'#index').slice(1);let v=VIEWS.includes(h)?h:h.startsWith('post-')?'blog':VIEWS.includes(h)?h:'index';
+  if(h==='about'){v='index'}
+  $$('[data-view]').forEach(s=>s.hidden=s.dataset.view!==v);
+  $$('[data-nav]').forEach(a=>a.dataset.nav===v?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
+  if(v==='blog'){const reading=h.startsWith('post-')&&renderReader(h.slice(5));$('#blogList').hidden=!!reading;$('#blogReader').hidden=!reading}
+  if(v==='photos')renderPhotos();
+  requestAnimationFrame(()=>{drawVisibleMotifs();$$('#homePhotos canvas[data-photo]').forEach(cv=>drawPhoto(cv,PHOTOS.find(p=>p.id===cv.dataset.photo)));if(h==='about')$('#about').scrollIntoView();else window.scrollTo(0,0)});
+  torus.active=v==='index';
+}
+addEventListener('hashchange',route);
+
+/* =================== TORUS HERO =================== */
+const torus={active:true,a:0,pts:[],knot:[]};
+(function(){const N=3200,R=1,r=.42;for(let i=0;i<N;i++){const u=(i/N)*Math.PI*2*41.3,v=(i*0.618034%1)*Math.PI*2;torus.pts.push([(R+r*Math.cos(v))*Math.cos(u),(R+r*Math.cos(v))*Math.sin(u),r*Math.sin(v)])}
+  for(let i=0;i<=400;i++){const t=i/400*Math.PI*2;torus.knot.push([(R+r*Math.cos(3*t))*Math.cos(2*t),(R+r*Math.cos(3*t))*Math.sin(2*t),r*Math.sin(3*t)])}})();
+function drawTorus(){
+  const cv=$('#torus');if(!cv.offsetParent)return;const [c,w,h]=fitCanvas(cv);c.clearRect(0,0,w,h);
+  const ink=css('--ink'),or=css('--orange'),s=Math.min(w,h)*.36,cx=w/2,cy=h/2-6,tilt=1.05,ca=Math.cos(torus.a),sa=Math.sin(torus.a),ct=Math.cos(tilt),st=Math.sin(tilt);
+  const P=([x,y,z])=>{const x1=x*ca-y*sa,y1=x*sa+y*ca;const y2=y1*ct-z*st,z2=y1*st+z*ct;const k=3/(3+y2);return [cx+x1*s*k,cy-z2*s*k,y2]};
+  c.fillStyle=ink;for(const p of torus.pts){const [x,y,d]=P(p);c.globalAlpha=.25+.6*(1-(d+1.5)/3);const z=1+(1-(d+1.5)/3)*1.2;c.fillRect(x,y,z,z)}
+  c.globalAlpha=1;c.strokeStyle=or;c.lineWidth=2.2;c.beginPath();torus.knot.forEach((p,i)=>{const [x,y]=P(p);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();
+  c.strokeStyle=ink;c.lineWidth=1;c.globalAlpha=.5;c.beginPath();c.moveTo(cx-s*1.6,cy);c.lineTo(cx+s*1.6,cy);c.moveTo(cx,cy-s*1.1);c.lineTo(cx,cy+s*1.1);c.stroke();c.globalAlpha=1;
+}
+function loop(){if(torus.active&&!document.hidden){torus.a+=.0045;drawTorus()}requestAnimationFrame(loop)}
+
+/* =================== THEME / CLOCK / COPY =================== */
+$('#themeBtn').addEventListener('click',()=>{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark';try{localStorage.setItem('kmylo-theme',r.dataset.theme)}catch(e){}redrawAll()});
+try{const t=localStorage.getItem('kmylo-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redrawAll);
+function redrawAll(){requestAnimationFrame(()=>{drawVisibleMotifs();drawTorus()})}
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{redrawAll();$$('canvas[data-photo]').forEach(cv=>{if(cv.offsetParent)drawPhoto(cv,PHOTOS.find(p=>p.id===cv.dataset.photo))})},150)});
+const fmt=new Intl.DateTimeFormat('en-GB',{timeZone:'America/Argentina/Buenos_Aires',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+setInterval(()=>$('#clock').textContent=fmt.format(new Date())+' ART',1000);$('#clock').textContent=fmt.format(new Date())+' ART';
+$('#copyMail').addEventListener('click',()=>{const t='kmylo6@dot.com';navigator.clipboard.writeText(t).then(()=>toast('Email copied')).catch(()=>{const r=document.createRange();r.selectNodeContents($('#mailTxt'));const s=getSelection();s.removeAllRanges();s.addRange(r);toast('Selected, press Ctrl+C')})});
+
+route();drawTorus();if(!RM)requestAnimationFrame(loop);
+if(document.fonts)document.fonts.ready.then(redrawAll);
+</script>
