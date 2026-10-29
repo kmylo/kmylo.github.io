@@ -1,0 +1,4091 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no"
+    />
+    <title>ChromaLab</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #0e0e0f;
+        --bg2: #161618;
+        --bg3: #1e1e21;
+        --bg4: #26262a;
+        --border: rgba(255, 255, 255, 0.07);
+        --border2: rgba(255, 255, 255, 0.12);
+        --text: #f0f0ee;
+        --text2: #888887;
+        --text3: #555553;
+        --accent: #c8f542;
+        --accent-dim: rgba(200, 245, 66, 0.12);
+        --accent-dim2: rgba(200, 245, 66, 0.06);
+        --red: #ff5f57;
+        --amber: #ffbd2e;
+        --blue: #5e9bff;
+        --teal: #3ecfaa;
+        --r: 10px;
+        --r2: 14px;
+        --font: 'DM Sans', sans-serif;
+        --mono: 'DM Mono', monospace;
+      }
+      body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 16px;
+      }
+
+      /* HEADER */
+      .header {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .logo {
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        color: var(--accent);
+        text-transform: uppercase;
+      }
+      .logo span {
+        color: var(--text3);
+        font-weight: 300;
+      }
+      .mode-switcher {
+        display: flex;
+        gap: 2px;
+        background: var(--bg3);
+        border: 0.5px solid var(--border);
+        border-radius: 999px;
+        padding: 3px;
+      }
+      .mode-btn {
+        font-family: var(--font);
+        font-size: 11px;
+        font-weight: 400;
+        padding: 6px 14px;
+        border-radius: 999px;
+        border: none;
+        background: transparent;
+        color: var(--text2);
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: 0.02em;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .mode-btn svg {
+        width: 12px;
+        height: 12px;
+        opacity: 0.7;
+      }
+      .mode-btn.active {
+        background: var(--bg);
+        color: var(--text);
+        border: 0.5px solid var(--border2);
+      }
+      .mode-btn.active svg {
+        opacity: 1;
+      }
+
+      /* APP */
+      .app {
+        width: 100%;
+        max-width: 900px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      /* TOOLBAR */
+      .toolbar {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .btn {
+        font-family: var(--font);
+        font-size: 11px;
+        font-weight: 400;
+        padding: 7px 13px;
+        border-radius: var(--r);
+        border: 0.5px solid var(--border2);
+        background: var(--bg3);
+        color: var(--text2);
+        cursor: pointer;
+        transition: all 0.15s;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        letter-spacing: 0.01em;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .btn:hover {
+        background: var(--bg4);
+        color: var(--text);
+      }
+      .btn:active {
+        opacity: 0.7;
+      }
+      .btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+      .btn.primary {
+        background: var(--accent);
+        color: #0e0e0f;
+        border-color: transparent;
+        font-weight: 500;
+      }
+      .btn.primary:hover {
+        background: #d4f955;
+      }
+      .btn.danger {
+        border-color: rgba(255, 95, 87, 0.3);
+        color: var(--red);
+      }
+      .btn.danger:hover {
+        background: rgba(255, 95, 87, 0.1);
+      }
+      .btn svg {
+        width: 13px;
+        height: 13px;
+      }
+      .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        display: inline-block;
+        animation: pulse 1.4s ease infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+
+      /* CANVAS */
+      .canvas-wrap {
+        position: relative;
+        background: var(--bg2);
+        border: 0.5px solid var(--border);
+        border-radius: var(--r2);
+        overflow: hidden;
+        min-height: 280px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #mainCanvas {
+        display: none;
+        max-width: 100%;
+        cursor: crosshair;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      #grayCanvas {
+        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      .placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 4rem 2rem;
+        text-align: center;
+        pointer-events: none;
+      }
+      .placeholder-icon {
+        width: 48px;
+        height: 48px;
+        border: 0.5px solid var(--border2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text3);
+      }
+      .placeholder h2 {
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--text2);
+      }
+      .placeholder p {
+        font-size: 12px;
+        color: var(--text3);
+        line-height: 1.6;
+        max-width: 280px;
+      }
+      .placeholder-btns {
+        display: flex;
+        gap: 8px;
+      }
+      .placeholder-btns .btn {
+        pointer-events: all;
+      }
+      #magnifier {
+        position: absolute;
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        border: 1.5px solid var(--border2);
+        pointer-events: none;
+        overflow: hidden;
+        display: none;
+        z-index: 10;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      }
+      .crosshair {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+        z-index: 11;
+      }
+      .crosshair::before,
+      .crosshair::after {
+        content: '';
+        position: absolute;
+        background: rgba(255, 255, 255, 0.8);
+      }
+      .crosshair::before {
+        width: 1px;
+        height: 100%;
+        left: 50%;
+      }
+      .crosshair::after {
+        height: 1px;
+        width: 100%;
+        top: 50%;
+      }
+      .pin-dot {
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.9);
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+        z-index: 5;
+        transition: transform 0.15s;
+      }
+      .pin-dot.auto-pin {
+        border-color: var(--accent);
+      }
+      .pin-dot.selected-pin {
+        transform: translate(-50%, -50%) scale(1.45);
+      }
+      .touch-ripple {
+        position: absolute;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.7);
+        pointer-events: none;
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 1;
+        transition: transform 0.25s ease-out, opacity 0.25s ease-out;
+        z-index: 20;
+      }
+      .touch-ripple.pop {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0;
+      }
+      .gray-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: rgba(200, 245, 66, 0.15);
+        border: 0.5px solid rgba(200, 245, 66, 0.3);
+        color: var(--accent);
+        padding: 3px 8px;
+        border-radius: 999px;
+        display: none;
+        z-index: 6;
+      }
+
+      /* gradient line */
+      .grad-line-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        z-index: 7;
+      }
+      .grad-line-btn-row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      /* PANELS */
+      .panel {
+        display: none;
+      }
+      .panel.active {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .panel-empty {
+        text-align: center;
+        padding: 2rem;
+        font-size: 11px;
+        color: var(--text3);
+        font-family: var(--mono);
+        font-style: italic;
+      }
+
+      /* CARDS */
+      .v-card {
+        background: var(--bg2);
+        border: 0.5px solid var(--border);
+        border-radius: var(--r2);
+        padding: 14px 15px;
+        position: relative;
+      }
+      .v-card-title {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin-bottom: 12px;
+      }
+      .scope-card {
+        background: var(--bg2);
+        border: 0.5px solid var(--border);
+        border-radius: var(--r2);
+        padding: 12px 13px;
+        position: relative;
+      }
+      .scope-title {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin-bottom: 8px;
+      }
+      .scope-canvas {
+        width: 100%;
+        display: block;
+        border-radius: 3px;
+      }
+      .scope-meta {
+        font-size: 10px;
+        color: var(--text2);
+        font-family: var(--mono);
+        margin-top: 5px;
+      }
+      .scope-meta strong {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .scope-maximize {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 22px;
+        height: 22px;
+        border-radius: 5px;
+        background: var(--bg4);
+        border: 0.5px solid var(--border2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 2;
+      }
+      .scope-maximize svg {
+        width: 11px;
+        height: 11px;
+        color: var(--text2);
+      }
+      .scope-card:hover .scope-maximize,
+      .v-card:hover .scope-maximize {
+        opacity: 1;
+      }
+      .scope-maximize:hover {
+        background: var(--bg3);
+      }
+
+      /* SAMPLER */
+      .samples-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2px;
+      }
+      .samples-label {
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 300;
+        color: var(--text3);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .samples-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .sample-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 11px;
+        border-radius: var(--r);
+        border: 0.5px solid var(--border);
+        background: var(--bg2);
+        animation: fadeUp 0.2s ease;
+        cursor: pointer;
+        transition: border-color 0.15s;
+      }
+      .sample-row:hover {
+        border-color: var(--border2);
+      }
+      .sample-row.selected {
+        border-color: var(--accent);
+        background: var(--accent-dim2);
+      }
+      .sample-row.is-auto {
+        border-left: 2px solid var(--accent);
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .swatch {
+        width: 32px;
+        height: 32px;
+        border-radius: 7px;
+        flex-shrink: 0;
+        border: 0.5px solid rgba(255, 255, 255, 0.1);
+      }
+      .sample-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+      }
+      .sample-hex {
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--text);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .sample-name {
+        font-size: 10px;
+        color: var(--text3);
+        font-family: var(--mono);
+        font-style: italic;
+      }
+      .sample-meta {
+        font-size: 10px;
+        color: var(--text2);
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        font-family: var(--mono);
+      }
+      .copy-toast {
+        font-size: 9px;
+        color: var(--accent);
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .copy-toast.show {
+        opacity: 1;
+      }
+      .auto-badge {
+        font-size: 8px;
+        font-family: var(--font);
+        background: var(--accent-dim);
+        color: var(--accent);
+        border-radius: 3px;
+        padding: 1px 5px;
+      }
+      .brightness-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        align-items: flex-end;
+      }
+      .brightness-bar-bg {
+        width: 56px;
+        height: 4px;
+        border-radius: 2px;
+        background: var(--bg4);
+        overflow: hidden;
+      }
+      .brightness-bar {
+        height: 100%;
+        border-radius: 2px;
+      }
+      .brightness-val {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--text3);
+      }
+      .remove-btn {
+        padding: 4px 6px;
+        border: none;
+        background: transparent;
+        color: var(--text3);
+        cursor: pointer;
+        border-radius: 5px;
+        font-size: 16px;
+        line-height: 1;
+        flex-shrink: 0;
+        transition: color 0.15s;
+      }
+      .remove-btn:hover {
+        color: var(--red);
+      }
+      /* sort bar */
+      .sort-bar {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        padding: 0 2px;
+      }
+      .sort-btn {
+        font-family: var(--mono);
+        font-size: 9px;
+        padding: 3px 8px;
+        border-radius: 5px;
+        border: 0.5px solid var(--border);
+        background: transparent;
+        color: var(--text3);
+        cursor: pointer;
+        transition: all 0.12s;
+      }
+      .sort-btn:hover {
+        color: var(--text2);
+        background: var(--bg3);
+      }
+      .sort-btn.active {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-dim);
+      }
+
+      /* AUTO-SAMPLE DRAWER */
+      .auto-drawer {
+        background: var(--bg2);
+        border: 0.5px solid var(--border2);
+        border-radius: var(--r2);
+        overflow: hidden;
+      }
+      .auto-drawer-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 13px;
+        cursor: pointer;
+        user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .auto-drawer-title {
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text2);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .auto-drawer-title svg {
+        width: 12px;
+        height: 12px;
+      }
+      .auto-drawer-arrow {
+        font-size: 10px;
+        color: var(--text3);
+        transition: transform 0.2s;
+      }
+      .auto-drawer.open .auto-drawer-arrow {
+        transform: rotate(180deg);
+      }
+      .auto-drawer-body {
+        display: none;
+        padding: 0 13px 13px;
+        border-top: 0.5px solid var(--border);
+      }
+      .auto-drawer.open .auto-drawer-body {
+        display: block;
+      }
+      .strategy-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 5px;
+        margin-bottom: 12px;
+        padding-top: 12px;
+      }
+      .strategy-btn {
+        font-family: var(--font);
+        font-size: 11px;
+        padding: 7px 10px;
+        border-radius: var(--r);
+        border: 0.5px solid var(--border2);
+        background: var(--bg3);
+        color: var(--text2);
+        cursor: pointer;
+        text-align: left;
+        transition: all 0.15s;
+        line-height: 1.35;
+      }
+      .strategy-btn:hover {
+        background: var(--bg4);
+        color: var(--text);
+      }
+      .strategy-btn.active {
+        background: var(--accent-dim);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .strategy-btn strong {
+        display: block;
+        font-weight: 500;
+        font-size: 11px;
+      }
+      .strategy-btn span {
+        font-size: 9px;
+        opacity: 0.7;
+      }
+      .ctrl-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      @media (max-width: 460px) {
+        .ctrl-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .ctrl-row-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .ctrl-label {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--text3);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .ctrl-label span {
+        color: var(--text2);
+        font-weight: 500;
+      }
+      input[type='range'] {
+        width: 100%;
+        height: 3px;
+        -webkit-appearance: none;
+        appearance: none;
+        background: var(--bg4);
+        border-radius: 2px;
+        outline: none;
+        cursor: pointer;
+      }
+      input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        border: 2px solid var(--bg);
+      }
+      input[type='range']::-moz-range-thumb {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: var(--accent);
+        cursor: pointer;
+        border: 2px solid var(--bg);
+      }
+      .strategy-desc {
+        font-size: 10px;
+        color: var(--text3);
+        font-family: var(--mono);
+        font-style: italic;
+        margin-bottom: 10px;
+        line-height: 1.5;
+        padding: 6px 8px;
+        background: var(--bg3);
+        border-radius: var(--r);
+        border-left: 2px solid var(--accent);
+      }
+      .auto-run-row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .auto-run-status {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--text3);
+        font-style: italic;
+      }
+
+      /* VALORES */
+      .valores-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      @media (max-width: 540px) {
+        .valores-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .toggle-switch {
+        width: 32px;
+        height: 18px;
+        border-radius: 9px;
+        border: 0.5px solid var(--border2);
+        background: var(--bg4);
+        position: relative;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+        flex-shrink: 0;
+      }
+      .toggle-switch::after {
+        content: '';
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--text3);
+        top: 2px;
+        left: 2px;
+        transition: transform 0.2s, background 0.2s;
+      }
+      .toggle-switch.on {
+        background: var(--accent-dim);
+        border-color: var(--accent);
+      }
+      .toggle-switch.on::after {
+        transform: translateX(14px);
+        background: var(--accent);
+      }
+      .toggle-label {
+        font-size: 11px;
+        color: var(--text2);
+      }
+      .delta-pick-row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+      .delta-pick-label {
+        font-size: 10px;
+        color: var(--text3);
+        font-family: var(--mono);
+        min-width: 14px;
+      }
+      .delta-pick-swatch {
+        width: 26px;
+        height: 26px;
+        border-radius: 5px;
+        border: 0.5px solid var(--border2);
+        background: var(--bg4);
+        flex-shrink: 0;
+      }
+      .delta-pick-val {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text2);
+      }
+      .delta-result {
+        border-top: 0.5px solid var(--border);
+        padding-top: 10px;
+        margin-top: 4px;
+      }
+      .delta-number {
+        font-family: var(--mono);
+        font-size: 28px;
+        font-weight: 300;
+        line-height: 1;
+      }
+      .delta-label {
+        font-size: 10px;
+        color: var(--text2);
+        margin-top: 3px;
+      }
+      .delta-bar-wrap {
+        height: 4px;
+        background: var(--bg4);
+        border-radius: 2px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+      .delta-bar {
+        height: 100%;
+        border-radius: 2px;
+        transition: width 0.4s ease;
+      }
+      .delta-hint {
+        font-size: 10px;
+        color: var(--text3);
+        margin-top: 4px;
+        font-family: var(--mono);
+      }
+      .delta-none {
+        font-size: 11px;
+        color: var(--text3);
+        font-family: var(--mono);
+        font-style: italic;
+      }
+      .hist-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 4px;
+      }
+      .hist-label {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--text3);
+      }
+      .hist-meta {
+        font-size: 10px;
+        color: var(--text2);
+        font-family: var(--mono);
+        margin-top: 6px;
+      }
+      .hist-meta span {
+        color: var(--text);
+        font-weight: 500;
+      }
+
+      /* GRADIENT LINE */
+      .grad-line-wrap {
+        background: var(--bg2);
+        border: 0.5px solid var(--border2);
+        border-radius: var(--r2);
+        padding: 12px 13px;
+      }
+      .grad-line-title {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin-bottom: 8px;
+      }
+      .grad-status {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text3);
+        font-style: italic;
+        margin-bottom: 6px;
+      }
+      #gradCanvas {
+        width: 100%;
+        display: block;
+        border-radius: 3px;
+      }
+      .grad-meta {
+        font-size: 10px;
+        color: var(--text2);
+        font-family: var(--mono);
+        margin-top: 4px;
+      }
+
+      /* ANÁLISIS */
+      .analisis-run-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .analisis-status {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text3);
+        font-style: italic;
+      }
+      .palette-bar {
+        display: flex;
+        gap: 0;
+        border-radius: 6px;
+        overflow: hidden;
+        height: 36px;
+      }
+      .palette-seg {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 2px 4px;
+      }
+      .palette-seg-pct {
+        font-family: var(--mono);
+        font-size: 8px;
+        color: rgba(255, 255, 255, 0.7);
+        line-height: 1;
+      }
+      .palette-swatches {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .pal-swatch-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+      .pal-swatch {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 0.5px solid rgba(255, 255, 255, 0.1);
+        flex-shrink: 0;
+        cursor: pointer;
+      }
+      .pal-swatch-info {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--text2);
+        line-height: 1.4;
+      }
+      .analisis-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      @media (max-width: 540px) {
+        .analisis-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 6px;
+      }
+      .metric-cell {
+        background: var(--bg3);
+        border-radius: var(--r);
+        padding: 10px 11px;
+      }
+      .metric-label {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--text3);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .metric-value {
+        font-family: var(--mono);
+        font-size: 15px;
+        font-weight: 300;
+        color: var(--text);
+      }
+      .metric-sub {
+        font-size: 9px;
+        color: var(--text3);
+        font-family: var(--mono);
+        margin-top: 2px;
+      }
+      .temp-bar-wrap {
+        height: 4px;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-top: 6px;
+        background: linear-gradient(to right, #5e9bff, #888, #ff8c42);
+      }
+      .temp-marker {
+        height: 4px;
+        width: 2px;
+        background: white;
+        position: relative;
+        transition: margin-left 0.4s ease;
+      }
+      .harmony-card {
+        background: var(--bg2);
+        border: 0.5px solid var(--border);
+        border-radius: var(--r2);
+        padding: 14px 15px;
+      }
+      .harmony-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 3px;
+      }
+      .harmony-desc {
+        font-size: 11px;
+        color: var(--text2);
+        line-height: 1.6;
+      }
+      .harmony-angles {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text3);
+        margin-top: 6px;
+      }
+      .harmony-confidence {
+        font-family: var(--mono);
+        font-size: 10px;
+        margin-top: 4px;
+      }
+      .mood-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+      .mood-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .mood-label {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text2);
+        min-width: 80px;
+      }
+      .mood-bar-wrap {
+        flex: 1;
+        height: 4px;
+        background: var(--bg4);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .mood-bar {
+        height: 100%;
+        border-radius: 2px;
+        background: var(--accent);
+        transition: width 0.5s ease;
+      }
+      .mood-val {
+        font-family: var(--mono);
+        font-size: 9px;
+        color: var(--text3);
+        min-width: 28px;
+        text-align: right;
+      }
+
+      /* WCAG MATRIX */
+      .wcag-grid {
+        display: grid;
+        gap: 3px;
+        margin-top: 8px;
+      }
+      .wcag-cell {
+        border-radius: 4px;
+        padding: 5px 6px;
+        font-family: var(--mono);
+        font-size: 9px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        cursor: default;
+      }
+      .wcag-swatches {
+        display: flex;
+        gap: 3px;
+        align-items: center;
+      }
+      .wcag-sw {
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        border: 0.5px solid rgba(255, 255, 255, 0.1);
+      }
+      .wcag-ratio {
+        font-weight: 500;
+      }
+      .wcag-pass {
+        background: rgba(62, 207, 170, 0.1);
+        border: 0.5px solid rgba(62, 207, 170, 0.2);
+      }
+      .wcag-warn {
+        background: rgba(255, 189, 46, 0.1);
+        border: 0.5px solid rgba(255, 189, 46, 0.2);
+      }
+      .wcag-fail {
+        background: rgba(255, 95, 87, 0.08);
+        border: 0.5px solid rgba(255, 95, 87, 0.15);
+      }
+
+      /* HUE WHEEL */
+      #hueWheelCanvas {
+        display: block;
+        margin: 0 auto;
+      }
+
+      /* EXPORT */
+      .export-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 6px;
+      }
+      .export-btn-card {
+        background: var(--bg3);
+        border: 0.5px solid var(--border);
+        border-radius: var(--r);
+        padding: 10px 11px;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-align: left;
+      }
+      .export-btn-card:hover {
+        background: var(--bg4);
+        border-color: var(--border2);
+      }
+      .export-btn-card strong {
+        display: block;
+        font-size: 11px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 2px;
+      }
+      .export-btn-card span {
+        font-size: 9px;
+        color: var(--text3);
+        font-family: var(--mono);
+      }
+
+      /* MODAL */
+      .scope-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.82);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        animation: bkIn 0.15s ease;
+      }
+      @keyframes bkIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .scope-modal {
+        background: var(--bg2);
+        border: 0.5px solid var(--border2);
+        border-radius: var(--r2);
+        padding: 16px 18px;
+        width: 100%;
+        max-width: 780px;
+        max-height: 90vh;
+        overflow: auto;
+        animation: mdIn 0.18s ease;
+      }
+      @keyframes mdIn {
+        from {
+          opacity: 0;
+          transform: scale(0.96);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .scope-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 14px;
+      }
+      .scope-modal-title {
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text2);
+      }
+      .scope-modal-close {
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        background: var(--bg3);
+        border: 0.5px solid var(--border2);
+        color: var(--text2);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        line-height: 1;
+        transition: all 0.15s;
+      }
+      .scope-modal-close:hover {
+        background: var(--bg4);
+        color: var(--text);
+      }
+
+      /* DALTONISM OVERLAY */
+      .dalton-row {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .dalton-btn {
+        font-family: var(--mono);
+        font-size: 9px;
+        padding: 4px 9px;
+        border-radius: 5px;
+        border: 0.5px solid var(--border);
+        background: var(--bg3);
+        color: var(--text3);
+        cursor: pointer;
+        transition: all 0.12s;
+      }
+      .dalton-btn:hover {
+        color: var(--text2);
+        background: var(--bg4);
+      }
+      .dalton-btn.active {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--accent-dim);
+      }
+
+      .hint {
+        font-size: 10px;
+        color: var(--text3);
+        font-family: var(--mono);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 2px;
+      }
+      input[type='file'] {
+        display: none;
+      }
+      video {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <div class="logo">Chroma<span>Lab</span></div>
+      <div class="mode-switcher" id="modeSwitcher">
+        <button class="mode-btn active" data-mode="sampler">
+          <svg
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <circle cx="7" cy="7" r="2.5" />
+            <path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13" /></svg
+          >Sampler
+        </button>
+        <button class="mode-btn" data-mode="valores">
+          <svg
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <rect x="1" y="1" width="12" height="12" rx="1" />
+            <path d="M1 7h12M7 1v12" /></svg
+          >Valores
+        </button>
+        <button class="mode-btn" data-mode="analisis">
+          <svg
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path d="M1 13L4 8l3 3 3-5 3-2" /></svg
+          >Análisis
+        </button>
+      </div>
+    </div>
+    <div class="app">
+      <div class="toolbar">
+        <button class="btn primary" id="btnCamera">
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+          >
+            <path
+              d="M15 12.5a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5V5.5a1.5 1.5 0 011.5-1.5h2.5L6.5 2h3l1.5 2H13A1.5 1.5 0 0115 5.5z"
+            />
+            <circle cx="8" cy="8.5" r="2.5" /></svg
+          >Cámara
+        </button>
+        <button class="btn" id="btnUpload">
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+          >
+            <path
+              d="M14 10v2.5a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12.5V10M8 2v8M5 5l3-3 3 3"
+            /></svg
+          >Subir
+        </button>
+        <input type="file" id="fileInput" accept="image/*" />
+        <button class="btn danger" id="btnClear" disabled>
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+          >
+            <path
+              d="M2 4h12M5 4V2.5h6V4M12.5 4l-.8 9.5a1 1 0 01-1 .9H5.3a1 1 0 01-1-.9L3.5 4"
+            /></svg
+          >Limpiar
+        </button>
+        <span
+          id="liveInd"
+          style="
+            display: none;
+            align-items: center;
+            gap: 5px;
+            font-size: 10px;
+            color: var(--text3);
+            font-family: var(--mono);
+          "
+        >
+          <span class="status-dot"></span>live
+        </span>
+      </div>
+
+      <!-- CANVAS -->
+      <div class="canvas-wrap" id="canvasWrap">
+        <div class="gray-badge" id="grayBadge">valores — L*</div>
+        <div class="placeholder" id="placeholder">
+          <div class="placeholder-icon">
+            <svg
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.2"
+            >
+              <path
+                d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"
+              />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+          </div>
+          <h2>Sin imagen</h2>
+          <p>Abrí la cámara o subí una imagen para comenzar.</p>
+          <div class="placeholder-btns">
+            <button
+              class="btn primary"
+              onclick="document.getElementById('btnCamera').click()"
+            >
+              Cámara
+            </button>
+            <button
+              class="btn"
+              onclick="document.getElementById('btnUpload').click()"
+            >
+              Subir
+            </button>
+          </div>
+        </div>
+        <canvas id="mainCanvas"></canvas>
+        <canvas id="grayCanvas"></canvas>
+        <canvas id="gradLineCanvas" class="grad-line-overlay"></canvas>
+        <div id="magnifier">
+          <canvas id="magCanvas" width="152" height="152"></canvas>
+          <div class="crosshair"></div>
+        </div>
+        <video id="videoEl" autoplay playsinline muted></video>
+      </div>
+
+      <!-- ══ SAMPLER ══ -->
+      <div class="panel active" id="panel-sampler">
+        <div class="auto-drawer" id="autoDrawer">
+          <div class="auto-drawer-header" id="autoDrawerHeader">
+            <div class="auto-drawer-title">
+              <svg
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.4"
+              >
+                <circle cx="8" cy="8" r="3" />
+                <path
+                  d="M8 1v1.5M8 13.5V15M1 8h1.5M13.5 8H15M2.93 2.93l1.06 1.06M12.01 12.01l1.06 1.06M2.93 13.07l1.06-1.06M12.01 3.99l1.06-1.06"
+                /></svg
+              >Auto-sample
+            </div>
+            <span class="auto-drawer-arrow">&#9660;</span>
+          </div>
+          <div class="auto-drawer-body">
+            <div class="strategy-grid" id="strategyGrid">
+              <button class="strategy-btn active" data-strategy="kmeans-color">
+                <strong>K-means color</strong><span>clusters en CIE Lab</span>
+              </button>
+              <button class="strategy-btn" data-strategy="kmeans-lum">
+                <strong>K-means valor</strong
+                ><span>clusters por luminosidad</span>
+              </button>
+              <button class="strategy-btn" data-strategy="brightness-buckets">
+                <strong>Buckets tonales</strong><span>zonas de brillo</span>
+              </button>
+              <button class="strategy-btn" data-strategy="saturation-zones">
+                <strong>Zonas saturacion</strong><span>vividos vs neutros</span>
+              </button>
+              <button class="strategy-btn" data-strategy="hue-sectors">
+                <strong>Sectores de tono</strong><span>circulo cromatico</span>
+              </button>
+              <button class="strategy-btn" data-strategy="random">
+                <strong>Aleatorio</strong><span>muestras al azar</span>
+              </button>
+            </div>
+            <div class="strategy-desc" id="strategyDesc">
+              K-means en CIE Lab — perceptualmente uniforme. Cada muestra
+              representa el color promedio de su cluster.
+            </div>
+            <div class="ctrl-grid">
+              <div class="ctrl-row-item">
+                <div class="ctrl-label">
+                  Cantidad <span id="valCount">6</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderCount"
+                  min="2"
+                  max="16"
+                  value="6"
+                  step="1"
+                />
+              </div>
+              <div class="ctrl-row-item">
+                <div class="ctrl-label">
+                  Presencia min % <span id="valThresh">2</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderThresh"
+                  min="0"
+                  max="20"
+                  value="2"
+                  step="1"
+                />
+              </div>
+              <div class="ctrl-row-item" id="scatterWrap">
+                <div class="ctrl-label">
+                  Scatter <span id="valScatter">0</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderScatter"
+                  min="0"
+                  max="6"
+                  value="0"
+                  step="1"
+                />
+              </div>
+              <div
+                class="ctrl-row-item"
+                id="satFilterWrap"
+                style="display: none"
+              >
+                <div class="ctrl-label">
+                  Sat min % <span id="valSatFilter">10</span>
+                </div>
+                <input
+                  type="range"
+                  id="sliderSatFilter"
+                  min="0"
+                  max="50"
+                  value="10"
+                  step="1"
+                />
+              </div>
+            </div>
+            <div class="auto-run-row">
+              <button class="btn primary" id="btnAutoRun" disabled>
+                <svg
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  style="width: 12px; height: 12px"
+                >
+                  <polygon points="4,2 14,8 4,14" /></svg
+                >Generar muestras
+              </button>
+              <span class="auto-run-status" id="autoRunStatus"
+                >carga una imagen primero</span
+              >
+            </div>
+          </div>
+        </div>
+        <div id="samplerEmpty" class="panel-empty">
+          sin muestras — toca la imagen o usa auto-sample
+        </div>
+        <div id="samplerContent" style="display: none">
+          <div class="samples-header">
+            <span class="samples-label" id="samplesLabel">0 muestras</span>
+            <div class="sort-bar">
+              <span
+                style="
+                  font-family: var(--mono);
+                  font-size: 9px;
+                  color: var(--text3);
+                  margin-right: 2px;
+                "
+                >orden:</span
+              >
+              <button class="sort-btn active" data-sort="added">
+                agregado
+              </button>
+              <button class="sort-btn" data-sort="lum-asc">L* ↑</button>
+              <button class="sort-btn" data-sort="lum-desc">L* ↓</button>
+              <button class="sort-btn" data-sort="hue">tono</button>
+              <button class="sort-btn" data-sort="sat">sat</button>
+            </div>
+          </div>
+          <div class="samples-grid" id="samplesGrid"></div>
+        </div>
+      </div>
+
+      <!-- ══ VALORES ══ -->
+      <div class="panel" id="panel-valores">
+        <div class="toggle-row">
+          <div class="toggle-switch on" id="grayToggle"></div>
+          <span class="toggle-label">Ver en escala de grises</span>
+        </div>
+        <div class="valores-grid">
+          <div class="v-card">
+            <div class="v-card-title">&#916; comparador de valor</div>
+            <div id="deltaContent">
+              <div class="delta-none">Selecciona 2 muestras para comparar.</div>
+            </div>
+          </div>
+          <div class="v-card">
+            <div class="v-card-title">Histograma tonal (L*)</div>
+            <div
+              class="scope-maximize"
+              onclick="openModal('histCanvas','Histograma tonal','histMeta')"
+              title="Maximizar"
+            >
+              <svg
+                viewBox="0 0 12 12"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+              >
+                <path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8" />
+              </svg>
+            </div>
+            <canvas id="histCanvas" height="80"></canvas>
+            <div class="hist-labels">
+              <span class="hist-label">0</span
+              ><span class="hist-label">128</span
+              ><span class="hist-label">255</span>
+            </div>
+            <div class="hist-meta" id="histMeta">carga una imagen</div>
+          </div>
+        </div>
+        <!-- Gradient line tool -->
+        <div class="grad-line-wrap">
+          <div class="grad-line-title">
+            Medicion de gradiente — linea entre 2 puntos
+          </div>
+          <div class="grad-status" id="gradStatus">
+            Activa el modo y toca 2 puntos en la imagen.
+          </div>
+          <div class="grad-line-btn-row" style="margin-bottom: 8px">
+            <button class="btn" id="btnGradMode">Activar modo linea</button>
+            <button class="btn" id="btnGradClear" style="display: none">
+              Limpiar linea
+            </button>
+          </div>
+          <canvas id="gradCanvas" height="80" style="display: none"></canvas>
+          <div class="grad-meta" id="gradMeta"></div>
+        </div>
+        <!-- Daltonism -->
+        <div class="v-card">
+          <div class="v-card-title">Simulacion de daltonismo</div>
+          <div class="dalton-row" id="daltonRow">
+            <button class="dalton-btn active" data-dalton="none">Normal</button>
+            <button class="dalton-btn" data-dalton="deutan">
+              Deuteranopia
+            </button>
+            <button class="dalton-btn" data-dalton="protan">Protanopia</button>
+            <button class="dalton-btn" data-dalton="tritan">Tritanopia</button>
+          </div>
+          <div
+            style="
+              font-size: 10px;
+              color: var(--text3);
+              font-family: var(--mono);
+              margin-top: 8px;
+              font-style: italic;
+            "
+          >
+            El canvas muestra la imagen simulada. Los samples se leen del canvas
+            simulado.
+          </div>
+        </div>
+        <div id="valoresSamplesWrap" style="display: none">
+          <div
+            class="samples-label"
+            style="margin-bottom: 6px; display: block"
+            id="valoresSamplesLabel"
+          >
+            0 muestras
+          </div>
+          <div class="samples-grid" id="valoresSamplesGrid"></div>
+        </div>
+      </div>
+
+      <!-- ══ ANÁLISIS ══ -->
+      <div class="panel" id="panel-analisis">
+        <div class="analisis-run-bar">
+          <button class="btn primary" id="btnAnalizar" disabled>
+            <svg
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.4"
+              style="width: 13px; height: 13px"
+            >
+              <path d="M1 13L4 8l3 3 3-5 3-2" /></svg
+            >Analizar imagen
+          </button>
+          <span class="analisis-status" id="analisisStatus">sin analisis</span>
+        </div>
+        <div id="analisisResults" style="display: none">
+          <div class="v-card" style="margin-bottom: 8px">
+            <div class="v-card-title">Paleta dominante — k-means CIE Lab</div>
+            <div class="palette-bar" id="paletteBar"></div>
+            <div class="palette-swatches" id="paletteSwatches"></div>
+          </div>
+          <div class="analisis-grid">
+            <div class="scope-card">
+              <div class="scope-title">Histograma RGB</div>
+              <div
+                class="scope-maximize"
+                onclick="openModal('rgbHistCanvas','Histograma RGB','rgbHistMeta')"
+              >
+                <svg
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.3"
+                >
+                  <path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8" />
+                </svg>
+              </div>
+              <canvas
+                class="scope-canvas"
+                id="rgbHistCanvas"
+                height="70"
+              ></canvas>
+              <div class="scope-meta" id="rgbHistMeta"></div>
+            </div>
+            <div class="scope-card">
+              <div class="scope-title">Vectorscope + rueda de tono</div>
+              <div
+                class="scope-maximize"
+                onclick="openModal('vscopeCanvas','Vectorscope','vscopeMeta')"
+              >
+                <svg
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.3"
+                >
+                  <path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8" />
+                </svg>
+              </div>
+              <canvas
+                class="scope-canvas"
+                id="vscopeCanvas"
+                height="130"
+              ></canvas>
+              <div class="scope-meta" id="vscopeMeta"></div>
+            </div>
+            <div class="scope-card">
+              <div class="scope-title">Sat vs Luminosidad</div>
+              <div
+                class="scope-maximize"
+                onclick="openModal('satLumCanvas','Sat vs Luminosidad','satLumMeta')"
+              >
+                <svg
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.3"
+                >
+                  <path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8" />
+                </svg>
+              </div>
+              <canvas
+                class="scope-canvas"
+                id="satLumCanvas"
+                height="110"
+              ></canvas>
+              <div class="scope-meta" id="satLumMeta"></div>
+            </div>
+            <div class="scope-card">
+              <div class="scope-title">Parade R · G · B</div>
+              <div
+                class="scope-maximize"
+                onclick="openModal('paradeCanvas','Parade RGB','paradeMeta')"
+              >
+                <svg
+                  viewBox="0 0 12 12"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.3"
+                >
+                  <path d="M1 4V1h3M8 1h3v3M11 8v3H8M4 11H1V8" />
+                </svg>
+              </div>
+              <canvas
+                class="scope-canvas"
+                id="paradeCanvas"
+                height="70"
+              ></canvas>
+              <div class="scope-meta" id="paradeMeta"></div>
+            </div>
+          </div>
+          <div class="metrics-grid" style="margin-top: 8px">
+            <div class="metric-cell">
+              <div class="metric-label">Temperatura</div>
+              <div class="metric-value" id="metTemp">—</div>
+              <div class="temp-bar-wrap">
+                <div class="temp-marker" id="tempMarker"></div>
+              </div>
+              <div class="metric-sub" id="metTempSub"></div>
+            </div>
+            <div class="metric-cell">
+              <div class="metric-label">Luminosidad media</div>
+              <div class="metric-value" id="metLum">—</div>
+              <div class="metric-sub" id="metLumSub"></div>
+            </div>
+            <div class="metric-cell">
+              <div class="metric-label">Saturacion media</div>
+              <div class="metric-value" id="metSat">—</div>
+              <div class="metric-sub" id="metSatSub"></div>
+            </div>
+          </div>
+          <div class="harmony-card" style="margin-top: 8px">
+            <div class="v-card-title">Armonia cromatica</div>
+            <div class="harmony-name" id="harmonyName">—</div>
+            <div class="harmony-confidence" id="harmonyConf"></div>
+            <div class="harmony-desc" id="harmonyDesc"></div>
+            <div class="harmony-angles" id="harmonyAngles"></div>
+          </div>
+          <div class="v-card" style="margin-top: 8px">
+            <div class="v-card-title">Perfil de imagen</div>
+            <div class="mood-grid" id="moodGrid"></div>
+          </div>
+          <div class="v-card" style="margin-top: 8px">
+            <div class="v-card-title">
+              Contraste WCAG entre pares dominantes
+            </div>
+            <div id="wcagGrid"></div>
+          </div>
+          <div class="v-card" style="margin-top: 8px">
+            <div class="v-card-title">Exportar paleta</div>
+            <div class="export-grid" id="exportGrid">
+              <div class="export-btn-card" onclick="exportPalette('json')">
+                <strong>JSON</strong><span>hex + rgb + hsl + Lab</span>
+              </div>
+              <div class="export-btn-card" onclick="exportPalette('css')">
+                <strong>CSS variables</strong><span>--color-1: #... </span>
+              </div>
+              <div class="export-btn-card" onclick="exportPalette('tailwind')">
+                <strong>Tailwind</strong><span>theme.extend.colors</span>
+              </div>
+              <div class="export-btn-card" onclick="exportPalette('scss')">
+                <strong>SCSS map</strong><span>$palette: (...)</span>
+              </div>
+              <div class="export-btn-card" onclick="exportPalette('figma')">
+                <strong>Figma tokens</strong><span>Style Dictionary JSON</span>
+              </div>
+              <div class="export-btn-card" onclick="exportPNG()">
+                <strong>PNG tarjeta</strong><span>compartible en redes</span>
+              </div>
+            </div>
+            <div id="exportOutput" style="display: none; margin-top: 8px">
+              <textarea
+                id="exportText"
+                style="
+                  width: 100%;
+                  height: 120px;
+                  background: var(--bg3);
+                  border: 0.5px solid var(--border2);
+                  border-radius: var(--r);
+                  color: var(--text);
+                  font-family: var(--mono);
+                  font-size: 10px;
+                  padding: 8px;
+                  resize: vertical;
+                "
+                readonly
+              ></textarea>
+              <button
+                class="btn"
+                style="margin-top: 5px"
+                onclick="copyExport()"
+              >
+                Copiar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hint">
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.3"
+        >
+          <circle cx="6" cy="6" r="5" />
+          <path d="M6 5v4M6 3.5v.5" /></svg
+        ><span id="hintText">toca la imagen para samplear</span>
+      </div>
+    </div>
+
+    <script>
+      // ═══════════════ STATE ═══════════════
+      let currentMode = 'sampler',
+        imageLoaded = false,
+        samples = [],
+        selectedForDelta = [];
+      let stream = null,
+        animFrame = null,
+        cameraMode = false;
+      let showGray = true,
+        currentDalton = 'none',
+        analysisData = null,
+        sampleIdCounter = 0;
+      let currentSort = 'added';
+      let gradMode = false,
+        gradPoints = [],
+        gradLineCanvas,
+        gradLineCtx;
+
+      const $ = (id) => document.getElementById(id);
+      const mainCanvas = $('mainCanvas'),
+        ctx = mainCanvas.getContext('2d', { willReadFrequently: true });
+      const grayCanvas = $('grayCanvas'),
+        grayCtx = grayCanvas.getContext('2d', { willReadFrequently: true });
+      const magCanvas = $('magCanvas'),
+        magCtx = magCanvas.getContext('2d');
+      const magnifier = $('magnifier'),
+        videoEl = $('videoEl'),
+        canvasWrap = $('canvasWrap'),
+        placeholder = $('placeholder');
+      gradLineCanvas = $('gradLineCanvas');
+      gradLineCtx = gradLineCanvas.getContext('2d');
+
+      // ═══════════════ HELPERS ═══════════════
+      function rgbToHex(r, g, b) {
+        return (
+          '#' +
+          [r, g, b]
+            .map((v) => v.toString(16).padStart(2, '0'))
+            .join('')
+            .toUpperCase()
+        );
+      }
+      function perceivedL(r, g, b) {
+        return Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+      }
+      function rgbToHsl(r, g, b) {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        const mx = Math.max(r, g, b),
+          mn = Math.min(r, g, b);
+        let h,
+          s,
+          l = (mx + mn) / 2;
+        if (mx === mn) {
+          h = s = 0;
+        } else {
+          const d = mx - mn;
+          s = l > 0.5 ? d / (2 - mx - mn) : d / (mx + mn);
+          switch (mx) {
+            case r:
+              h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+              break;
+            case g:
+              h = ((b - r) / d + 2) / 6;
+              break;
+            default:
+              h = ((r - g) / d + 4) / 6;
+          }
+        }
+        return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+      }
+      function rgbToLab(r, g, b) {
+        let R = r / 255,
+          G = g / 255,
+          B = b / 255;
+        R = R > 0.04045 ? Math.pow((R + 0.055) / 1.055, 2.4) : R / 12.92;
+        G = G > 0.04045 ? Math.pow((G + 0.055) / 1.055, 2.4) : G / 12.92;
+        B = B > 0.04045 ? Math.pow((B + 0.055) / 1.055, 2.4) : B / 12.92;
+        let X = R * 0.4124564 + G * 0.3575761 + B * 0.1804375;
+        let Y = R * 0.2126729 + G * 0.7151522 + B * 0.072175;
+        let Z = R * 0.0193339 + G * 0.119192 + B * 0.9503041;
+        X /= 0.95047;
+        Z /= 1.08883;
+        function f(t) {
+          return t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+        }
+        const L = 116 * f(Y) - 16,
+          A = 500 * (f(X) - f(Y)),
+          BB = 200 * (f(Y) - f(Z));
+        return [L, A, BB];
+      }
+      function labDistance(a, b) {
+        return Math.sqrt(
+          (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2
+        );
+      }
+      function colorName(r, g, b) {
+        const [h, s, l] = rgbToHsl(r, g, b);
+        if (s < 8) {
+          if (l > 90) return 'blanco';
+          if (l > 70) return 'gris claro';
+          if (l > 45) return 'gris';
+          if (l > 20) return 'gris oscuro';
+          return 'negro';
+        }
+        const hNames = [
+          [15, 'rojo'],
+          [30, 'rojo-naranja'],
+          [45, 'naranja'],
+          [60, 'naranja-amarillo'],
+          [75, 'amarillo'],
+          [105, 'amarillo-verde'],
+          [150, 'verde'],
+          [180, 'verde-azulado'],
+          [210, 'cian'],
+          [240, 'azul-cian'],
+          [255, 'azul'],
+          [285, 'azul-violeta'],
+          [315, 'violeta'],
+          [345, 'rosa-violeta'],
+          [360, 'rojo'],
+        ];
+        let name = 'rojo';
+        for (const [deg, n] of hNames) {
+          if (h <= deg) {
+            name = n;
+            break;
+          }
+        }
+        const sat = s < 30 ? 'apagado ' : s > 75 ? 'vivo ' : '';
+        const lum = l > 75 ? 'claro ' : l < 30 ? 'oscuro ' : '';
+        return (sat + lum + name).trim();
+      }
+      async function copyText(text, el) {
+        try {
+          await navigator.clipboard.writeText(text);
+        } catch (e) {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.cssText = 'position:fixed;opacity:0';
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          try {
+            document.execCommand('copy');
+          } catch (_) {}
+          document.body.removeChild(ta);
+        }
+        if (el) {
+          el.classList.add('show');
+          setTimeout(() => el.classList.remove('show'), 1400);
+        }
+      }
+
+      // ═══════════════ DALTONISM ═══════════════
+      const daltonMatrix = {
+        deutan: [
+          [0.367, 0.861, -0.228],
+          [0.28, 0.673, 0.047],
+          [0, -0.051, 1.051],
+        ],
+        protan: [
+          [0.152, 1.053, -0.205],
+          [0.115, 0.786, 0.099],
+          [0, -0.059, 1.059],
+        ],
+        tritan: [
+          [1.256, -0.077, -0.179],
+          [0, 0.926, 0.074],
+          [-0.011, 0.133, 0.878],
+        ],
+      };
+      function applyDaltonism(idata, type) {
+        if (type === 'none') return idata;
+        const m = daltonMatrix[type];
+        const out = new Uint8ClampedArray(idata.length);
+        for (let i = 0; i < idata.length; i += 4) {
+          const r = idata[i] / 255,
+            g = idata[i + 1] / 255,
+            b = idata[i + 2] / 255;
+          out[i] = Math.round(
+            Math.max(0, Math.min(1, m[0][0] * r + m[0][1] * g + m[0][2] * b)) *
+              255
+          );
+          out[i + 1] = Math.round(
+            Math.max(0, Math.min(1, m[1][0] * r + m[1][1] * g + m[1][2] * b)) *
+              255
+          );
+          out[i + 2] = Math.round(
+            Math.max(0, Math.min(1, m[2][0] * r + m[2][1] * g + m[2][2] * b)) *
+              255
+          );
+          out[i + 3] = idata[i + 3];
+        }
+        return out;
+      }
+
+      // ═══════════════ COORDS ═══════════════
+      function canvasCoordsFromClient(cx, cy) {
+        const rect = mainCanvas.getBoundingClientRect(),
+          wr = canvasWrap.getBoundingClientRect();
+        const sx = mainCanvas.width / rect.width,
+          sy = mainCanvas.height / rect.height;
+        return {
+          x: Math.round((cx - rect.left) * sx),
+          y: Math.round((cy - rect.top) * sy),
+          cssX: cx - wr.left,
+          cssY: cy - wr.top,
+        };
+      }
+      function canvasToCSS(cx, cy) {
+        const rect = mainCanvas.getBoundingClientRect(),
+          wr = canvasWrap.getBoundingClientRect();
+        return {
+          cssX: rect.left - wr.left + cx * (rect.width / mainCanvas.width),
+          cssY: rect.top - wr.top + cy * (rect.height / mainCanvas.height),
+        };
+      }
+
+      // ═══════════════ MODE SWITCH ═══════════════
+      $('modeSwitcher').addEventListener('click', (e) => {
+        const btn = e.target.closest('.mode-btn');
+        if (!btn) return;
+        const mode = btn.dataset.mode;
+        currentMode = mode;
+        document
+          .querySelectorAll('.mode-btn')
+          .forEach((b) => b.classList.toggle('active', b === btn));
+        document
+          .querySelectorAll('.panel')
+          .forEach((p) => p.classList.remove('active'));
+        $('panel-' + mode).classList.add('active');
+        const hints = {
+          sampler: 'toca la imagen para samplear colores',
+          valores:
+            'modo valores — grises · comparador de L* · linea de gradiente',
+          analisis: 'presiona "Analizar" para k-means en Lab',
+        };
+        $('hintText').textContent = hints[mode];
+        applyVisualMode();
+        if (mode === 'valores') {
+          updateHistogram();
+          updateDelta();
+          renderValoresSamples();
+        }
+        if (mode === 'sampler') renderSamples();
+      });
+
+      // ═══════════════ GRAYSCALE / DALTON ═══════════════
+      function applyVisualMode() {
+        const grayOn = currentMode === 'valores' && showGray;
+        $('grayBadge').style.display = grayOn ? 'block' : 'none';
+        if (!imageLoaded) {
+          mainCanvas.style.filter = '';
+          return;
+        }
+        if (currentDalton !== 'none') {
+          renderDalton();
+          mainCanvas.style.opacity = '0';
+          grayCanvas.style.display = 'block';
+          grayCanvas.style.filter = grayOn ? 'grayscale(1)' : '';
+        } else if (grayOn) {
+          mainCanvas.style.filter = 'grayscale(1)';
+          grayCanvas.style.display = 'none';
+        } else {
+          mainCanvas.style.filter = '';
+          grayCanvas.style.display = 'none';
+          mainCanvas.style.opacity = '1';
+        }
+      }
+      function renderDalton() {
+        const idata = ctx.getImageData(
+          0,
+          0,
+          mainCanvas.width,
+          mainCanvas.height
+        );
+        grayCanvas.width = mainCanvas.width;
+        grayCanvas.height = mainCanvas.height;
+        grayCanvas.style.width =
+          mainCanvas.style.width || mainCanvas.width + 'px';
+        grayCanvas.style.height =
+          mainCanvas.style.height || mainCanvas.height + 'px';
+        const transformed = applyDaltonism(idata.data, currentDalton);
+        const imgData = new ImageData(
+          transformed,
+          mainCanvas.width,
+          mainCanvas.height
+        );
+        grayCtx.putImageData(imgData, 0, 0);
+      }
+      function getReadCtx() {
+        return currentDalton !== 'none' ? grayCtx : ctx;
+      }
+
+      $('grayToggle').addEventListener('click', () => {
+        showGray = !showGray;
+        $('grayToggle').classList.toggle('on', showGray);
+        applyVisualMode();
+      });
+      $('daltonRow').addEventListener('click', (e) => {
+        const btn = e.target.closest('.dalton-btn');
+        if (!btn) return;
+        currentDalton = btn.dataset.dalton;
+        document
+          .querySelectorAll('.dalton-btn')
+          .forEach((b) => b.classList.toggle('active', b === btn));
+        if (imageLoaded) applyVisualMode();
+      });
+
+      // ═══════════════ IMAGE LOADING ═══════════════
+      function showImage(img) {
+        const maxW = canvasWrap.clientWidth - 2,
+          maxH = Math.max(280, Math.min(520, window.innerHeight * 0.55));
+        const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+        mainCanvas.width = Math.round(img.width * scale);
+        mainCanvas.height = Math.round(img.height * scale);
+        mainCanvas.style.display = 'block';
+        ctx.drawImage(img, 0, 0, mainCanvas.width, mainCanvas.height);
+        placeholder.style.display = 'none';
+        gradLineCanvas.width = mainCanvas.width;
+        gradLineCanvas.height = mainCanvas.height;
+        gradLineCanvas.style.width = mainCanvas.offsetWidth + 'px';
+        gradLineCanvas.style.height = mainCanvas.offsetHeight + 'px';
+        imageLoaded = true;
+        $('btnClear').disabled = false;
+        $('btnAnalizar').disabled = false;
+        $('btnAutoRun').disabled = false;
+        $('autoRunStatus').textContent = 'listo';
+        applyVisualMode();
+        updateHistogram();
+      }
+
+      // ═══════════════ CAMERA ═══════════════
+      function drawFrame() {
+        if (!cameraMode) return;
+        ctx.drawImage(videoEl, 0, 0, mainCanvas.width, mainCanvas.height);
+        if (currentDalton !== 'none') renderDalton();
+        updateHistogram();
+        animFrame = requestAnimationFrame(drawFrame);
+      }
+      $('btnCamera').addEventListener('click', async () => {
+        if (cameraMode) {
+          stopCamera();
+          return;
+        }
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'environment',
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: false,
+          });
+          videoEl.srcObject = stream;
+          await new Promise((r) => {
+            videoEl.onloadedmetadata = r;
+          });
+          videoEl.play();
+          const maxW = canvasWrap.clientWidth - 2,
+            maxH = Math.max(280, Math.min(520, window.innerHeight * 0.55));
+          const scale = Math.min(
+            maxW / videoEl.videoWidth,
+            maxH / videoEl.videoHeight,
+            1
+          );
+          mainCanvas.width = Math.round(videoEl.videoWidth * scale);
+          mainCanvas.height = Math.round(videoEl.videoHeight * scale);
+          mainCanvas.style.display = 'block';
+          placeholder.style.display = 'none';
+          gradLineCanvas.width = mainCanvas.width;
+          gradLineCanvas.height = mainCanvas.height;
+          imageLoaded = true;
+          cameraMode = true;
+          $(
+            'btnCamera'
+          ).innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" style="width:13px;height:13px"><line x1="1" y1="1" x2="15" y2="15"/><path d="M14 10v2.5a1.5 1.5 0 01-1.5 1.5h-9A1.5 1.5 0 012 12.5v-7"/><circle cx="8" cy="8.5" r="2.5"/></svg> Detener`;
+          $('liveInd').style.display = 'flex';
+          $('btnClear').disabled = false;
+          $('btnAnalizar').disabled = false;
+          $('btnAutoRun').disabled = false;
+          $('autoRunStatus').textContent = 'listo';
+          applyVisualMode();
+          drawFrame();
+        } catch (e) {
+          alert('Camara no disponible.');
+        }
+      });
+      function stopCamera() {
+        if (stream) {
+          stream.getTracks().forEach((t) => t.stop());
+          stream = null;
+        }
+        cameraMode = false;
+        cancelAnimationFrame(animFrame);
+        $(
+          'btnCamera'
+        ).innerHTML = `<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" style="width:13px;height:13px"><path d="M15 12.5a1.5 1.5 0 01-1.5 1.5h-11A1.5 1.5 0 011 12.5V5.5a1.5 1.5 0 011.5-1.5h2.5L6.5 2h3l1.5 2H13A1.5 1.5 0 0115 5.5z"/><circle cx="8" cy="8.5" r="2.5"/></svg> Camara`;
+        $('liveInd').style.display = 'none';
+      }
+
+      // ═══════════════ UPLOAD ═══════════════
+      $('btnUpload').addEventListener('click', () => $('fileInput').click());
+      $('fileInput').addEventListener('change', (e) => {
+        const f = e.target.files[0];
+        if (!f) return;
+        stopCamera();
+        const url = URL.createObjectURL(f),
+          img = new Image();
+        img.onload = () => {
+          clearAllPins();
+          samples = [];
+          selectedForDelta = [];
+          gradPoints = [];
+          clearGradLine();
+          showImage(img);
+          renderSamples();
+          updateDelta();
+          analysisData = null;
+          $('analisisResults').style.display = 'none';
+          $('analisisStatus').textContent = 'sin analisis';
+        };
+        img.src = url;
+        $('fileInput').value = '';
+      });
+
+      // ═══════════════ CANVAS EVENTS ═══════════════
+      mainCanvas.addEventListener('mousemove', (e) => {
+        if (!imageLoaded) return;
+        const { x, y } = canvasCoordsFromClient(e.clientX, e.clientY);
+        if (x < 0 || y < 0 || x >= mainCanvas.width || y >= mainCanvas.height) {
+          magnifier.style.display = 'none';
+          return;
+        }
+        const zoom = 4,
+          magR = 38;
+        magCtx.clearRect(0, 0, 152, 152);
+        magCtx.save();
+        magCtx.imageSmoothingEnabled = false;
+        magCtx.scale(zoom, zoom);
+        const src = currentDalton !== 'none' ? grayCanvas : mainCanvas;
+        magCtx.drawImage(
+          src,
+          x - magR / zoom,
+          y - magR / zoom,
+          (magR * 2) / zoom,
+          (magR * 2) / zoom,
+          0,
+          0,
+          magR * 2,
+          magR * 2
+        );
+        magCtx.restore();
+        const wr = canvasWrap.getBoundingClientRect(),
+          cssX = e.clientX - wr.left,
+          cssY = e.clientY - wr.top,
+          cw = canvasWrap.clientWidth;
+        let mx = cssX + 22;
+        if (mx + 80 > cw - 4) mx = cssX - 102;
+        let my = cssY - 42;
+        if (my < 4) my = cssY + 22;
+        magnifier.style.left = mx + 'px';
+        magnifier.style.top = my + 'px';
+        magnifier.style.display = 'block';
+      });
+      mainCanvas.addEventListener('mouseleave', () => {
+        magnifier.style.display = 'none';
+      });
+
+      function handleCanvasClick(clientX, clientY) {
+        if (!imageLoaded) return;
+        if (cameraMode)
+          ctx.drawImage(videoEl, 0, 0, mainCanvas.width, mainCanvas.height);
+        if (currentDalton !== 'none') renderDalton();
+        const { x, y, cssX, cssY } = canvasCoordsFromClient(clientX, clientY);
+        if (x < 0 || y < 0 || x >= mainCanvas.width || y >= mainCanvas.height)
+          return;
+        if (gradMode) {
+          handleGradPoint(x, y, cssX, cssY);
+          return;
+        }
+        const rc = getReadCtx();
+        const d = rc.getImageData(x, y, 1, 1).data;
+        addSample(d[0], d[1], d[2], x, y, cssX, cssY, false);
+      }
+      mainCanvas.addEventListener('click', (e) =>
+        handleCanvasClick(e.clientX, e.clientY)
+      );
+      mainCanvas.addEventListener(
+        'touchend',
+        (e) => {
+          e.preventDefault();
+          const t = e.changedTouches[0];
+          const { x, y, cssX, cssY } = canvasCoordsFromClient(
+            t.clientX,
+            t.clientY
+          );
+          if (x < 0 || y < 0 || x >= mainCanvas.width || y >= mainCanvas.height)
+            return;
+          if (!gradMode) {
+            const rc = getReadCtx();
+            const d = rc.getImageData(x, y, 1, 1).data;
+            const hex = rgbToHex(d[0], d[1], d[2]);
+            const rip = document.createElement('div');
+            rip.className = 'touch-ripple';
+            rip.style.left = cssX + 'px';
+            rip.style.top = cssY + 'px';
+            rip.style.borderColor = hex;
+            canvasWrap.appendChild(rip);
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => rip.classList.add('pop'))
+            );
+            setTimeout(() => rip.remove(), 350);
+          }
+          handleCanvasClick(t.clientX, t.clientY);
+        },
+        { passive: false }
+      );
+      window.addEventListener('resize', () => {
+        samples.forEach((s) => {
+          if (!s.pinEl) return;
+          const { cssX, cssY } = canvasToCSS(s.canvasX, s.canvasY);
+          s.pinEl.style.left = cssX + 'px';
+          s.pinEl.style.top = cssY + 'px';
+        });
+      });
+
+      // ═══════════════ PINS ═══════════════
+      function clearAllPins() {
+        samples.forEach((s) => {
+          if (s.pinEl) s.pinEl.remove();
+        });
+      }
+      function makePinEl(cssX, cssY, hex, id, isAuto) {
+        const pin = document.createElement('div');
+        pin.className = 'pin-dot' + (isAuto ? ' auto-pin' : '');
+        pin.style.left = cssX + 'px';
+        pin.style.top = cssY + 'px';
+        pin.style.background = hex;
+        pin.dataset.id = id;
+        canvasWrap.appendChild(pin);
+        return pin;
+      }
+
+      // ═══════════════ SAMPLING ═══════════════
+      function addSample(r, g, b, canvasX, canvasY, cssX, cssY, isAuto) {
+        const id = ++sampleIdCounter,
+          hex = rgbToHex(r, g, b),
+          brightness = perceivedL(r, g, b);
+        const [h, s, l] = rgbToHsl(r, g, b),
+          [[L]] = [[rgbToLab(r, g, b)[0]]];
+        const name = colorName(r, g, b);
+        const pinEl = makePinEl(cssX, cssY, hex, id, isAuto);
+        samples.push({
+          id,
+          r,
+          g,
+          b,
+          hex,
+          brightness,
+          h,
+          s,
+          l,
+          L: Math.round(L),
+          name,
+          isAuto,
+          canvasX,
+          canvasY,
+          cssX,
+          cssY,
+          pinEl,
+        });
+        if (currentMode === 'valores') {
+          if (selectedForDelta.length < 2) selectedForDelta.push(id);
+          else selectedForDelta = [selectedForDelta[1], id];
+        }
+        renderSamples();
+        if (currentMode === 'valores') {
+          updateDelta();
+          renderValoresSamples();
+        }
+        updateHistogram();
+      }
+
+      // ═══════════════ SORT ═══════════════
+      let sortedSamples = () => {
+        const s = [...samples];
+        if (currentSort === 'lum-asc') s.sort((a, b) => a.L - b.L);
+        else if (currentSort === 'lum-desc') s.sort((a, b) => b.L - a.L);
+        else if (currentSort === 'hue') s.sort((a, b) => a.h - b.h);
+        else if (currentSort === 'sat') s.sort((a, b) => b.s - a.s);
+        return s;
+      };
+      document.querySelector('.sort-bar').addEventListener('click', (e) => {
+        const btn = e.target.closest('.sort-btn');
+        if (!btn) return;
+        currentSort = btn.dataset.sort;
+        document
+          .querySelectorAll('.sort-btn')
+          .forEach((b) => b.classList.toggle('active', b === btn));
+        renderSamples();
+      });
+
+      // ═══════════════ RENDER SAMPLES ═══════════════
+      function renderSamples() {
+        const grid = $('samplesGrid'),
+          empty = $('samplerEmpty'),
+          content = $('samplerContent');
+        $('samplesLabel').textContent =
+          samples.length + ' muestra' + (samples.length !== 1 ? 's' : '');
+        if (!samples.length) {
+          empty.style.display = 'block';
+          content.style.display = 'none';
+          return;
+        }
+        empty.style.display = 'none';
+        content.style.display = 'block';
+        grid.innerHTML = '';
+        sortedSamples().forEach((s) => {
+          const tid = 't' + s.id,
+            isSel = selectedForDelta.includes(s.id);
+          const row = document.createElement('div');
+          row.className =
+            'sample-row' +
+            (s.isAuto ? ' is-auto' : '') +
+            (isSel ? ' selected' : '');
+          row.innerHTML = `<div class="swatch" style="background:${
+            s.hex
+          }"></div>
+      <div class="sample-info">
+        <div class="sample-hex">${s.hex}${
+            s.isAuto ? '<span class="auto-badge">auto</span>' : ''
+          }<span class="copy-toast" id="${tid}">copiado</span></div>
+        <div class="sample-name">${s.name}</div>
+        <div class="sample-meta"><span>rgb(${s.r},${s.g},${
+            s.b
+          })</span><span>hsl(${s.h}°,${s.s}%,${s.l}%)</span><span>L* ${
+            s.L
+          }</span></div>
+      </div>
+      <div class="brightness-wrap"><div class="brightness-bar-bg"><div class="brightness-bar" style="width:${
+        (s.brightness / 255) * 100
+      }%;background:${s.hex}"></div></div><div class="brightness-val">${
+            s.brightness
+          }</div></div>
+      <button class="remove-btn">×</button>`;
+          row
+            .querySelector('.swatch')
+            .addEventListener('click', () => copyText(s.hex, $('t' + s.id)));
+          row
+            .querySelector('.sample-hex')
+            .addEventListener('click', () => copyText(s.hex, $('t' + s.id)));
+          row.querySelector('.remove-btn').addEventListener('click', (e2) => {
+            e2.stopPropagation();
+            if (s.pinEl) s.pinEl.remove();
+            samples = samples.filter((x) => x.id !== s.id);
+            selectedForDelta = selectedForDelta.filter((i) => i !== s.id);
+            renderSamples();
+            updateDelta();
+            renderValoresSamples();
+          });
+          row.addEventListener('click', (e2) => {
+            if (e2.target.closest('.remove-btn')) return;
+            const idx = selectedForDelta.indexOf(s.id);
+            if (idx >= 0) selectedForDelta.splice(idx, 1);
+            else {
+              if (selectedForDelta.length >= 2) selectedForDelta.shift();
+              selectedForDelta.push(s.id);
+            }
+            updatePinSel();
+            renderSamples();
+            updateDelta();
+            renderValoresSamples();
+          });
+          grid.appendChild(row);
+        });
+      }
+      function updatePinSel() {
+        samples.forEach((s) => {
+          if (!s.pinEl) return;
+          s.pinEl.classList.toggle(
+            'selected-pin',
+            selectedForDelta.includes(s.id)
+          );
+        });
+      }
+
+      // ═══════════════ AUTO-SAMPLE DRAWER ═══════════════
+      const strategyDescs = {
+        'kmeans-color':
+          'K-means en CIE Lab. Cada muestra = color promedio del cluster. Ideal para paletas dominantes perceptualmente precisas.',
+        'kmeans-lum':
+          'K-means solo en canal L*. Muestras que representan los distintos valores tonales. Perfecto para grafito.',
+        'brightness-buckets':
+          'Divide 0-255 en N zonas iguales y extrae el promedio de cada zona. Cobertura garantizada de todo el rango.',
+        'saturation-zones':
+          'Agrupa por nivel de saturacion. Muestra gama de colores vividos a neutros.',
+        'hue-sectors':
+          'Divide el circulo cromatico en N sectores. Muestra que familias de tono existen en la imagen.',
+        random:
+          'Muestras al azar. Util para explorar variacion local o texturas.',
+      };
+      let currentStrategy = 'kmeans-color';
+      $('autoDrawerHeader').addEventListener('click', () =>
+        $('autoDrawer').classList.toggle('open')
+      );
+      $('strategyGrid').addEventListener('click', (e) => {
+        const btn = e.target.closest('.strategy-btn');
+        if (!btn) return;
+        currentStrategy = btn.dataset.strategy;
+        document
+          .querySelectorAll('.strategy-btn')
+          .forEach((b) => b.classList.toggle('active', b === btn));
+        $('strategyDesc').textContent = strategyDescs[currentStrategy];
+        $('scatterWrap').style.display = [
+          'kmeans-color',
+          'kmeans-lum',
+          'brightness-buckets',
+          'random',
+        ].includes(currentStrategy)
+          ? 'flex'
+          : 'none';
+        $('satFilterWrap').style.display = [
+          'hue-sectors',
+          'saturation-zones',
+        ].includes(currentStrategy)
+          ? 'flex'
+          : 'none';
+      });
+      [
+        'sliderCount',
+        'sliderThresh',
+        'sliderScatter',
+        'sliderSatFilter',
+      ].forEach((id) => {
+        const el = $(id),
+          out = $(
+            id
+              .replace('slider', 'val')
+              .replace('Count', 'Count')
+              .replace('Thresh', 'Thresh')
+              .replace('Scatter', 'Scatter')
+              .replace('SatFilter', 'SatFilter')
+          );
+        const valId = {
+          sliderCount: 'valCount',
+          sliderThresh: 'valThresh',
+          sliderScatter: 'valScatter',
+          sliderSatFilter: 'valSatFilter',
+        }[id];
+        el.addEventListener('input', () => {
+          $(valId).textContent = el.value;
+        });
+      });
+      $('btnAutoRun').addEventListener('click', () => {
+        if (!imageLoaded) return;
+        if (cameraMode)
+          ctx.drawImage(videoEl, 0, 0, mainCanvas.width, mainCanvas.height);
+        if (currentDalton !== 'none') renderDalton();
+        const K = parseInt($('sliderCount').value),
+          threshPct = parseInt($('sliderThresh').value) / 100;
+        const scatter = parseInt($('sliderScatter').value),
+          satMin = parseInt($('sliderSatFilter').value);
+        samples
+          .filter((s) => s.isAuto)
+          .forEach((s) => {
+            if (s.pinEl) s.pinEl.remove();
+          });
+        samples = samples.filter((s) => !s.isAuto);
+        selectedForDelta = selectedForDelta.filter((id) =>
+          samples.find((s) => s.id === id)
+        );
+        $('autoRunStatus').textContent = 'procesando...';
+        setTimeout(() => {
+          const rc = getReadCtx();
+          const idata = rc.getImageData(
+              0,
+              0,
+              mainCanvas.width,
+              mainCanvas.height
+            ).data,
+            W = mainCanvas.width;
+          const step = Math.max(1, Math.floor((W * mainCanvas.height) / 3000));
+          const pixels = [];
+          for (let i = 0; i < idata.length; i += 4 * step) {
+            if (idata[i + 3] < 200) continue;
+            pixels.push([idata[i], idata[i + 1], idata[i + 2], i / 4]);
+          }
+          let results = [];
+          if (currentStrategy === 'kmeans-color')
+            results = kmeansLab(pixels, K, threshPct, scatter);
+          else if (currentStrategy === 'kmeans-lum')
+            results = kmeansLum(pixels, K, threshPct, scatter);
+          else if (currentStrategy === 'brightness-buckets')
+            results = brightnessBuckets(pixels, K, threshPct, scatter);
+          else if (currentStrategy === 'saturation-zones')
+            results = saturationZones(pixels, K, threshPct, satMin);
+          else if (currentStrategy === 'hue-sectors')
+            results = hueSectors(pixels, K, threshPct, satMin);
+          else results = randomSamples(pixels, K, scatter);
+          results.forEach(({ r, g, b, pixIdx }) => {
+            const canvasX = pixIdx % W,
+              canvasY = Math.floor(pixIdx / W),
+              { cssX, cssY } = canvasToCSS(canvasX, canvasY);
+            addSample(r, g, b, canvasX, canvasY, cssX, cssY, true);
+          });
+          $('autoRunStatus').textContent =
+            results.length + ' muestras generadas';
+        }, 20);
+      });
+
+      // Strategy implementations
+      function kmeansLab(pixels, K, threshPct, scatter) {
+        const lp = pixels.map((px) => ({
+          lab: rgbToLab(px[0], px[1], px[2]),
+          rgb: px,
+        }));
+        let centroids = [];
+        for (let k = 0; k < K; k++)
+          centroids.push([...lp[Math.floor((k * lp.length) / K)].lab]);
+        for (let iter = 0; iter < 14; iter++) {
+          const sums = Array.from({ length: K }, () => [0, 0, 0, 0]);
+          for (const px of lp) {
+            let minD = Infinity,
+              best = 0;
+            for (let k = 0; k < K; k++) {
+              const d = labDistance(px.lab, centroids[k]);
+              if (d < minD) {
+                minD = d;
+                best = k;
+              }
+            }
+            sums[best][0] += px.lab[0];
+            sums[best][1] += px.lab[1];
+            sums[best][2] += px.lab[2];
+            sums[best][3]++;
+          }
+          centroids = sums.map((s, k) =>
+            s[3] > 0 ? [s[0] / s[3], s[1] / s[3], s[2] / s[3]] : centroids[k]
+          );
+        }
+        const asgn = lp.map((px) => {
+          let minD = Infinity,
+            best = 0;
+          for (let k = 0; k < K; k++) {
+            const d = labDistance(px.lab, centroids[k]);
+            if (d < minD) {
+              minD = d;
+              best = k;
+            }
+          }
+          return best;
+        });
+        const results = [];
+        const total = pixels.length;
+        for (let k = 0; k < K; k++) {
+          const mem = lp.filter((_, i) => asgn[i] === k);
+          if (mem.length / total < threshPct) continue;
+          const r = Math.round(
+              mem.reduce((s, p) => s + p.rgb[0], 0) / mem.length
+            ),
+            g = Math.round(mem.reduce((s, p) => s + p.rgb[1], 0) / mem.length),
+            b = Math.round(mem.reduce((s, p) => s + p.rgb[2], 0) / mem.length);
+          const rep = findRep(
+            mem.map((m) => m.rgb),
+            r,
+            g,
+            b
+          );
+          results.push({ r, g, b, pixIdx: rep[3] });
+          for (let sc = 0; sc < scatter; sc++) {
+            const p = mem[Math.floor(Math.random() * mem.length)].rgb;
+            results.push({ r: p[0], g: p[1], b: p[2], pixIdx: p[3] });
+          }
+        }
+        return results;
+      }
+      function kmeansLum(pixels, K, threshPct, scatter) {
+        const lp = pixels.map((px) => ({
+          lum: perceivedL(px[0], px[1], px[2]),
+          rgb: px,
+        }));
+        let centroids = [];
+        for (let k = 0; k < K; k++)
+          centroids.push(lp[Math.floor((k * lp.length) / K)].lum);
+        for (let iter = 0; iter < 20; iter++) {
+          const sums = Array.from({ length: K }, () => [0, 0]);
+          for (const px of lp) {
+            let minD = Infinity,
+              best = 0;
+            for (let k = 0; k < K; k++) {
+              const d = Math.abs(px.lum - centroids[k]);
+              if (d < minD) {
+                minD = d;
+                best = k;
+              }
+            }
+            sums[best][0] += px.lum;
+            sums[best][1]++;
+          }
+          centroids = sums.map((s, k) =>
+            s[1] > 0 ? s[0] / s[1] : centroids[k]
+          );
+        }
+        const asgn = lp.map((px) => {
+          let minD = Infinity,
+            best = 0;
+          for (let k = 0; k < K; k++) {
+            const d = Math.abs(px.lum - centroids[k]);
+            if (d < minD) {
+              minD = d;
+              best = k;
+            }
+          }
+          return best;
+        });
+        const results = [];
+        const total = pixels.length;
+        for (let k = 0; k < K; k++) {
+          const mem = lp.filter((_, i) => asgn[i] === k);
+          if (mem.length / total < threshPct) continue;
+          const r = Math.round(
+              mem.reduce((s, p) => s + p.rgb[0], 0) / mem.length
+            ),
+            g = Math.round(mem.reduce((s, p) => s + p.rgb[1], 0) / mem.length),
+            b = Math.round(mem.reduce((s, p) => s + p.rgb[2], 0) / mem.length);
+          const rep = findRep(
+            mem.map((m) => m.rgb),
+            r,
+            g,
+            b
+          );
+          results.push({ r, g, b, pixIdx: rep[3] });
+          for (let sc = 0; sc < scatter; sc++) {
+            const p = mem[Math.floor(Math.random() * mem.length)].rgb;
+            results.push({ r: p[0], g: p[1], b: p[2], pixIdx: p[3] });
+          }
+        }
+        return results.sort(
+          (a, b) => perceivedL(a.r, a.g, a.b) - perceivedL(b.r, b.g, b.b)
+        );
+      }
+      function brightnessBuckets(pixels, K, threshPct, scatter) {
+        const step = 256 / K,
+          buckets = Array.from({ length: K }, () => []);
+        for (const px of pixels) {
+          const bi = Math.min(
+            K - 1,
+            Math.floor(perceivedL(px[0], px[1], px[2]) / step)
+          );
+          buckets[bi].push(px);
+        }
+        const total = pixels.length,
+          results = [];
+        buckets.forEach((bucket) => {
+          if (!bucket.length || bucket.length / total < threshPct) return;
+          const r = Math.round(
+              bucket.reduce((s, p) => s + p[0], 0) / bucket.length
+            ),
+            g = Math.round(
+              bucket.reduce((s, p) => s + p[1], 0) / bucket.length
+            ),
+            b = Math.round(
+              bucket.reduce((s, p) => s + p[2], 0) / bucket.length
+            );
+          const mid = bucket[Math.floor(bucket.length / 2)];
+          results.push({ r, g, b, pixIdx: mid[3] });
+          for (let sc = 0; sc < scatter; sc++) {
+            const p = bucket[Math.floor(Math.random() * bucket.length)];
+            results.push({ r: p[0], g: p[1], b: p[2], pixIdx: p[3] });
+          }
+        });
+        return results;
+      }
+      function saturationZones(pixels, K, threshPct, satMin) {
+        const step = 100 / K,
+          buckets = Array.from({ length: K }, () => []);
+        for (const px of pixels) {
+          const [h, s, l] = rgbToHsl(px[0], px[1], px[2]);
+          if (s < satMin) continue;
+          buckets[Math.min(K - 1, Math.floor(s / step))].push({ px, s, l });
+        }
+        const total = pixels.length,
+          results = [];
+        buckets.forEach((bucket) => {
+          if (!bucket.length || bucket.length / total < threshPct) return;
+          const r = Math.round(
+              bucket.reduce((s, p) => s + p.px[0], 0) / bucket.length
+            ),
+            g = Math.round(
+              bucket.reduce((s, p) => s + p.px[1], 0) / bucket.length
+            ),
+            b = Math.round(
+              bucket.reduce((s, p) => s + p.px[2], 0) / bucket.length
+            );
+          results.push({
+            r,
+            g,
+            b,
+            pixIdx: bucket[Math.floor(bucket.length / 2)].px[3],
+          });
+        });
+        return results;
+      }
+      function hueSectors(pixels, K, threshPct, satMin) {
+        const ss = 360 / K,
+          buckets = Array.from({ length: K }, () => []);
+        for (const px of pixels) {
+          const [h, s, l] = rgbToHsl(px[0], px[1], px[2]);
+          if (s < satMin) continue;
+          buckets[Math.min(K - 1, Math.floor(h / ss))].push({ px, h, s, l });
+        }
+        const total = pixels.length,
+          results = [];
+        buckets.forEach((bucket) => {
+          if (!bucket.length || bucket.length / total < threshPct) return;
+          const top = [...bucket]
+            .sort((a, b) => b.s - a.s)
+            .slice(0, Math.max(1, Math.floor(bucket.length * 0.3)));
+          const r = Math.round(
+              top.reduce((s, p) => s + p.px[0], 0) / top.length
+            ),
+            g = Math.round(top.reduce((s, p) => s + p.px[1], 0) / top.length),
+            b = Math.round(top.reduce((s, p) => s + p.px[2], 0) / top.length);
+          results.push({
+            r,
+            g,
+            b,
+            pixIdx: top[Math.floor(top.length / 2)].px[3],
+          });
+        });
+        return results;
+      }
+      function randomSamples(pixels, K, scatter) {
+        const results = [],
+          chosen = new Set(),
+          n = Math.min(K, pixels.length);
+        while (results.length < n) {
+          const idx = Math.floor(Math.random() * pixels.length);
+          if (chosen.has(idx)) continue;
+          chosen.add(idx);
+          const px = pixels[idx];
+          results.push({ r: px[0], g: px[1], b: px[2], pixIdx: px[3] });
+          for (let sc = 0; sc < scatter; sc++) {
+            const p = pixels[Math.floor(Math.random() * pixels.length)];
+            results.push({ r: p[0], g: p[1], b: p[2], pixIdx: p[3] });
+          }
+        }
+        return results;
+      }
+      function findRep(members, r, g, b) {
+        let best = Infinity,
+          bi = 0;
+        const step = Math.max(1, Math.floor(members.length / 200));
+        for (let i = 0; i < members.length; i += step) {
+          const d =
+            (members[i][0] - r) ** 2 +
+            (members[i][1] - g) ** 2 +
+            (members[i][2] - b) ** 2;
+          if (d < best) {
+            best = d;
+            bi = i;
+          }
+        }
+        return members[bi];
+      }
+
+      // ═══════════════ VALORES MODE ═══════════════
+      function updateDelta() {
+        const dc = $('deltaContent'),
+          s1 = samples.find((s) => s.id === selectedForDelta[0]),
+          s2 = samples.find((s) => s.id === selectedForDelta[1]);
+        if (!s1 && !s2) {
+          dc.innerHTML =
+            '<div class="delta-none">Selecciona 2 muestras tocando la imagen para comparar.</div>';
+          return;
+        }
+        if (s1 && !s2) {
+          dc.innerHTML = `<div class="delta-pick-row"><span class="delta-pick-label">A</span><div class="delta-pick-swatch" style="background:${s1.hex}"></div><span class="delta-pick-val">L* ${s1.L} · ${s1.hex}</span></div><div class="delta-pick-row"><span class="delta-pick-label">B</span><div class="delta-pick-swatch"></div><span class="delta-pick-val" style="color:var(--text3);font-style:italic">selecciona otra muestra</span></div>`;
+          return;
+        }
+        const delta = Math.abs(s1.L - s2.L);
+        let color, label, hint;
+        if (delta < 8) {
+          color = 'var(--red)';
+          label = 'muy similares';
+          hint = 'riesgo de colapso al reproducir';
+        } else if (delta < 18) {
+          color = 'var(--amber)';
+          label = 'similares';
+          hint = 'diferencia sutil, verificar en impresion';
+        } else if (delta < 35) {
+          color = 'var(--teal)';
+          label = 'diferenciados';
+          hint = 'rango legible en la mayoria de medios';
+        } else {
+          color = 'var(--accent)';
+          label = 'alto contraste';
+          hint = 'rango amplio — bien diferenciados';
+        }
+        dc.innerHTML = `<div class="delta-pick-row"><span class="delta-pick-label">A</span><div class="delta-pick-swatch" style="background:${
+          s1.hex
+        }"></div><span class="delta-pick-val">L* ${s1.L} · ${
+          s1.hex
+        }</span></div><div class="delta-pick-row" style="margin-bottom:6px"><span class="delta-pick-label">B</span><div class="delta-pick-swatch" style="background:${
+          s2.hex
+        }"></div><span class="delta-pick-val">L* ${s2.L} · ${
+          s2.hex
+        }</span></div><div class="delta-result"><div class="delta-number" style="color:${color}">&#916;${delta}</div><div class="delta-label" style="color:${color}">${label}</div><div class="delta-bar-wrap"><div class="delta-bar" style="width:${Math.min(
+          100,
+          (delta / 80) * 100
+        )}%;background:${color}"></div></div><div class="delta-hint">${hint}</div></div>`;
+      }
+      function updateHistogram() {
+        if (!imageLoaded) return;
+        const c = $('histCanvas');
+        const hctx = c.getContext('2d');
+        const W = c.offsetWidth || 280;
+        c.width = W;
+        c.height = 80;
+        const rc = getReadCtx();
+        const idata = rc.getImageData(
+          0,
+          0,
+          mainCanvas.width,
+          mainCanvas.height
+        ).data;
+        const hist = new Array(256).fill(0);
+        let sum = 0,
+          count = 0;
+        for (let i = 0; i < idata.length; i += 4) {
+          if (idata[i + 3] < 200) continue;
+          const lum = perceivedL(idata[i], idata[i + 1], idata[i + 2]);
+          hist[lum]++;
+          sum += lum;
+          count++;
+        }
+        const maxV = Math.max(...hist);
+        hctx.clearRect(0, 0, W, 80);
+        const bw = W / 256;
+        for (let i = 0; i < 256; i++) {
+          const h = (hist[i] / maxV) * 72;
+          hctx.fillStyle = `rgb(${i},${i},${i})`;
+          hctx.fillRect(i * bw, 80 - h, bw + 0.5, h);
+        }
+        if (hist[0] > count * 0.02) {
+          hctx.fillStyle = 'rgba(255,95,87,.6)';
+          hctx.fillRect(0, 0, 6, 80);
+        }
+        if (hist[255] > count * 0.02) {
+          hctx.fillStyle = 'rgba(255,95,87,.6)';
+          hctx.fillRect(W - 6, 0, 6, 80);
+        }
+        const mean = count > 0 ? Math.round(sum / count) : 0;
+        const key = mean < 80 ? 'low-key' : mean > 180 ? 'high-key' : 'mid-key';
+        $(
+          'histMeta'
+        ).innerHTML = `media: <span>${mean}/255</span> · <span>${key}</span>`;
+      }
+      function renderValoresSamples() {
+        const wrap = $('valoresSamplesWrap'),
+          grid = $('valoresSamplesGrid');
+        $('valoresSamplesLabel').textContent =
+          samples.length + ' muestra' + (samples.length !== 1 ? 's' : '');
+        if (!samples.length) {
+          wrap.style.display = 'none';
+          return;
+        }
+        wrap.style.display = 'block';
+        grid.innerHTML = '';
+        [...samples]
+          .sort((a, b) => b.L - a.L)
+          .forEach((s) => {
+            const isSel = selectedForDelta.includes(s.id),
+              lGray = `rgb(${s.brightness},${s.brightness},${s.brightness})`;
+            const row = document.createElement('div');
+            row.className = 'sample-row' + (isSel ? ' selected' : '');
+            row.innerHTML = `<div class="swatch" style="background:${lGray}"></div><div class="sample-info"><div class="sample-hex">L* ${s.L}</div><div class="sample-name">${s.hex}</div><div class="sample-meta"><span>brillo ${s.brightness}/255</span></div></div><div class="brightness-wrap"><div class="brightness-bar-bg"><div class="brightness-bar" style="width:${s.L}%;background:${lGray}"></div></div><div class="brightness-val">${s.L}%</div></div><button class="remove-btn">&#x2715;</button>`;
+            row.addEventListener('click', (e2) => {
+              if (e2.target.closest('.remove-btn')) return;
+              const idx = selectedForDelta.indexOf(s.id);
+              if (idx >= 0) selectedForDelta.splice(idx, 1);
+              else {
+                if (selectedForDelta.length >= 2) selectedForDelta.shift();
+                selectedForDelta.push(s.id);
+              }
+              updatePinSel();
+              renderSamples();
+              updateDelta();
+              renderValoresSamples();
+            });
+            row.querySelector('.remove-btn').addEventListener('click', (e2) => {
+              e2.stopPropagation();
+              if (s.pinEl) s.pinEl.remove();
+              samples = samples.filter((x) => x.id !== s.id);
+              selectedForDelta = selectedForDelta.filter((i) => i !== s.id);
+              renderSamples();
+              updateDelta();
+              renderValoresSamples();
+            });
+            grid.appendChild(row);
+          });
+      }
+
+      // GRADIENT LINE TOOL
+      $('btnGradMode').addEventListener('click', () => {
+        gradMode = !gradMode;
+        $('btnGradMode').textContent = gradMode
+          ? 'Desactivar modo linea'
+          : 'Activar modo linea';
+        $('btnGradMode').classList.toggle('primary', gradMode);
+        if (!gradMode) clearGradLine();
+      });
+      $('btnGradClear').addEventListener('click', clearGradLine);
+      function clearGradLine() {
+        gradPoints = [];
+        gradLineCtx.clearRect(
+          0,
+          0,
+          gradLineCanvas.width,
+          gradLineCanvas.height
+        );
+        $('gradCanvas').style.display = 'none';
+        $('gradMeta').textContent = '';
+        $('btnGradClear').style.display = 'none';
+        $('gradStatus').textContent =
+          'Activa el modo y toca 2 puntos en la imagen.';
+      }
+      function handleGradPoint(x, y, cssX, cssY) {
+        if (gradPoints.length >= 2) gradPoints = [];
+        gradPoints.push({ x, y, cssX, cssY });
+        drawGradOverlay();
+        if (gradPoints.length === 2) computeGradLine();
+        else $('gradStatus').textContent = 'Punto A marcado. Toca el punto B.';
+      }
+      function drawGradOverlay() {
+        gradLineCtx.clearRect(
+          0,
+          0,
+          gradLineCanvas.width,
+          gradLineCanvas.height
+        );
+        gradPoints.forEach((p) => {
+          gradLineCtx.beginPath();
+          gradLineCtx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+          gradLineCtx.fillStyle = 'rgba(200,245,66,.9)';
+          gradLineCtx.fill();
+          gradLineCtx.strokeStyle = 'rgba(0,0,0,.5)';
+          gradLineCtx.lineWidth = 1;
+          gradLineCtx.stroke();
+        });
+        if (gradPoints.length === 2) {
+          gradLineCtx.beginPath();
+          gradLineCtx.moveTo(gradPoints[0].x, gradPoints[0].y);
+          gradLineCtx.lineTo(gradPoints[1].x, gradPoints[1].y);
+          gradLineCtx.strokeStyle = 'rgba(200,245,66,.6)';
+          gradLineCtx.lineWidth = 1.5;
+          gradLineCtx.setLineDash([4, 3]);
+          gradLineCtx.stroke();
+          gradLineCtx.setLineDash([]);
+        }
+      }
+      function computeGradLine() {
+        const [A, B] = gradPoints,
+          N = 80,
+          rc = getReadCtx(),
+          lumValues = [];
+        for (let i = 0; i <= N; i++) {
+          const t = i / N,
+            x = Math.round(A.x + (B.x - A.x) * t),
+            y = Math.round(A.y + (B.y - A.y) * t);
+          if (x < 0 || y < 0 || x >= mainCanvas.width || y >= mainCanvas.height)
+            continue;
+          const d = rc.getImageData(x, y, 1, 1).data;
+          lumValues.push(perceivedL(d[0], d[1], d[2]));
+        }
+        const c = $('gradCanvas'),
+          W = c.offsetWidth || 400;
+        c.width = W;
+        c.height = 80;
+        c.style.display = 'block';
+        const gctx = c.getContext('2d');
+        gctx.clearRect(0, 0, W, 80);
+        gctx.fillStyle = '#0a0a0c';
+        gctx.fillRect(0, 0, W, 80);
+        gctx.strokeStyle = 'rgba(255,255,255,.04)';
+        gctx.lineWidth = 0.5;
+        [25, 50, 75].forEach((y) => {
+          gctx.beginPath();
+          gctx.moveTo(0, y);
+          gctx.lineTo(W, y);
+          gctx.stroke();
+        });
+        const bw = W / lumValues.length;
+        gctx.beginPath();
+        lumValues.forEach((v, i) => {
+          const x = i * bw,
+            y = 80 - (v / 255) * 72;
+          i === 0 ? gctx.moveTo(x, y) : gctx.lineTo(x, y);
+        });
+        gctx.strokeStyle = 'var(--accent)';
+        gctx.lineWidth = 1.5;
+        gctx.stroke();
+        lumValues.forEach((v, i) => {
+          gctx.fillStyle = 'rgba(200,245,66,.4)';
+          gctx.fillRect(i * bw, 80 - (v / 255) * 72, bw * 0.8, 2);
+        });
+        const minL = Math.min(...lumValues),
+          maxL = Math.max(...lumValues),
+          delta = maxL - minL;
+        const smooth = lumValues.every(
+          (v, i) => i === 0 || Math.abs(v - lumValues[i - 1]) < 15
+        );
+        $(
+          'gradMeta'
+        ).innerHTML = `min L* <strong>${minL}</strong> &middot; max L* <strong>${maxL}</strong> &middot; delta <strong>${delta}</strong> &middot; ${
+          smooth ? 'gradiente suave' : 'gradiente con saltos'
+        }`;
+        $('gradStatus').textContent =
+          'Analizado. Toca el canvas para nueva medicion.';
+        $('btnGradClear').style.display = 'inline-flex';
+      }
+
+      // ANALISIS MODE
+      $('btnAnalizar').addEventListener('click', () => {
+        if (!imageLoaded) return;
+        if (cameraMode)
+          ctx.drawImage(videoEl, 0, 0, mainCanvas.width, mainCanvas.height);
+        $('analisisStatus').textContent = 'analizando...';
+        $('btnAnalizar').disabled = true;
+        setTimeout(() => {
+          runAnalysis();
+          $('btnAnalizar').disabled = false;
+        }, 30);
+      });
+      function runAnalysis() {
+        const idata = ctx.getImageData(
+            0,
+            0,
+            mainCanvas.width,
+            mainCanvas.height
+          ).data,
+          W = mainCanvas.width,
+          H = mainCanvas.height,
+          total = W * H;
+        const step = Math.max(1, Math.floor(total / 4000));
+        const pixels = [];
+        let sumR = 0,
+          sumG = 0,
+          sumB = 0,
+          sumL = 0,
+          sumS = 0,
+          count = 0;
+        for (let i = 0; i < idata.length; i += 4 * step) {
+          if (idata[i + 3] < 200) continue;
+          const r = idata[i],
+            g = idata[i + 1],
+            b = idata[i + 2];
+          pixels.push([r, g, b]);
+          sumR += r;
+          sumG += g;
+          sumB += b;
+          const [h, s, l] = rgbToHsl(r, g, b);
+          sumL += l;
+          sumS += s;
+          count++;
+        }
+        const K = 6,
+          lp = pixels.map(([r, g, b]) => ({
+            lab: rgbToLab(r, g, b),
+            rgb: [r, g, b],
+          }));
+        let centroids = [];
+        for (let k = 0; k < K; k++)
+          centroids.push([...lp[Math.floor((k * lp.length) / K)].lab]);
+        for (let iter = 0; iter < 15; iter++) {
+          const sums = Array.from({ length: K }, () => [0, 0, 0, 0]);
+          for (const px of lp) {
+            let minD = Infinity,
+              best = 0;
+            for (let k = 0; k < K; k++) {
+              const d = labDistance(px.lab, centroids[k]);
+              if (d < minD) {
+                minD = d;
+                best = k;
+              }
+            }
+            sums[best][0] += px.lab[0];
+            sums[best][1] += px.lab[1];
+            sums[best][2] += px.lab[2];
+            sums[best][3]++;
+          }
+          centroids = sums.map((s, k) =>
+            s[3] > 0 ? [s[0] / s[3], s[1] / s[3], s[2] / s[3]] : centroids[k]
+          );
+        }
+        const cc = new Array(K).fill(0),
+          cRGB = Array.from({ length: K }, () => [0, 0, 0]);
+        for (const px of lp) {
+          let minD = Infinity,
+            best = 0;
+          for (let k = 0; k < K; k++) {
+            const d = labDistance(px.lab, centroids[k]);
+            if (d < minD) {
+              minD = d;
+              best = k;
+            }
+          }
+          cc[best]++;
+          cRGB[best][0] += px.rgb[0];
+          cRGB[best][1] += px.rgb[1];
+          cRGB[best][2] += px.rgb[2];
+        }
+        const palette = centroids
+          .map((_, k) => {
+            const n = cc[k];
+            if (!n) return null;
+            const r = Math.round(cRGB[k][0] / n),
+              g = Math.round(cRGB[k][1] / n),
+              b = Math.round(cRGB[k][2] / n);
+            return {
+              r,
+              g,
+              b,
+              hex: rgbToHex(r, g, b),
+              pct: (n / lp.length) * 100,
+              hsl: rgbToHsl(r, g, b),
+              lab: rgbToLab(r, g, b),
+              name: colorName(r, g, b),
+            };
+          })
+          .filter(Boolean)
+          .sort((a, b) => b.pct - a.pct);
+        const meanR = Math.round(sumR / count),
+          meanG = Math.round(sumG / count),
+          meanB = Math.round(sumB / count);
+        const tempScore = meanR - meanB,
+          meanLum = Math.round(sumL / count),
+          meanSat = Math.round(sumS / count);
+        analysisData = {
+          palette,
+          meanR,
+          meanG,
+          meanB,
+          tempScore,
+          meanLum,
+          meanSat,
+          harmony: detectHarmony(palette),
+          mood: computeMood(meanLum, meanSat, tempScore, palette),
+          idata,
+          W,
+          H,
+        };
+        renderAnalysis();
+      }
+
+      function detectHarmony(palette) {
+        const chromatic = palette.filter((c) => c.hsl[1] > 15);
+        if (!chromatic.length)
+          return {
+            name: 'acromatica',
+            conf: 95,
+            desc: 'Imagen principalmente neutra.',
+            angles: 'sin tonos cromaticos',
+          };
+        const rawHues = chromatic.map((c) => c.hsl[0]).sort((a, b) => a - b);
+        const fused = [];
+        for (const h of rawHues) {
+          if (
+            !fused.length ||
+            Math.min(
+              Math.abs(h - fused[fused.length - 1]),
+              360 - Math.abs(h - fused[fused.length - 1])
+            ) > 22
+          )
+            fused.push(h);
+        }
+        const n = fused.length,
+          sorted = [...fused].sort((a, b) => a - b);
+        const gaps = [];
+        for (let i = 1; i < sorted.length; i++)
+          gaps.push(sorted[i] - sorted[i - 1]);
+        gaps.push(360 - (sorted[sorted.length - 1] - sorted[0]));
+        const span = sorted[sorted.length - 1] - sorted[0];
+        let name,
+          desc,
+          conf = 70;
+        if (n <= 1 || span < 30) {
+          name = 'monocromatica';
+          desc = 'Un solo tono dominante con variaciones de luminosidad.';
+          conf = 92;
+        } else if (span < 60) {
+          name = 'analoga';
+          desc = 'Tonos vecinos en el circulo cromatico. Armonia natural.';
+          conf = 88;
+        } else if (n === 2 && Math.abs(Math.max(...gaps) - 180) < 35) {
+          name = 'complementaria';
+          desc = 'Tonos opuestos. Alto contraste visual.';
+          conf = 85;
+        } else if (n >= 3 && gaps.every((g) => Math.abs(g - 120) < 30)) {
+          name = 'triadica';
+          desc = 'Tres tonos a 120 grados. Paleta rica y equilibrada.';
+          conf = 82;
+        } else if (n >= 4 && gaps.every((g) => Math.abs(g - 90) < 25)) {
+          name = 'tetradica';
+          desc = 'Cuatro tonos a 90 grados. Paleta compleja.';
+          conf = 78;
+        } else if (n === 2 && Math.max(...gaps) > 150) {
+          name = 'complementaria dividida';
+          desc = 'Tono dominante con adyacentes al complementario.';
+          conf = 72;
+        } else {
+          name = 'policromatica';
+          desc = 'Multiples familias de tono.';
+          conf = 60;
+        }
+        return {
+          name,
+          conf,
+          desc,
+          angles: 'tonos: ' + fused.map((h) => h + 'deg').join(' - '),
+        };
+      }
+      function computeMood(lum, sat, temp, palette) {
+        const warmth = Math.max(0, Math.min(100, 50 + temp * 0.4)),
+          energy = Math.round(
+            sat * 0.6 +
+              Math.min(100, (palette[0] && palette[0].hsl[1]) || 0) * 0.4
+          );
+        return [
+          { label: 'calidez', val: Math.round(warmth) },
+          { label: 'energia', val: Math.round(energy) },
+          { label: 'oscuridad', val: Math.round(100 - lum) },
+          { label: 'saturacion', val: Math.round(sat) },
+          {
+            label: 'complejidad',
+            val: Math.round(
+              Math.min(100, palette.filter((c) => c.pct > 5).length * 16)
+            ),
+          },
+        ];
+      }
+      function wcagContrast(c1, c2) {
+        function lum(r, g, b) {
+          const a = [r, g, b].map((v) => {
+            v /= 255;
+            return v <= 0.03928
+              ? v / 12.92
+              : Math.pow((v + 0.055) / 1.055, 2.4);
+          });
+          return 0.2126 * a[0] + 0.7152 * a[1] + 0.0722 * a[2];
+        }
+        const l1 = lum(c1.r, c1.g, c1.b),
+          l2 = lum(c2.r, c2.g, c2.b),
+          hi = Math.max(l1, l2),
+          lo = Math.min(l1, l2);
+        return Math.round(((hi + 0.05) / (lo + 0.05)) * 100) / 100;
+      }
+      function renderWCAG(palette) {
+        const grid = $('wcagGrid');
+        grid.innerHTML = '';
+        const pairs = [];
+        for (let i = 0; i < palette.length; i++)
+          for (let j = i + 1; j < palette.length; j++)
+            pairs.push([palette[i], palette[j]]);
+        grid.style.cssText =
+          'display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:8px';
+        pairs.slice(0, 9).forEach(([a, b]) => {
+          const ratio = wcagContrast(a, b),
+            passAA = ratio >= 4.5,
+            passLg = ratio >= 3;
+          const cell = document.createElement('div');
+          cell.className =
+            'wcag-cell ' +
+            (passAA ? 'wcag-pass' : passLg ? 'wcag-warn' : 'wcag-fail');
+          cell.innerHTML =
+            '<div class="wcag-swatches"><div class="wcag-sw" style="background:' +
+            a.hex +
+            '"></div><div class="wcag-sw" style="background:' +
+            b.hex +
+            '"></div></div><div class="wcag-ratio" style="color:' +
+            (passAA ? 'var(--teal)' : passLg ? 'var(--amber)' : 'var(--red)') +
+            '">' +
+            ratio +
+            ':1</div><div style="font-size:9px;color:var(--text3)">' +
+            (passAA ? 'AA pass' : passLg ? 'AA large' : 'fail') +
+            '</div>';
+          grid.appendChild(cell);
+        });
+      }
+      function renderAnalysis() {
+        const d = analysisData;
+        $('analisisStatus').textContent =
+          'listo - ' + d.palette.length + ' clusters';
+        $('analisisResults').style.display = 'block';
+        const bar = $('paletteBar'),
+          sw = $('paletteSwatches');
+        bar.innerHTML = '';
+        sw.innerHTML = '';
+        d.palette.forEach((c) => {
+          const seg = document.createElement('div');
+          seg.className = 'palette-seg';
+          seg.style.background = c.hex;
+          seg.style.flex = c.pct.toFixed(1);
+          seg.innerHTML =
+            '<span class="palette-seg-pct">' + c.pct.toFixed(0) + '%</span>';
+          bar.appendChild(seg);
+          const item = document.createElement('div');
+          item.className = 'pal-swatch-item';
+          item.innerHTML =
+            '<div class="pal-swatch" style="background:' +
+            c.hex +
+            '" title="' +
+            c.hex +
+            '"></div><div class="pal-swatch-info">' +
+            c.hex +
+            '<br>' +
+            c.pct.toFixed(1) +
+            '% - ' +
+            c.name +
+            '</div>';
+          item.querySelector('.pal-swatch').addEventListener('click', () => {
+            const { cssX, cssY } = canvasToCSS(
+              Math.floor(mainCanvas.width / 2),
+              Math.floor(mainCanvas.height / 2)
+            );
+            addSample(
+              c.r,
+              c.g,
+              c.b,
+              Math.floor(mainCanvas.width / 2),
+              Math.floor(mainCanvas.height / 2),
+              cssX,
+              cssY,
+              true
+            );
+          });
+          sw.appendChild(item);
+        });
+        drawRGBHist(d.idata, d.W, d.H);
+        drawVscope(d.idata, d.W, d.H);
+        drawSatLum(d.idata, d.W, d.H);
+        drawParade(d.idata, d.W, d.H);
+        $('metTemp').textContent =
+          d.tempScore > 30 ? 'calida' : d.tempScore < -30 ? 'fria' : 'neutra';
+        $('metTempSub').textContent =
+          (d.tempScore > 0 ? '+' : '') + Math.round(d.tempScore) + ' (R-B)';
+        $('tempMarker').style.marginLeft =
+          Math.max(
+            0,
+            Math.min(98, Math.round(((d.tempScore + 255) / 510) * 100))
+          ) + '%';
+        $('metLum').textContent = d.meanLum + '%';
+        $('metLumSub').textContent =
+          d.meanLum > 70 ? 'high-key' : d.meanLum < 35 ? 'low-key' : 'mid-key';
+        $('metSat').textContent = d.meanSat + '%';
+        $('metSatSub').textContent =
+          d.meanSat > 65
+            ? 'muy saturada'
+            : d.meanSat > 35
+            ? 'saturada'
+            : d.meanSat > 15
+            ? 'moderada'
+            : 'desaturada';
+        $('harmonyName').textContent = d.harmony.name;
+        $('harmonyConf').innerHTML =
+          '<span style="font-family:var(--mono);font-size:10px;color:' +
+          (d.harmony.conf > 80
+            ? 'var(--teal)'
+            : d.harmony.conf > 65
+            ? 'var(--amber)'
+            : 'var(--text3)') +
+          '">confianza: ' +
+          d.harmony.conf +
+          '%</span>';
+        $('harmonyDesc').textContent = d.harmony.desc;
+        $('harmonyAngles').textContent = d.harmony.angles;
+        const mg = $('moodGrid');
+        mg.innerHTML = '';
+        d.mood.forEach((m) => {
+          const row = document.createElement('div');
+          row.className = 'mood-row';
+          row.innerHTML =
+            '<span class="mood-label">' +
+            m.label +
+            '</span><div class="mood-bar-wrap"><div class="mood-bar" style="width:' +
+            m.val +
+            '%"></div></div><span class="mood-val">' +
+            m.val +
+            '%</span>';
+          mg.appendChild(row);
+        });
+        renderWCAG(d.palette);
+      }
+
+      function drawRGBHist(idata, W, H) {
+        const c = $('rgbHistCanvas'),
+          W2 = c.offsetWidth || 200;
+        c.width = W2;
+        const hctx = c.getContext('2d');
+        const step = Math.max(1, Math.floor(idata.length / 4 / 4000));
+        const hR = new Array(256).fill(0),
+          hG = new Array(256).fill(0),
+          hB = new Array(256).fill(0);
+        for (let i = 0; i < idata.length; i += 4 * step) {
+          if (idata[i + 3] < 200) continue;
+          hR[idata[i]]++;
+          hG[idata[i + 1]]++;
+          hB[idata[i + 2]]++;
+        }
+        const maxV = Math.max(
+          Math.max(...hR),
+          Math.max(...hG),
+          Math.max(...hB)
+        );
+        hctx.fillStyle = '#0a0a0c';
+        hctx.fillRect(0, 0, W2, 70);
+        const bw = W2 / 256;
+        [
+          [hR, 'rgba(255,95,87,.6)'],
+          [hG, 'rgba(100,220,120,.6)'],
+          [hB, 'rgba(94,155,255,.6)'],
+        ].forEach(([h, col]) => {
+          hctx.fillStyle = col;
+          for (let i = 0; i < 256; i++) {
+            const bh = (h[i] / maxV) * 64;
+            hctx.fillRect(i * bw, 70 - bh, bw + 0.5, bh);
+          }
+        });
+        $('rgbHistMeta').innerHTML =
+          'R <strong>' +
+          analysisData.meanR +
+          '</strong> - G <strong>' +
+          analysisData.meanG +
+          '</strong> - B <strong>' +
+          analysisData.meanB +
+          '</strong>';
+      }
+      function drawVscope(idata, W, H) {
+        const c = $('vscopeCanvas'),
+          CW = c.offsetWidth || 200;
+        c.width = CW;
+        c.height = 130;
+        const vctx = c.getContext('2d');
+        vctx.fillStyle = '#0a0a0c';
+        vctx.fillRect(0, 0, CW, 130);
+        const cx = CW / 2,
+          cy = 65,
+          R = Math.min(CW / 2, 62) - 4;
+        vctx.strokeStyle = 'rgba(255,255,255,.07)';
+        vctx.lineWidth = 0.5;
+        for (let r = R / 3; r <= R; r += R / 3) {
+          vctx.beginPath();
+          vctx.arc(cx, cy, r, 0, Math.PI * 2);
+          vctx.stroke();
+        }
+        vctx.beginPath();
+        vctx.moveTo(cx - R - 2, cy);
+        vctx.lineTo(cx + R + 2, cy);
+        vctx.stroke();
+        vctx.beginPath();
+        vctx.moveTo(cx, cy - R - 2);
+        vctx.lineTo(cx, cy + R + 2);
+        vctx.stroke();
+        vctx.fillStyle = 'rgba(255,255,255,.2)';
+        vctx.font = '8px DM Mono,monospace';
+        [
+          [0, 'R'],
+          [60, 'Y'],
+          [120, 'G'],
+          [180, 'C'],
+          [240, 'B'],
+          [300, 'M'],
+        ].forEach(([deg, label]) => {
+          const a = (deg * Math.PI) / 180;
+          vctx.fillText(
+            label,
+            cx + Math.cos(a) * (R + 6) - 4,
+            cy - Math.sin(a) * (R + 6) + 4
+          );
+        });
+        const step = Math.max(1, Math.floor(idata.length / 4 / 3000));
+        const density = new Float32Array(CW * 130);
+        let maxD = 0;
+        for (let i = 0; i < idata.length; i += 4 * step) {
+          if (idata[i + 3] < 200) continue;
+          const [h, s, l] = rgbToHsl(idata[i], idata[i + 1], idata[i + 2]);
+          if (s < 5) continue;
+          const angle = (h * Math.PI) / 180,
+            rad = (s / 100) * R,
+            x = Math.round(cx + Math.cos(angle) * rad),
+            y = Math.round(cy - Math.sin(angle) * rad);
+          if (x >= 0 && x < CW && y >= 0 && y < 130) {
+            density[y * CW + x]++;
+            if (density[y * CW + x] > maxD) maxD = density[y * CW + x];
+          }
+        }
+        for (let i = 0; i < idata.length; i += 4 * step) {
+          if (idata[i + 3] < 200) continue;
+          const [h, s, l] = rgbToHsl(idata[i], idata[i + 1], idata[i + 2]);
+          if (s < 5) continue;
+          const angle = (h * Math.PI) / 180,
+            rad = (s / 100) * R,
+            x = Math.round(cx + Math.cos(angle) * rad),
+            y = Math.round(cy - Math.sin(angle) * rad);
+          if (x < 0 || x >= CW || y < 0 || y >= 130) continue;
+          const d2 = density[y * CW + x];
+          vctx.fillStyle =
+            'hsla(' +
+            h +
+            ',80%,55%,' +
+            Math.min(0.8, 0.1 + (d2 / maxD) * 0.7) +
+            ')';
+          vctx.fillRect(x, y, 2, 2);
+        }
+        if (analysisData)
+          analysisData.palette
+            .filter((c) => c.hsl[1] > 10)
+            .forEach((c) => {
+              const angle = (c.hsl[0] * Math.PI) / 180,
+                rad = (c.hsl[1] / 100) * R,
+                x = cx + Math.cos(angle) * rad,
+                y = cy - Math.sin(angle) * rad;
+              vctx.beginPath();
+              vctx.arc(x, y, 4, 0, Math.PI * 2);
+              vctx.fillStyle = c.hex;
+              vctx.fill();
+              vctx.strokeStyle = 'rgba(255,255,255,.8)';
+              vctx.lineWidth = 1;
+              vctx.stroke();
+            });
+        const hueCount = new Array(360).fill(0);
+        for (let i = 0; i < idata.length; i += 4 * step) {
+          if (idata[i + 3] < 200) continue;
+          const [h, s] = rgbToHsl(idata[i], idata[i + 1], idata[i + 2]);
+          if (s > 5) hueCount[h]++;
+        }
+        const domHue = hueCount.indexOf(Math.max(...hueCount));
+        $('vscopeMeta').innerHTML =
+          'tono dominante: <strong>' + domHue + 'deg</strong>';
+      }
+      function drawSatLum(idata, W, H) {
+        const c = $('satLumCanvas'),
+          CW = c.offsetWidth || 200;
+        c.width = CW;
+        c.height = 110;
+        const sctx = c.getContext('2d');
+        sctx.fillStyle = '#0a0a0c';
+        sctx.fillRect(0, 0, CW, 110);
+        sctx.strokeStyle = 'rgba(255,255,255,.04)';
+        sctx.lineWidth = 0.5;
+        for (let i = 1; i < 4; i++) {
+          sctx.beginPath();
+          sctx.moveTo((i * CW) / 4, 0);
+          sctx.lineTo((i * CW) / 4, 110);
+          sctx.stroke();
+          sctx.beginPath();
+          sctx.moveTo(0, (i * 110) / 4);
+          sctx.lineTo(CW, (i * 110) / 4);
+          sctx.stroke();
+        }
+        sctx.fillStyle = 'rgba(255,255,255,.1)';
+        sctx.font = '8px DM Mono,monospace';
+        sctx.fillText('pasteles', CW / 4 - 20, 14);
+        sctx.fillText('vividos', CW * 0.75 - 16, 14);
+        sctx.fillText('neutros osc', 4, 106);
+        sctx.fillText('neutros cl', CW * 0.6, 106);
+        const NX = 80,
+          NY = 60,
+          dmap = new Array(NX * NY).fill(0);
+        const step = Math.max(1, Math.floor(idata.length / 4 / 4000));
+        for (let i = 0; i < idata.length; i += 4 * step) {
+          if (idata[i + 3] < 200) continue;
+          const [h, s, l] = rgbToHsl(idata[i], idata[i + 1], idata[i + 2]);
+          dmap[
+            Math.min(NY - 1, Math.floor((1 - s / 100) * NY)) * NX +
+              Math.min(NX - 1, Math.floor((l / 100) * NX))
+          ]++;
+        }
+        const maxD = Math.max(...dmap);
+        for (let yi = 0; yi < NY; yi++) {
+          for (let xi = 0; xi < NX; xi++) {
+            const d2 = dmap[yi * NX + xi];
+            if (!d2) continue;
+            const l = (xi / NX) * 100,
+              s = (1 - yi / NY) * 100,
+              h = analysisData ? analysisData.palette[0].hsl[0] : 200;
+            sctx.fillStyle =
+              'hsla(' +
+              h +
+              ',' +
+              Math.max(20, s) +
+              '%,' +
+              Math.max(20, l) +
+              '%,' +
+              Math.min(0.9, 0.05 + (d2 / maxD) * 0.85) +
+              ')';
+            sctx.fillRect(
+              (xi * CW) / NX,
+              (yi * 110) / NY,
+              CW / NX + 1,
+              110 / NY + 1
+            );
+          }
+        }
+        sctx.fillStyle = 'rgba(255,255,255,.25)';
+        sctx.font = '8px DM Mono,monospace';
+        sctx.fillText('lum ->', 2, 108);
+        sctx.fillText('sat', 2, 12);
+        $('satLumMeta').innerHTML =
+          'sat media <strong>' +
+          analysisData.meanSat +
+          '%</strong> - lum media <strong>' +
+          analysisData.meanLum +
+          '%</strong>';
+      }
+      function drawParade(idata, W, H) {
+        const c = $('paradeCanvas'),
+          CW = c.offsetWidth || 200;
+        c.width = CW;
+        c.height = 70;
+        const pctx = c.getContext('2d');
+        pctx.fillStyle = '#0a0a0c';
+        pctx.fillRect(0, 0, CW, 70);
+        const segW = Math.floor((CW - 4) / 3);
+        [
+          { offset: 0, col: 'rgba(255,95,87,.7)', ch: 0 },
+          { offset: segW + 2, col: 'rgba(100,220,120,.7)', ch: 1 },
+          { offset: (segW + 2) * 2, col: 'rgba(94,155,255,.7)', ch: 2 },
+        ].forEach(({ offset, col, ch }) => {
+          pctx.strokeStyle = col;
+          pctx.lineWidth = 1;
+          for (let x = 0; x < segW; x++) {
+            const imgX = Math.floor((x / segW) * W);
+            let sum = 0,
+              cnt = 0;
+            for (let y = 0; y < H; y += Math.max(1, Math.floor(H / segW))) {
+              const idx = (y * W + imgX) * 4;
+              if (idata[idx + 3] < 200) continue;
+              sum += idata[idx + ch];
+              cnt++;
+            }
+            const avg = cnt > 0 ? sum / cnt : 0;
+            pctx.beginPath();
+            pctx.moveTo(offset + x, 68);
+            pctx.lineTo(offset + x, 68 - (avg / 255) * 62);
+            pctx.stroke();
+          }
+          pctx.strokeStyle = 'rgba(255,255,255,.06)';
+          pctx.lineWidth = 0.5;
+          if (offset > 0) {
+            pctx.beginPath();
+            pctx.moveTo(offset - 1, 0);
+            pctx.lineTo(offset - 1, 70);
+            pctx.stroke();
+          }
+        });
+        $('paradeMeta').innerHTML =
+          'R<strong>' +
+          analysisData.meanR +
+          '</strong> G<strong>' +
+          analysisData.meanG +
+          '</strong> B<strong>' +
+          analysisData.meanB +
+          '</strong>';
+      }
+
+      // EXPORT
+      function exportPalette(format) {
+        if (!analysisData) return;
+        const p = analysisData.palette;
+        let out = '';
+        if (format === 'json')
+          out = JSON.stringify(
+            p.map((c, i) => ({
+              index: i + 1,
+              hex: c.hex,
+              rgb: { r: c.r, g: c.g, b: c.b },
+              hsl: { h: c.hsl[0], s: c.hsl[1], l: c.hsl[2] },
+              percent: Math.round(c.pct * 10) / 10,
+              name: c.name,
+            })),
+            null,
+            2
+          );
+        else if (format === 'css')
+          out = p
+            .map(
+              (c, i) =>
+                '--color-' +
+                (i + 1) +
+                ': ' +
+                c.hex +
+                '; /* ' +
+                c.name +
+                ' ' +
+                c.pct.toFixed(1) +
+                '% */'
+            )
+            .join('\n');
+        else if (format === 'tailwind')
+          out =
+            'colors: {\n' +
+            p
+              .map(
+                (c, i) =>
+                  "  'brand-" + (i + 1) + "': '" + c.hex + "', // " + c.name
+              )
+              .join('\n') +
+            '\n}';
+        else if (format === 'scss')
+          out =
+            '$palette: (\n' +
+            p
+              .map(
+                (c, i) =>
+                  "  'color-" + (i + 1) + "': " + c.hex + ',  // ' + c.name
+              )
+              .join('\n') +
+            '\n);';
+        else if (format === 'figma')
+          out = JSON.stringify(
+            {
+              colors: Object.fromEntries(
+                p.map((c, i) => [
+                  'color-' + (i + 1),
+                  { value: c.hex, type: 'color', description: c.name },
+                ])
+              ),
+            },
+            null,
+            2
+          );
+        $('exportText').value = out;
+        $('exportOutput').style.display = 'block';
+      }
+      function copyExport() {
+        try {
+          navigator.clipboard.writeText($('exportText').value);
+        } catch (e) {
+          const t = $('exportText');
+          t.select();
+          document.execCommand('copy');
+        }
+      }
+      function exportPNG() {
+        if (!analysisData) return;
+        const p = analysisData.palette;
+        const W = 600,
+          H = 200,
+          oc = document.createElement('canvas');
+        oc.width = W;
+        oc.height = H;
+        const octx = oc.getContext('2d');
+        octx.fillStyle = '#0e0e0f';
+        octx.fillRect(0, 0, W, H);
+        octx.fillStyle = '#c8f542';
+        octx.font = 'bold 13px monospace';
+        octx.fillText('CHROMALAB', 20, 28);
+        const sw = Math.floor((W - 40) / p.length);
+        p.forEach((c, i) => {
+          const x = 20 + i * sw;
+          octx.fillStyle = c.hex;
+          octx.fillRect(x, 40, sw - 4, 80);
+          octx.fillStyle = 'rgba(255,255,255,.7)';
+          octx.font = '9px monospace';
+          octx.fillText(c.hex, x, 138);
+          octx.fillText(c.pct.toFixed(0) + '%', x, 150);
+          octx.fillText(c.name, x, 162);
+        });
+        const link = document.createElement('a');
+        link.download = 'chromalab-palette.png';
+        link.href = oc.toDataURL();
+        link.click();
+      }
+
+      // MODAL
+      function openModal(canvasId, title, metaId) {
+        const src = document.getElementById(canvasId),
+          metaEl = document.getElementById(metaId);
+        if (!src) return;
+        const backdrop = document.createElement('div');
+        backdrop.className = 'scope-modal-backdrop';
+        backdrop.addEventListener('click', (e) => {
+          if (e.target === backdrop) close();
+        });
+        const modal = document.createElement('div');
+        modal.className = 'scope-modal';
+        const hdr = document.createElement('div');
+        hdr.className = 'scope-modal-header';
+        hdr.innerHTML =
+          '<span class="scope-modal-title">' +
+          title +
+          '</span><button class="scope-modal-close" id="_mc">&#x2715;</button>';
+        modal.appendChild(hdr);
+        const big = document.createElement('canvas');
+        const TW = Math.min(window.innerWidth - 80, 740),
+          TH = Math.round(TW * (src.height / Math.max(1, src.width)));
+        big.width = TW;
+        big.height = TH;
+        big.style.cssText =
+          'width:100%;display:block;border-radius:6px;background:#0a0a0c';
+        const bctx = big.getContext('2d');
+        bctx.imageSmoothingEnabled = true;
+        bctx.drawImage(src, 0, 0, TW, TH);
+        modal.appendChild(big);
+        if (metaEl && metaEl.innerHTML) {
+          const m = document.createElement('div');
+          m.className = 'scope-meta';
+          m.style.marginTop = '8px';
+          m.innerHTML = metaEl.innerHTML;
+          modal.appendChild(m);
+        }
+        backdrop.appendChild(modal);
+        document.body.appendChild(backdrop);
+        document.getElementById('_mc').addEventListener('click', close);
+        function close() {
+          backdrop.style.animation = 'bkIn .1s ease reverse';
+          setTimeout(() => backdrop.remove(), 100);
+        }
+        const esc = (e) => {
+          if (e.key === 'Escape') {
+            close();
+            document.removeEventListener('keydown', esc);
+          }
+        };
+        document.addEventListener('keydown', esc);
+      }
+
+      // CLEAR
+      $('btnClear').addEventListener('click', () => {
+        clearAllPins();
+        samples = [];
+        selectedForDelta = [];
+        gradPoints = [];
+        clearGradLine();
+        renderSamples();
+        updateDelta();
+        renderValoresSamples();
+        updateHistogram();
+        $('autoRunStatus').textContent = 'listo';
+      });
+
+      // INIT
+      applyVisualMode();
+    </script>
+  </body>
+</html>
