@@ -1,0 +1,6 @@
+$('#btn-1598934641228').prop('disabled', true)
+$0.removeAttribute('disabled')
+$('#btn-1598934641228').attr('disabled', true)
+
+$('#btn-1598934641228').removeAttr('disabled')
+$('#btn-1598934641228').removeClass('disabled')
