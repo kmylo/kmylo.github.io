@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+		<?php
+	include("mail_form-02.php");
+	?>
+	<!-- CONTACT.HTML -->
+<form method='POST' action='mail_form.php'>	  
+  Email: <input name='email' type='text' /><br />
+  Subject: <input name='subject' type='text' /><br />
+  Message:<br />
+  <textarea name='message' rows='15' cols='40'>
+  </textarea><br />
+  <input type='submit' />
+  <div class="g-recaptcha" data-sitekey="6LfaHtEZAAAAANUckBknnzOtveyCqyemyQJQaVh5"></div>
+</form>
+</body>
+</html>
