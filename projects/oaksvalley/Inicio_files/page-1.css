@@ -70,7 +70,7 @@
   .sp-dots
   ul
   li.sp-dot-0 {
-  background: url("./../../images/JUMBOTRON/oaks_header_bg_0003_IMG08.jpg")
+  background: url("../images/JUMBOTRON/oaks_header_bg_0003_IMG08.jpg")
     no-repeat scroll center center / cover;
 }
 #sppb-addon-1553258972243
@@ -238,7 +238,7 @@
   .sp-dots
   ul
   li.sp-dot-1 {
-  background: url("./../../images/JUMBOTRON/oaks_header_bg_0004_IMG07.jpg")
+  background: url("../images/JUMBOTRON/oaks_header_bg_0004_IMG07.jpg")
     no-repeat scroll center center / cover;
 }
 #sppb-addon-1553258972243
@@ -396,7 +396,7 @@
   .sp-dots
   ul
   li.sp-dot-2 {
-  background: url("./../../images/JUMBOTRON/oaks_header.jpg")
+  background: url("../images/JUMBOTRON/oaks_header.jpg")
     no-repeat scroll center center / cover;
 }
 #sppb-addon-1553258972243
@@ -554,7 +554,7 @@
   .sp-dots
   ul
   li.sp-dot-3 {
-  background: url("./../../images/JUMBOTRON/oaks_header_bg_0014c.jpg")
+  background: url("../images/JUMBOTRON/oaks_header_bg_0014c.jpg")
     no-repeat scroll center center / cover;
 }
 #sppb-addon-1553258972243
@@ -2066,7 +2066,7 @@
   margin-right: 0px;
   margin-bottom: 0px;
   margin-left: 0px;
-  background-image: url(../../../images/images/ejecutivos_0001.jpg);
+  background-image: url(../images/images/ejecutivos_0001.jpg);
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
