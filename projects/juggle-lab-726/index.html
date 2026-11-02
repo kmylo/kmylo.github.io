@@ -1,0 +1,2923 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Juggle Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@500;700;800&family=Doto:wght@700;900&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c0f; --panel:#12161b; --panel2:#181d23; --line:#242b33; --text:#e7ebf0; --muted:#8793a0;
+  --accent:#ffb020; --cyan:#3fd0ff; --red:#ff5a5a; --green:#45e08a; --r:10px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:13px/1.45 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap;min-height:49px}
+.brand{display:flex;align-items:baseline;gap:10px;font-weight:650;font-size:15px;letter-spacing:.2px}
+.brand small{font-weight:400;color:var(--muted);font-size:12px}
+.logo{width:10px;height:10px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);align-self:center}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:flex;align-items:center;gap:6px;padding:3px 9px;border:1px solid var(--line);border-radius:99px;color:var(--muted);font-size:12px}
+.chip i{width:7px;height:7px;border-radius:50%;background:#4a535d}
+.chip.on i{background:var(--green);box-shadow:0 0 8px var(--green)}
+.chip.warn i{background:var(--accent)}
+main{display:grid;grid-template-columns:1fr 340px;height:calc(100% - 49px);min-height:0}
+.stage{position:relative;min-height:0;background:#000}
+#stage{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+.empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:16px}
+.empty[hidden]{display:none}
+.empty ol{color:var(--muted);max-width:440px;margin:0;padding:18px 24px 18px 40px;border:1px dashed var(--line);border-radius:var(--r);background:rgba(10,12,15,.82);line-height:1.9}
+.empty b{color:var(--text)}
+aside{border-left:1px solid var(--line);overflow:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.card h2{margin:0 0 10px;font-size:11px;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);font-weight:600}
+.tabs{position:sticky;top:-12px;z-index:5;margin:-12px -12px 0;padding:10px 12px;background:var(--bg);border-bottom:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.tabs button{padding:6px 4px;font-size:12px;border-radius:7px;color:var(--muted)}
+.tabs button.on{background:var(--panel2);color:var(--text);border-color:var(--accent)}
+.card[hidden]{display:none}
+.card.feat h2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:0}
+.card.feat .body{margin-top:10px}
+.card.feat.off .body{display:none}
+.switch{position:relative;width:34px;height:20px;flex:none}
+.switch input{opacity:0;width:100%;height:100%;margin:0;position:absolute;inset:0;cursor:pointer;z-index:1}
+.switch i{position:absolute;inset:0;border-radius:99px;background:#2a323b;transition:background .15s}
+.switch i::after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#8793a0;transition:transform .15s,background .15s}
+.switch input:checked+i{background:rgba(255,176,32,.35)}
+.switch input:checked+i::after{transform:translateX(14px);background:var(--accent)}
+.switch input:focus-visible+i{outline:2px solid var(--accent);outline-offset:2px}
+canvas.panel{width:100%;display:block;background:#000;border:1px solid var(--line);border-radius:8px}
+input[type=text],input[type=number]{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit;min-width:0;flex:1}
+.eq{font:600 15px/1.5 ui-monospace,Menlo,monospace;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;text-align:center}
+.eq b{color:var(--accent);font-weight:700}
+.big{font-size:22px !important}
+.ok{color:var(--green)} .bad{color:var(--red)}
+.list{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.list .item{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 9px;background:var(--panel2);border:1px solid var(--line);border-radius:8px}
+.list .item span{flex:1;color:var(--muted)}
+.list .item button{padding:2px 8px}
+.meter{height:8px;border-radius:99px;background:#20262d;position:relative;overflow:hidden;margin:6px 0}
+.meter i{position:absolute;top:0;bottom:0;left:50%;width:3px;background:var(--accent);border-radius:2px;transform:translateX(-50%)}
+.meter::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:1px;background:#4a535d}
+.row{display:flex;gap:8px;align-items:center;margin:6px 0;flex-wrap:wrap}
+button,select,.file{appearance:none;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;cursor:pointer}
+button:hover,.file:hover{border-color:#3a434e}
+button.primary{background:var(--accent);color:#1a1200;border-color:var(--accent);font-weight:600}
+button.rec{color:var(--red)}
+button.rec.active{background:var(--red);color:#fff;border-color:var(--red)}
+select{flex:1;min-width:0}
+.file input{display:none}
+label.sl{display:grid;grid-template-columns:1fr auto;gap:2px 8px;margin:8px 0;color:var(--muted)}
+label.sl input{grid-column:1/-1;width:100%;accent-color:var(--accent)}
+label.sl output{color:var(--text);font-variant-numeric:tabular-nums}
+label.tg{display:flex;align-items:center;gap:8px;margin:5px 0;cursor:pointer}
+label.tg input{accent-color:var(--accent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.colors{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.color{display:flex;align-items:center;gap:8px;padding:5px 6px 5px 8px;background:var(--panel2);border:1px solid var(--line);border-radius:8px}
+.color .sw{width:18px;height:18px;border-radius:50%;border:1px solid rgba(255,255,255,.25);flex:none}
+.color span{flex:1;color:var(--muted);font-variant-numeric:tabular-nums}
+.color button{padding:2px 8px}
+.note{color:var(--muted);font-size:12px;margin:4px 0}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+.stat small{display:block;color:var(--muted);font-size:11px}
+.stat b{font-size:16px;font-variant-numeric:tabular-nums;font-weight:600}
+#log{list-style:none;margin:0;padding:0;max-height:220px;overflow:auto;font-variant-numeric:tabular-nums}
+#log li{padding:4px 0;border-bottom:1px solid var(--line);display:flex;gap:8px}
+#log li i{width:8px;height:8px;border-radius:50%;margin-top:5px;flex:none}
+kbd{font:11px ui-monospace,Menlo,monospace;background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:1px 5px}
+#video{position:absolute;width:2px;height:2px;opacity:0;pointer-events:none;left:0;top:0}
+@media (max-width:860px){
+  main{grid-template-columns:1fr;grid-template-rows:55vh auto;height:auto}
+  aside{border-left:0;border-top:1px solid var(--line)}
+}
+</style>
+<style>
+/* ===== Estilo cyberpunk / HUD: negro, lima y rosa fluor, paneles con esquina cortada,
+   micro-rótulos técnicos, sin sombras ===== */
+:root{
+  --bg:#060607; --panel:#0d0e10; --panel2:#141519; --line:#25272c; --line2:#3a3d44;
+  --text:#eef0f2; --muted:#7f858f; --accent:#c6ff1a; --accent-ink:#0a0a0a; --pink:#ff2d6f; --violet:#7b4dff; --red:#ff3b30;
+  --green:#c6ff1a; --cyan:#29e0ff; --r:4px; --cut:14px;
+  --display:"Oxanium","Chakra Petch",ui-sans-serif,sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  --dot:"Doto","JetBrains Mono",monospace; --body:"Space Grotesk",ui-sans-serif,system-ui,sans-serif;
+}
+html,body{background:var(--bg);color:var(--text);font:13px/1.45 var(--body)}
+body{background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:32px 32px}
+::selection{background:var(--accent);color:var(--accent-ink)}
+
+/* cabecera */
+header{background:var(--bg);border-bottom:1px solid var(--line);position:relative;padding-top:18px}
+header::before{content:"JUGGLE_LAB ▲ SITESWAP ENGINE ▲ M-JUGGLE-ON(26) ▲ JUGGLE_LAB ▲ SITESWAP ENGINE ▲ M-JUGGLE-ON(26) ▲ JUGGLE_LAB ▲ SITESWAP ENGINE ▲ M-JUGGLE-ON(26) ▲ JUGGLE_LAB ▲ SITESWAP ENGINE ▲ M-JUGGLE-ON(26)";
+  position:absolute;left:0;right:0;top:0;height:14px;overflow:hidden;white-space:nowrap;background:var(--accent);color:var(--accent-ink);font:700 9px/14px var(--mono);letter-spacing:1.5px;padding-left:12px}
+.brand{font:900 22px/1 var(--dot);letter-spacing:1.5px;text-transform:uppercase;gap:12px;color:var(--text)}
+.brand small{font:500 9px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);border-left:1px solid var(--line2);padding-left:12px}
+.logo{width:14px;height:14px;border-radius:0;background:var(--accent);box-shadow:none;clip-path:polygon(0 0,100% 0,100% 60%,60% 100%,0 100%)}
+.chips{gap:6px}
+.chip{font:600 9px/1 var(--mono);letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);background:transparent;border:1px solid var(--line2);padding:6px 11px;border-radius:99px;box-shadow:none}
+.chip i{background:#3d4047;width:6px;height:6px}
+.chip.on{color:var(--text);border-color:var(--accent)}
+.chip.on i{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.chip.warn i{background:var(--pink);box-shadow:0 0 8px var(--pink)}
+main{height:calc(100% - 59px)}
+
+/* escenario */
+.stage{background:#000}
+.stage::before,.stage::after{content:"";position:absolute;z-index:2;width:22px;height:22px;border:2px solid var(--accent);pointer-events:none}
+.stage::before{left:12px;top:12px;border-right:0;border-bottom:0}
+.stage::after{right:12px;bottom:12px;border-left:0;border-top:0}
+.empty ol{background:rgba(6,6,7,.92);color:var(--muted);border:1px solid var(--line2);border-radius:0;font:500 12px/2 var(--mono);box-shadow:none;clip-path:polygon(0 0,calc(100% - 18px) 0,100% 18px,100% 100%,0 100%);border-left:3px solid var(--accent)}
+.empty b{color:var(--accent);font-weight:700}
+
+/* panel lateral */
+aside{background:var(--bg);border-left:1px solid var(--line);counter-reset:mod;gap:8px}
+.tabs{background:var(--bg);border-bottom:1px solid var(--line);gap:4px}
+.tabs button{font:700 10px/1 var(--mono);letter-spacing:1.6px;text-transform:uppercase;padding:10px 4px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:0}
+.tabs button:hover{color:var(--text);border-color:var(--line2)}
+.tabs button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,0 100%)}
+
+/* módulos HUD */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:0;padding:14px 14px 14px;box-shadow:none;position:relative;
+  clip-path:polygon(0 0,calc(100% - var(--cut)) 0,100% var(--cut),100% 100%,0 100%)}
+.card::before{content:"";position:absolute;top:0;right:0;width:calc(var(--cut) * 1.414);height:1px;background:var(--line);transform-origin:right top;transform:rotate(45deg) translate(0,0);right:calc(var(--cut) * -0.0)}
+.card:not([hidden]){counter-increment:mod}
+.card:not([hidden])::after{content:"S/N JL-" counter(mod,decimal-leading-zero);position:absolute;right:22px;top:15px;font:500 8.5px/1 var(--mono);letter-spacing:1.2px;color:#4a4e56}
+.card.feat::after{right:62px}
+.card h2{font:700 10px/1.2 var(--mono);letter-spacing:2px;color:var(--text);margin-bottom:12px;text-transform:uppercase}
+.card h2>span::before,.card:not(.feat) h2::before{content:"";display:inline-block;width:7px;height:7px;background:var(--line2);margin-right:8px;vertical-align:0;clip-path:polygon(0 0,100% 0,100% 100%)}
+.card.feat:not(.off){border-color:#2f3a12}
+.card.feat:not(.off) h2>span::before{background:var(--accent)}
+.card.feat:not(.off) h2{padding-bottom:10px;margin-bottom:2px;border-bottom:1px solid var(--line);
+  background:repeating-linear-gradient(-45deg,transparent 0 6px,rgba(198,255,26,.0) 6px 12px)}
+.card.feat:not(.off) .body{position:relative;padding-top:4px}
+.card.feat:not(.off) .body::before{content:"";display:block;height:5px;margin:0 0 10px;background:repeating-linear-gradient(-45deg,var(--accent) 0 3px,transparent 3px 8px);opacity:.55}
+
+/* controles */
+button,select,.file,input[type=text],input[type=number]{background:transparent;color:var(--text);border:1px solid var(--line2);border-radius:0;font:600 10.5px/1.2 var(--mono);letter-spacing:1px;text-transform:uppercase;box-shadow:none;padding:9px 12px;transition:border-color .12s,color .12s,background .12s}
+select{text-transform:none;letter-spacing:.3px;background:var(--panel2)}
+select option{background:#111;color:var(--text)}
+input[type=text],input[type=number]{text-transform:none;letter-spacing:.3px;background:var(--bg)}
+button:hover,.file:hover,select:hover{border-color:var(--accent);color:var(--accent)}
+button:active,.file:active{transform:none;background:rgba(198,255,26,.08)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:800;clip-path:polygon(0 0,calc(100% - 9px) 0,100% 9px,100% 100%,0 100%)}
+button.primary:hover{background:#d8ff5c;color:var(--accent-ink)}
+button.rec{color:var(--pink);border-color:#5a1f33}
+button.rec:hover{border-color:var(--pink);color:var(--pink)}
+button.rec.active{background:var(--pink);color:#fff;border-color:var(--pink);animation:recblink 1s steps(2) infinite}
+@keyframes recblink{50%{background:#b81d4f;border-color:#b81d4f}}
+label.sl{font:500 9.5px/1.3 var(--mono);letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:10px 0}
+label.sl output{font:700 11px/1 var(--mono);color:var(--accent)}
+label.tg{font:500 12px/1.3 var(--body);color:#c9ccd1}
+label.tg input[type=checkbox]{appearance:none;-webkit-appearance:none;width:13px;height:13px;border:1px solid var(--line2);background:var(--bg);margin:0;flex:none;display:grid;place-content:center;cursor:pointer}
+label.tg input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent)}
+label.tg input[type=checkbox]:checked::after{content:"";width:5px;height:5px;background:var(--accent-ink)}
+.note{font:400 11.5px/1.6 var(--body);color:var(--muted)}
+kbd{font:700 9.5px/1 var(--mono);background:var(--panel2);border:1px solid var(--line2);box-shadow:none;border-radius:0;padding:2px 5px;color:var(--accent)}
+
+/* deslizadores */
+input[type=range]{-webkit-appearance:none;appearance:none;height:16px;background:transparent;cursor:pointer;accent-color:var(--accent)}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:linear-gradient(90deg,var(--accent) var(--p,50%),#2b2e34 var(--p,50%))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:8px;height:16px;margin-top:-7px;background:var(--accent);border:0;border-radius:0}
+input[type=range]::-moz-range-track{height:2px;background:#2b2e34}
+input[type=range]::-moz-range-progress{height:2px;background:var(--accent)}
+input[type=range]::-moz-range-thumb{width:8px;height:16px;background:var(--accent);border:0;border-radius:0}
+
+/* lecturas */
+.stats{gap:6px}
+.stat,.eq{background:var(--bg);border:1px solid var(--line);border-radius:0;box-shadow:none;color:var(--text);position:relative}
+.stat::before{content:"";position:absolute;left:-1px;top:-1px;width:6px;height:6px;border-left:1px solid var(--accent);border-top:1px solid var(--accent)}
+.stat small{font:500 8.5px/1.25 var(--mono);letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
+.stat b{font:700 22px/1.1 var(--display);letter-spacing:.5px;color:var(--text)}
+.eq{font:600 12px/1.6 var(--mono);border-left:2px solid var(--accent)}
+.eq b{color:var(--accent)}
+.eq small{color:var(--muted)}
+.ok{color:var(--accent) !important} .bad{color:var(--pink) !important}
+.color,.list .item{background:var(--bg);border:1px solid var(--line);border-radius:0;box-shadow:none}
+.color .sw{border-radius:0 !important}
+.color span,.list .item span{font:500 10.5px/1.3 var(--mono);color:var(--text);letter-spacing:.5px}
+.color button,.list .item button{padding:3px 8px}
+#log li{border-bottom:1px solid var(--line);font:500 10.5px/1.45 var(--mono);color:#c9ccd1}
+#log li i{border-radius:0;width:6px;height:6px}
+canvas.panel,#ladder{background:#000 !important;border:1px solid var(--line) !important;border-radius:0 !important;box-shadow:none}
+
+/* interruptor */
+.switch{width:38px;height:18px}
+.switch i{border-radius:0;background:var(--bg);border:1px solid var(--line2);box-shadow:none}
+.switch i::after{left:2px;top:2px;width:12px;height:12px;border-radius:0;background:#4a4e56;box-shadow:none}
+.switch input:checked+i{background:rgba(198,255,26,.12);border-color:var(--accent)}
+.switch input:checked+i::after{transform:translateX(20px);background:var(--accent)}
+
+/* medidor del metrónomo */
+.meter{background:var(--bg);border:1px solid var(--line);border-radius:0;box-shadow:none;height:10px}
+.meter::before{background:var(--line2)}
+.meter i{background:var(--pink);border-radius:0;box-shadow:0 0 8px var(--pink)}
+
+@media (max-width:860px){aside{border-left:0;border-top:1px solid var(--line)} main{height:auto}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo"></span>Juggle Lab <small>Fase 1 · MacBook + proyector</small></div>
+  <div class="chips">
+    <span class="chip" id="chipCam"><i></i>Cámara</span>
+    <span class="chip" id="chipPose"><i></i>Pose</span>
+    <span class="chip" id="chipProj"><i></i>Proyección</span>
+  </div>
+</header>
+
+<main>
+  <section class="stage">
+    <canvas id="stage"></canvas>
+    <div class="empty" id="empty"><ol>
+      <li><b>Iniciar cámara</b> o cargar un video de prueba.</li>
+      <li><b>Clic sobre cada pelota</b> para registrar su color.</li>
+      <li><b>Abrir proyección</b>, arrastrar la ventana al proyector y pulsar <kbd>F</kbd>.</li>
+      <li>Sin cámara puedes probar efectos con el <b>Simulador</b>.</li>
+    </ol></div>
+  </section>
+
+  <aside>
+    <nav class="tabs" role="tablist" aria-label="Paneles">
+      <button data-tab-btn="captura">Captura</button><button data-tab-btn="visual">Visual</button><button data-tab-btn="ciencia">Ciencia</button>
+      <button data-tab-btn="sonido">Sonido</button><button data-tab-btn="entreno">Entreno</button><button data-tab-btn="show">Show</button>
+    </nav>
+    <section class="card" data-tab="captura">
+      <h2>Fuente</h2>
+      <div class="row"><select id="camSel"><option value="">Cámara predeterminada</option></select></div>
+      <div class="row">
+        <button class="primary" id="btnCam">Iniciar cámara</button>
+        <label class="file">Cargar video<input type="file" id="fileIn" accept="video/*"></label>
+        <button class="rec" id="btnRec">● Grabar clip</button>
+      </div>
+      <div class="row"><select id="recMode">
+        <option value="raw">Grabar: cámara sin efectos</option>
+        <option value="fx">Grabar: cámara con efectos</option>
+        <option value="proj">Grabar: solo efectos (como el proyector)</option>
+      </select></div>
+      <label class="tg"><input type="checkbox" id="tMirror" checked> Vista previa en espejo</label>
+    </section>
+
+    <section class="card" data-tab="captura">
+      <h2>Pelotas</h2>
+      <p class="note">Haz clic sobre una pelota: la app recorta su máscara, aprende su color completo y su tamaño, y después la busca solo cerca de donde la física predice que va a estar.</p>
+      <div class="colors" id="colors"></div>
+      <label class="sl">Tolerancia al seleccionar <output id="oTol"></output><input type="range" id="sTol" min="6" max="40" value="18"></label>
+      <label class="sl">Exigencia de color <output id="oSat"></output><input type="range" id="sSat" min="0.02" max="0.6" step="0.02" value="0.12"></label>
+      <label class="tg"><input type="checkbox" id="tRoi" checked> Buscar solo cerca de cada pelota (tracking)</label>
+      <label class="sl">Área mínima (px de detección) <output id="oArea"></output><input type="range" id="sArea" min="2" max="80" value="6"></label>
+      <div class="row"><button id="btnFreeze">Pausar cuadro</button><button id="btnClearColors">Borrar colores</button></div>
+      <p class="note">Pausa con <kbd>Espacio</kbd> cuando las pelotas estén nítidas y haz clic en cada una. Si dos pelotas son del mismo color, se agrupan solas (o usa <kbd>+</kbd>).</p>
+      <label class="tg"><input type="checkbox" id="tMask"> Ver máscara y ventanas de búsqueda</label>
+    </section>
+
+    <section class="card" data-tab="captura">
+      <h2>Medición</h2>
+      <div class="stats">
+        <div class="stat"><small>FPS de proceso</small><b id="vFps">-</b></div>
+        <div class="stat"><small>Pelotas / en el aire</small><b id="vBalls">0 / 0</b></div>
+        <div class="stat"><small>Última altura</small><b id="vHeight">-</b></div>
+        <div class="stat"><small>Lanzamientos / min</small><b id="vRate">0</b></div>
+        <div class="stat" style="grid-column:1/-1"><small>Escala estimada desde g</small><b id="vScale">esperando vuelos</b></div>
+      </div>
+      <p class="note">La escala sale de ajustar parábolas: como g = 9,81 m/s², la curvatura medida en la imagen dice cuánto mide un metro. Supone lanzamientos en un plano paralelo a la cámara.</p>
+    </section>
+
+    <section class="card" data-tab="ciencia">
+      <h2>Siteswap</h2>
+      <div class="stats">
+        <div class="stat"><small>Patrón detectado</small><b id="vPattern">-</b></div>
+        <div class="stat"><small>Beat</small><b id="vBeat">-</b></div>
+        <div class="stat"><small>Confianza</small><b id="vConf">-</b></div>
+        <div class="stat"><small>Tiempo en la mano</small><b id="vDwell">-</b></div>
+      </div>
+      <canvas id="ladder" style="width:100%;height:220px;display:block;margin-top:8px;background:#000;border:1px solid var(--line);border-radius:8px"></canvas>
+      <p class="note">Diagrama escalera: los rieles son las manos, el tiempo baja. Cada número es cuántos beats vuela esa pelota: n = (vuelo + tiempo en la mano) / beat. El tiempo en la mano sale del teorema del promedio (el promedio de los números es igual a la cantidad de pelotas). Si las dos manos lanzan a la vez, cambia a notación sincrónica (mano izquierda, mano derecha), con x para los cruces. La confianza dice qué tan cerca de un entero caen las mediciones. No detecta todavía multiplex ([33]).</p>
+    </section>
+
+    <section class="card" data-tab="visual">
+      <h2>Proyección</h2>
+      <div class="row"><button class="primary" id="btnProj">Abrir ventana de proyección</button></div>
+      <p class="note">En esa ventana: <kbd>F</kbd> pantalla completa, <kbd>C</kbd> calibrar esquinas, <kbd>R</kbd> reiniciar esquinas, <kbd>H</kbd> ayuda.</p>
+      <div class="grid2">
+        <label class="tg"><input type="checkbox" id="fxTrails" checked> Estelas</label>
+        <label class="tg"><input type="checkbox" id="fxApex" checked> Apex</label>
+        <label class="tg"><input type="checkbox" id="fxParticles" checked> Partículas</label>
+        <label class="tg"><input type="checkbox" id="fxSkeleton"> Esqueleto</label>
+        <label class="tg"><input type="checkbox" id="fxFlip"> Voltear horizontal</label>
+        <label class="tg"><input type="checkbox" id="fxCalib"> Calibrar</label>
+        <label class="tg"><input type="checkbox" id="fxLabels" checked> Números siteswap</label>
+      </div>
+      <label class="sl">Gravedad de partículas (× g) <output id="oGrav"></output><input type="range" id="sGrav" min="-2" max="3" step="0.1" value="1"></label>
+      <label class="sl">Largo de estela (s) <output id="oTrail"></output><input type="range" id="sTrail" min="0.1" max="1.5" step="0.05" value="0.5"></label>
+      <label class="sl">Intensidad <output id="oInt"></output><input type="range" id="sInt" min="0" max="3" step="0.1" value="1"></label>
+    </section>
+
+    <section class="card" data-tab="visual">
+      <h2>Capas</h2>
+      <label class="tg"><input type="checkbox" id="fxGeo"> Geometría entre pelotas</label>
+      <label class="tg"><input type="checkbox" id="fxBig"> Alturas grandes arriba</label>
+      <label class="tg"><input type="checkbox" id="fxHist"> Historial de alturas abajo</label>
+      <p class="note">Se ven en la vista previa y en la proyección.</p>
+    </section>
+
+    <section class="card" data-tab="visual">
+      <h2>Fondo generativo</h2>
+      <label class="tg"><input type="checkbox" id="fxBg"> Activar fondo 3D</label>
+      <div class="row"><select id="bgMode">
+        <option value="grid">Grilla que se deforma (HOLO)</option>
+        <option value="dots">Campo de puntos con gravedad</option>
+        <option value="mesh">Malla 3D reactiva</option>
+      </select></div>
+      <label class="tg"><input type="checkbox" id="bgBody" checked> El cuerpo deforma el fondo</label>
+      <label class="tg"><input type="checkbox" id="bgPreview" checked> Mostrar en la vista previa</label>
+      <label class="sl">Reacción a los trucos <output id="oReact"></output><input type="range" id="sReact" min="0" max="2.5" step="0.1" value="1"></label>
+      <p class="note">Tu cabeza, torso y manos empujan el fondo desde atrás; cada apex lanza una onda, cada lanzamiento suma energía, una caída lo sacude y un cambio de patrón cambia el color (y la forma, en la malla 3D).</p>
+    </section>
+
+    <section class="card" data-tab="captura">
+      <h2>Simulador</h2>
+      <div class="row"><button id="btnSim">Simular lanzamiento</button></div>
+      <div class="row">
+        <label class="tg"><input type="checkbox" id="tAuto"> Patrón automático</label>
+        <select id="simPat">
+          <option value="3">3 · cascada</option>
+          <option value="4">4 · fuente</option>
+          <option value="5">5 · cascada de 5</option>
+          <option value="441">441</option>
+          <option value="531">531</option>
+          <option value="423">423</option>
+          <option value="534">534</option>
+          <option value="(4,4)">(4,4) · fuente sincrónica</option>
+          <option value="(4x,4x)">(4x,4x)</option>
+          <option value="(4,2x)(2x,4)">(4,2x)(2x,4) · caja</option>
+        </select>
+      </div>
+      <p class="note">Pelotas virtuales para diseñar efectos y probar la detección de siteswap sin hacer malabares. Atajo: <kbd>S</kbd>.</p>
+    </section>
+
+    <section class="card" data-tab="captura">
+      <h2>Personas</h2>
+      <div class="row"><select id="numPoses"><option value="1">1 malabarista</option><option value="2">2 personas</option><option value="3">3 personas</option><option value="4">4 personas</option></select></div>
+      <p class="note">Detecta varias personas y usa todas sus manos para los lanzamientos. El siteswap sigue leyéndose como un solo malabarista (los pases entre personas no se interpretan todavía).</p>
+    </section>
+    <section class="card feat off" data-tab="ciencia" data-feat="shannon">
+      <h2><span>Teorema de Shannon</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="shannon" aria-label="Teorema de Shannon"><i></i></label></h2>
+      <div class="body">
+        <div class="eq" id="shEq">(F + D) · H = (V + D) · N</div>
+        <div class="stats" style="margin-top:8px">
+          <div class="stat"><small>F · vuelo</small><b id="shF">-</b></div>
+          <div class="stat"><small>D · en la mano</small><b id="shD">-</b></div>
+          <div class="stat"><small>V · mano vacía</small><b id="shV">-</b></div>
+          <div class="stat"><small>N pelotas · H manos</small><b id="shN">-</b></div>
+        </div>
+        <label class="tg"><input type="checkbox" id="shProj"> Mostrar la ecuación en la proyección</label>
+        <p class="note">Es una identidad exacta: en un tiempo dado, las pelotas reparten su tiempo entre vuelo y mano, y las manos entre mano y vacío; las dos cuentas tienen los mismos lanzamientos. Vale para cualquier patrón usando promedios (los de acá son de los últimos 20). La diferencia entre los dos lados es error de medición.</p>
+      </div>
+    </section>
+    <section class="card feat off" data-tab="ciencia" data-feat="graph">
+      <h2><span>Grafo de estados</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="graph" aria-label="Grafo de estados"><i></i></label></h2>
+      <div class="body">
+        <canvas class="panel" id="graphCv" style="height:300px"></canvas>
+        <label class="tg"><input type="checkbox" id="grProj"> Mostrar en la proyección</label>
+        <p class="note">Cada nodo es un estado: qué beats futuros ya tienen una pelota cayendo (1) o están libres (0). Cada lanzamiento es una flecha; un patrón es un ciclo en este grafo. El nodo de arriba es el estado base.</p>
+      </div>
+    </section>
+    <section class="card feat off" data-tab="ciencia" data-feat="ghost">
+      <h2><span>Trayectoria fantasma</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="ghost" aria-label="Trayectoria fantasma"><i></i></label></h2>
+      <div class="body">
+        <p class="note">Dibuja por adelantado la parábola que va a seguir cada pelota en el aire y marca dónde cae, con la cuenta regresiva en milisegundos.</p>
+      </div>
+    </section>
+    <section class="card feat off" data-tab="ciencia" data-feat="chrono">
+      <h2><span>Cronofotografía</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="chrono" aria-label="Cronofotografía"><i></i></label></h2>
+      <div class="body">
+        <label class="sl">Intervalo entre copias (s) <output id="oChStep"></output><input type="range" id="sChStep" min="0.02" max="0.15" step="0.01" value="0.05"></label>
+        <label class="sl">Duración (s) <output id="oChLen"></output><input type="range" id="sChLen" min="0.3" max="2" step="0.1" value="1"></label>
+        <p class="note">Como las fotos estroboscópicas de Muybridge: deja copias de cada pelota a intervalos iguales. Las copias se juntan arriba (va más lenta) y se separan abajo.</p>
+      </div>
+    </section>
+    <section class="card feat off" data-tab="ciencia" data-feat="phase">
+      <h2><span>Espacio de fases</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="phase" aria-label="Espacio de fases"><i></i></label></h2>
+      <div class="body">
+        <canvas class="panel" id="phaseCv" style="height:220px"></canvas>
+        <label class="tg"><input type="checkbox" id="phProj"> Mostrar en la proyección</label>
+        <p class="note">Altura contra velocidad vertical de cada pelota. Por conservación de energía, v² = v₀² − 2·g·h: cada vuelo es una parábola acostada en este plano, y un patrón estable repite el mismo bucle.</p>
+      </div>
+    </section>
+    <section class="card feat off" data-tab="sonido" data-feat="music">
+      <h2><span>Notas por atrapada</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="music" aria-label="Notas por atrapada"><i></i></label></h2>
+      <div class="body">
+        <div class="row"><select id="muScale">
+          <option value="penta">Pentatónica (tono por altura)</option>
+          <option value="major">Mayor (tono por altura)</option>
+          <option value="minor">Menor (tono por altura)</option>
+          <option value="harm">Serie armónica (tono = siteswap × 110 Hz)</option>
+        </select></div>
+        <label class="sl">Volumen <output id="oMuVol"></output><input type="range" id="sMuVol" min="0" max="1" step="0.05" value="0.5"></label>
+        <label class="tg"><input type="checkbox" id="muThrow" checked> Golpe suave en cada lanzamiento</label>
+        <label class="tg"><input type="checkbox" id="muChord" checked> Acorde al cambiar de patrón</label>
+        <p class="note">Cada pelota tiene su timbre. En la serie armónica, un 3 suena a la quinta de un 2 y un 4 una octava arriba de un 2: el patrón se vuelve un acorde.</p>
+      </div>
+    </section>
+    <section class="card feat off" data-tab="sonido" data-feat="metro">
+      <h2><span>Metrónomo</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="metro" aria-label="Metrónomo"><i></i></label></h2>
+      <div class="body">
+        <div class="row"><select id="meMode"><option value="follow">Seguir mi ritmo</option><option value="fixed">Tempo fijo</option></select></div>
+        <label class="sl">Lanzamientos por minuto <output id="oMeBpm"></output><input type="range" id="sMeBpm" min="60" max="300" step="5" value="180"></label>
+        <label class="tg"><input type="checkbox" id="meSound" checked> Sonido del clic</label>
+        <div class="meter" aria-label="Desvío del último lanzamiento"><i id="meNeedle"></i></div>
+        <div class="stats">
+          <div class="stat"><small>Último desvío</small><b id="meErr">-</b></div>
+          <div class="stat"><small>Desvío medio</small><b id="meMean">-</b></div>
+        </div>
+        <p class="note">La aguja marca si el último lanzamiento llegó antes (izquierda) o después (derecha) del clic.</p>
+      </div>
+    </section>
+    <section class="card feat off" data-tab="entreno" data-feat="coach">
+      <h2><span>Coach</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="coach" aria-label="Coach"><i></i></label></h2>
+      <div class="body">
+        <div class="stats">
+          <div class="stat"><small>Racha sin caídas</small><b id="coStreak">0</b></div>
+          <div class="stat"><small>Mejor racha</small><b id="coBest">0</b></div>
+          <div class="stat"><small>Regularidad de altura</small><b id="coH">-</b></div>
+          <div class="stat"><small>Regularidad de ritmo</small><b id="coR">-</b></div>
+          <div class="stat"><small>Mano der · izq</small><b id="coHands">-</b></div>
+          <div class="stat"><small>Lanzamientos · caídas</small><b id="coCount">0 · 0</b></div>
+        </div>
+        <small class="note" style="display:block;margin:8px 0 4px">Mapa de atrapadas</small>
+        <canvas class="panel" id="heatCv" style="height:120px"></canvas>
+        <div class="row" style="margin-top:8px"><button id="coReset">Reiniciar sesión</button><button id="coReport">Descargar reporte</button></div>
+        <p class="note">Regularidad de altura = cuánto varía la altura de cada número de siteswap consigo mismo (todos los 3 entre sí, todos los 5 entre sí). Regularidad de ritmo = desvío de los tiempos entre lanzamientos. Más bajo es más parejo.</p>
+      </div>
+    </section>
+    <section class="card feat off" data-tab="entreno" data-feat="challenge">
+      <h2><span>Desafíos</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="challenge" aria-label="Desafíos"><i></i></label></h2>
+      <div class="body">
+        <div class="row"><select id="chType"><option value="height">Altura objetivo</option><option value="siteswap">Siteswap</option></select></div>
+        <div id="chHeightBox">
+          <label class="sl">Altura objetivo (m) <output id="oChTarget"></output><input type="range" id="sChTarget" min="0.2" max="3" step="0.05" value="1"></label>
+          <label class="sl">Tolerancia (± cm) <output id="oChTol"></output><input type="range" id="sChTol" min="3" max="30" step="1" value="10"></label>
+        </div>
+        <div id="chSwBox" hidden>
+          <div class="row"><input type="text" id="chPattern" value="441" aria-label="Patrón objetivo"><input type="number" id="chGoal" value="12" min="3" max="99" style="max-width:70px" aria-label="Lanzamientos seguidos"></div>
+          <p class="note" id="chValid"></p>
+        </div>
+        <div class="row"><button class="primary" id="chStart">Empezar</button></div>
+        <div class="eq" id="chStatus">Sin desafío activo</div>
+        <p class="note">El estado del desafío se muestra también en la proyección.</p>
+      </div>
+    </section>
+    <section class="card feat off" data-tab="entreno" data-feat="teacher">
+      <h2><span>Profesor de patrones</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="teacher" aria-label="Profesor de patrones"><i></i></label></h2>
+      <div class="body">
+        <div class="row"><input type="text" id="tePattern" value="531" aria-label="Patrón a aprender"><button id="teUse">Usar como desafío</button></div>
+        <canvas class="panel" id="teachCv" style="height:200px"></canvas>
+        <label class="sl">Velocidad <output id="oTeSpeed"></output><input type="range" id="sTeSpeed" min="0.25" max="1.5" step="0.05" value="0.6"></label>
+        <label class="tg"><input type="checkbox" id="teProj"> Proyectar la guía</label>
+        <div class="eq" id="teCompare">Tu secuencia: -</div>
+        <p class="note">La animación sale de la notación: cada número es cuántos beats vuela la pelota, los impares cruzan de mano y los pares vuelven a la misma.</p>
+      </div>
+    </section>
+    <section class="card feat off" data-tab="show" data-feat="scenes">
+      <h2><span>Escenas por patrón</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="scenes" aria-label="Escenas por patrón"><i></i></label></h2>
+      <div class="body">
+        <div class="row"><input type="text" id="scName" placeholder="Patrón (ej. 441)" aria-label="Patrón de la escena"><button id="scSave">Guardar escena</button></div>
+        <div class="list" id="scList"></div>
+        <p class="note">Guarda cómo está la pestaña Visual (capas, fondo, efectos y deslizadores). Cuando detecta ese patrón, la escena se aplica sola. El nombre se llena con el patrón actual.</p>
+      </div>
+    </section>
+    <section class="card feat off" data-tab="show" data-feat="latency">
+      <h2><span>Compensar latencia</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="latency" aria-label="Compensar latencia"><i></i></label></h2>
+      <div class="body">
+        <label class="sl">Adelanto en la proyección (ms) <output id="oLead"></output><input type="range" id="sLead" min="0" max="250" step="5" value="0"></label>
+        <div class="row"><button id="latMeasure">Medir latencia</button></div>
+        <div class="eq" id="latStatus">Sin medir</div>
+        <p class="note">Para medir: abre la proyección y apunta la cámara a la zona proyectada. La proyección parpadea varias veces y se mide cuánto tarda la cámara en verlo. Ese tiempo se usa para dibujar cada pelota donde va a estar, no donde estaba.</p>
+      </div>
+    </section>
+    <section class="card" data-tab="show">
+      <h2>Calibración automática</h2>
+      <div class="row"><button class="primary" id="autoCal">Calibrar con la cámara</button></div>
+      <div class="eq" id="calStatus">-</div>
+      <p class="note">Con la proyección en pantalla completa y la cámara viendo la superficie: proyecta 4 puntos, los encuentra en la imagen y calcula las esquinas solo. Supone una superficie plana (en ese caso la correspondencia es exacta: es una homografía).</p>
+    </section>
+    <section class="card feat off" data-tab="show" data-feat="net">
+      <h2><span>Conexiones</span><label class="switch" title="Activar o desactivar"><input type="checkbox" data-feat-toggle="net" aria-label="Conexiones"><i></i></label></h2>
+      <div class="body">
+        <div class="row"><input type="text" id="netUrl" value="ws://localhost:8787" aria-label="Dirección WebSocket"></div>
+        <div class="eq" id="netStatus">Desconectado</div>
+        <div class="row" style="margin-top:8px"><button id="netBridge">Descargar puente (Node)</button></div>
+        <p class="note">Envía cada evento como JSON (lanzamiento, apex, atrapada, caída, patrón) y acepta comandos. TouchDesigner se conecta directo con un WebSocket DAT. El puente agrega salida OSC para Resolume y una página de control para el iPad o el iPhone: ejecútalo en la MacBook con <kbd>node juggle-bridge.mjs</kbd>.</p>
+      </div>
+    </section>
+    <section class="card" data-tab="*">
+      <h2>Eventos</h2>
+      <ul id="log"></ul>
+    </section>
+  </aside>
+</main>
+
+<video id="video" playsinline muted></video>
+
+<script type="text/plain" id="bridgeSrc">
+// juggle-bridge.mjs · puente para Juggle Lab
+// 1. npm install ws        2. node juggle-bridge.mjs [--port 8787] [--osc 127.0.0.1:7000]
+// Juggle Lab se conecta a ws://localhost:8787. TouchDesigner: WebSocket DAT a la misma dirección.
+// Resolume: recibe OSC en el puerto indicado (/juggle/throw, /juggle/apex, /juggle/catch, /juggle/drop, /juggle/pattern).
+// iPad o iPhone en la misma red: abre http://<ip-de-la-mac>:8787 para el control remoto.
+import { WebSocketServer } from 'ws';
+import http from 'node:http';
+import dgram from 'node:dgram';
+import os from 'node:os';
+
+const arg = (k, d) => { const i = process.argv.indexOf(k); return i > 0 ? process.argv[i + 1] : d; };
+const PORT = +arg('--port', 8787);
+const [OSC_HOST, OSC_PORT] = (arg('--osc', '127.0.0.1:7000')).split(':');
+const udp = dgram.createSocket('udp4');
+
+const oscStr = s => { const b = Buffer.from(String(s) + '\0'); return Buffer.concat([b, Buffer.alloc((4 - b.length % 4) % 4)]); };
+function oscMsg(addr, args) {
+  const parts = [oscStr(addr), oscStr(',' + args.map(a => typeof a === 'number' ? 'f' : 's').join(''))];
+  for (const a of args) { if (typeof a === 'number') { const b = Buffer.alloc(4); b.writeFloatBE(a); parts.push(b); } else parts.push(oscStr(a)); }
+  return Buffer.concat(parts);
+}
+const FIELDS = ['id', 'ci', 'x', 'y', 'height', 'value', 'text', 'hand', 'pattern', 'balls'];
+function sendOsc(m) {
+  const args = FIELDS.filter(k => m[k] != null && (typeof m[k] === 'number' || typeof m[k] === 'string')).map(k => m[k]);
+  try { udp.send(oscMsg(m.address || '/juggle/' + m.event, args), +OSC_PORT, OSC_HOST); } catch {}
+}
+
+const server = http.createServer((req, res) => {
+  if (req.url === '/' || req.url.startsWith('/?')) { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(REMOTE_HTML); }
+  else { res.writeHead(404); res.end(); }
+});
+const wss = new WebSocketServer({ server });
+let controls = [];
+const send = (ws, m) => { if (ws.readyState === 1) ws.send(JSON.stringify(m)); };
+wss.on('connection', ws => {
+  if (controls.length) send(ws, { type: 'controls', controls });
+  ws.on('message', buf => {
+    let m; try { m = JSON.parse(buf); } catch { return; }
+    if (m.type === 'hello' && m.role === 'lab') { ws.isLab = true; controls = m.controls || []; for (const c of wss.clients) if (c !== ws) send(c, { type: 'controls', controls }); console.log('Juggle Lab conectado'); }
+    else if (m.type === 'event') { for (const c of wss.clients) if (c !== ws) send(c, m); sendOsc(m); }
+    else if (m.type === 'cmd') { for (const c of wss.clients) if (c.isLab) send(c, m); }
+  });
+});
+server.listen(PORT, () => {
+  const ips = Object.values(os.networkInterfaces()).flat().filter(i => i && i.family === 'IPv4' && !i.internal).map(i => i.address);
+  console.log(`Puente listo · WebSocket ws://localhost:${PORT} · OSC → ${OSC_HOST}:${OSC_PORT}`);
+  for (const ip of ips) console.log(`Control remoto: http://${ip}:${PORT}`);
+});
+
+const REMOTE_HTML = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Juggle Lab · control</title><style>
+:root{--bg:#060607;--panel:#0d0e10;--ink:#eef0f2;--muted:#7f858f;--line:#2a2d33;--acc:#c6ff1a;--pink:#ff2d6f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.4 ui-monospace,Menlo,monospace;padding:14px}
+h1{font:800 34px/1 system-ui;letter-spacing:1px;margin:6px 0 2px;color:var(--acc)}.sub{color:var(--muted);font-size:10px;letter-spacing:2px;text-transform:uppercase}
+.now{display:flex;gap:8px;margin:14px 0}.now div{flex:1;background:#000;border:1px solid var(--line);border-left:2px solid var(--acc);padding:10px 12px;font:800 32px/1 system-ui;color:var(--ink)}
+.now small{display:block;color:var(--muted);font:500 9px ui-monospace,monospace;letter-spacing:1.5px;margin-bottom:6px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:10px 0}.tabs button{flex:1;min-width:80px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+button,.ctl{background:var(--panel);border:1px solid var(--line);border-radius:0;padding:14px 12px;font:600 11px ui-monospace,monospace;letter-spacing:1px;text-transform:uppercase;color:var(--ink);text-align:left}
+button.on{background:var(--acc);color:#0a0a0a;border-color:var(--acc)}.tabs button.on{background:var(--acc);color:#0a0a0a;border-color:var(--acc)}
+.ctl label{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px}
+.ctl input,.ctl select{width:100%;accent-color:var(--acc);background:#000;color:var(--ink);border:1px solid var(--line)}.st{color:var(--muted);font-size:10px;letter-spacing:1px}
+</style></head><body>
+<div class="sub">Juggle Lab · control remoto</div><h1 id="pat">-</h1><div class="st" id="st">Conectando…</div>
+<div class="now"><div><small>ÚLTIMO SITESWAP</small><span id="ss">-</span></div><div><small>ALTURA</small><span id="h">-</span></div></div>
+<div class="tabs" id="tabs"></div><div class="grid" id="grid"></div>
+<script>
+let ws, controls = [], tab = 'visual';
+const $ = s => document.querySelector(s);
+function connect(){ ws = new WebSocket('ws://' + location.host); ws.onopen = () => $('#st').textContent = 'Conectado';
+  ws.onclose = () => { $('#st').textContent = 'Desconectado · reintentando'; setTimeout(connect, 2000); };
+  ws.onmessage = ev => { const m = JSON.parse(ev.data);
+    if (m.type === 'controls') { controls = m.controls; render(); }
+    if (m.type === 'event') { if (m.event === 'pattern') $('#pat').textContent = m.pattern; if (m.event === 'siteswap') $('#ss').textContent = m.text ?? m.value; if (m.event === 'apex' && m.height != null) $('#h').textContent = m.height.toFixed(2).replace('.', ',') + ' m'; } }; }
+const cmd = (id, value) => ws && ws.readyState === 1 && ws.send(JSON.stringify({ type: 'cmd', id, value }));
+function render(){
+  const tabs = [...new Set(controls.map(c => c.tab).filter(t => t && t !== '*'))];
+  $('#tabs').innerHTML = ''; for (const t of tabs) { const b = document.createElement('button'); b.textContent = t.toUpperCase(); b.className = t === tab ? 'on' : ''; b.onclick = () => { tab = t; render(); }; $('#tabs').appendChild(b); }
+  const g = $('#grid'); g.innerHTML = '';
+  for (const c of controls.filter(c => c.tab === tab)) {
+    if (c.kind === 'toggle' || c.kind === 'button') { const b = document.createElement('button'); b.textContent = c.label; if (c.kind === 'toggle' && c.value) b.className = 'on';
+      b.onclick = () => { if (c.kind === 'toggle') { c.value = !c.value; b.className = c.value ? 'on' : ''; cmd(c.id, c.value); } else cmd(c.id); }; g.appendChild(b); }
+    else { const d = document.createElement('div'); d.className = 'ctl'; const l = document.createElement('label'); l.textContent = c.label; d.appendChild(l);
+      let inp; if (c.kind === 'range') { inp = document.createElement('input'); inp.type = 'range'; inp.min = c.min; inp.max = c.max; inp.step = c.step; inp.value = c.value; inp.oninput = () => cmd(c.id, inp.value); }
+      else { inp = document.createElement('select'); for (const [v, t] of c.options || []) { const o = document.createElement('option'); o.value = v; o.textContent = t; inp.appendChild(o); } inp.value = c.value; inp.onchange = () => cmd(c.id, inp.value); }
+      d.appendChild(inp); g.appendChild(d); }
+  } }
+connect();
+<\/script></body></html>`;
+</script>
+
+<script type="module">
+/* =========================================================
+   Juggle Lab · Fase 1
+   Percepción (color + pose) -> Física (tracking, parábolas)
+   -> Eventos (bus) -> Visuales (pantalla + proyector)
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const video = $('#video');
+const stage = $('#stage'), sctx = stage.getContext('2d');
+const proc = document.createElement('canvas'), pctx = proc.getContext('2d', { willReadFrequently: true });
+const maskCv = document.createElement('canvas'), mctx = maskCv.getContext('2d');
+let PW = 256, PH = 144;
+
+const FONT = { display: '"Oxanium", "Chakra Petch", ui-sans-serif, sans-serif', mono: '"JetBrains Mono", ui-monospace, Menlo, monospace', dot: '"Doto", "JetBrains Mono", ui-monospace, monospace' };
+const MP_URL = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs';
+const MP_WASM = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm';
+const MP_MODEL = 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+const G_SIM = 4.5;            // gravedad del simulador, en alturas de cuadro / s² (cuadro ≈ 2,2 m)
+const G_FALLBACK = 2.0;       // gravedad supuesta hasta tener escala medida
+
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('jl.' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('jl.' + k, JSON.stringify(v, (key, val) => key.startsWith('_') ? undefined : val)); } catch {} }
+};
+
+const S = {
+  source: null, stream: null, fileUrl: null, mirror: true, showMask: false,
+  targets: store.get('targets', []),
+  tolH: 18, req: 0.12, roiOn: true, rois: [], flash: null, minArea: 6,
+  fx: { trails: true, apex: true, particles: true, skeleton: false, flip: false, calib: false, labels: true, geo: false, big: false, hist: false },
+  simPattern: '3', simBeatIdx: 0,
+  grav: 1, trailLen: 0.5, intensity: 1,
+  mPerU: null, scaleSamples: [],
+  landmarker: null, pose: null,
+  sim: [], autoSim: false, lastSpawn: 0,
+  blobs: [], lastHeight: null, throwTimes: [], procFps: 0,
+  stageRect: { x: 0, y: 0, w: 1, h: 1 }
+};
+
+/* ---------- utilidades ---------- */
+const fmt = (n, d = 2) => n.toFixed(d).replace('.', ',');
+const fmtM = m => m == null ? '-' : fmt(m) + ' m';
+function hsv2rgb(h, s, v) {
+  const f = n => { const k = (n + h / 60) % 6; return Math.round(255 * (v - v * s * Math.max(0, Math.min(k, 4 - k, 1)))); };
+  return [f(5), f(3), f(1)];
+}
+function colorFor(ci, l = 60) {
+  if (ci < 0) return `hsl(338 100% ${l}%)`;
+  const t = S.targets[ci];
+  return t ? `hsl(${Math.round(t.h)} 100% ${l}%)` : '#ffffff';
+}
+function setChip(id, cls) { const el = $('#' + id); el.classList.remove('on', 'warn'); if (cls) el.classList.add(cls); }
+
+/* ---------- bus de eventos ---------- */
+const bus = {
+  map: {},
+  on(type, fn) { (this.map[type] ||= []).push(fn); },
+  emit(type, data) {
+    const e = { type, time: performance.now(), ...data };
+    for (const f of (this.map[type] || [])) f(e);
+    for (const f of (this.map['*'] || [])) f(e);
+  }
+};
+window.juggle = bus; // para conectar futuras apps: juggle.on('apex', e => ...)
+window.juggleDebug = () => ({ SW, tracks, sim: S.sim, seq: recentSeq().map(x => x.text).join(' ') });
+
+/* ---------- log ---------- */
+function logLine(text, color = '#8793a0') {
+  const li = document.createElement('li');
+  li.innerHTML = `<i style="background:${color}"></i><span></span>`;
+  li.querySelector('span').textContent = text;
+  const ul = $('#log'); ul.prepend(li);
+  while (ul.children.length > 80) ul.lastChild.remove();
+}
+bus.on('*', e => {
+  const id = '#' + e.id; let txt, col;
+  switch (e.type) {
+    case 'throw': txt = `Lanzamiento ${id}${e.hand ? ' · mano ' + e.hand : ''}`; col = colorFor(e.ci); break;
+    case 'apex': txt = `Apex ${id}${e.height != null ? ' · ' + (e.estimated ? '≈ ' : '') + fmtM(e.height) : ''}`; col = '#ffb020'; break;
+    case 'catch': txt = `Atrapada ${id} · vuelo ${fmt(e.flightTime)} s · ${fmtM(e.height)}`; col = '#29e0ff'; break;
+    case 'drop': txt = `Caída ${id}`; col = '#ff5a5a'; break;
+    default: return;
+  }
+  logLine(txt, col);
+});
+bus.on('throw', () => S.throwTimes.push(performance.now()));
+bus.on('apex', e => { if (e.height != null) S.lastHeight = e.height; });
+bus.on('catch', e => { if (e.height != null) S.lastHeight = e.height; });
+
+/* =========================================================
+   PERCEPCIÓN: detección de pelotas por color
+   ========================================================= */
+let labels = new Int16Array(0), stackBuf = new Int32Array(0), lastImg = null;
+
+function ensureProcSize() {
+  const vw = video.videoWidth || 16, vh = video.videoHeight || 9;
+  const h = Math.max(48, Math.round(PW * vh / vw));
+  if (PH !== h || proc.width !== PW) { PH = h; proc.width = PW; proc.height = PH; maskCv.width = PW; maskCv.height = PH; }
+}
+
+/* Modelo de color por pelota: histograma tono × saturación aprendido de su máscara.
+   Es más fino que "un tono ± tolerancia": captura brillos, sombras y el desenfoque de esa pelota. */
+const HB = 30, SB = 8, NB = HB * SB;
+const _c = { h: 0, s: 0, v: 0 };
+function hsvOf(r, g, b) {
+  const mx = r > g ? (r > b ? r : b) : (g > b ? g : b), mn = r < g ? (r < b ? r : b) : (g < b ? g : b), d = mx - mn;
+  _c.v = mx / 255; _c.s = mx ? d / mx : 0;
+  let h = 0;
+  if (d) { if (mx === r) h = ((g - b) / d) % 6; else if (mx === g) h = (b - r) / d + 2; else h = (r - g) / d + 4; h *= 60; if (h < 0) h += 360; }
+  _c.h = h; return _c;
+}
+const binOf = (h, s) => Math.min(HB - 1, (h / 360 * HB) | 0) * SB + Math.min(SB - 1, (s * SB) | 0);
+function buildHist(pix) {
+  const H = new Float32Array(NB);
+  for (const [h, s] of pix) {
+    const hb = Math.min(HB - 1, (h / 360 * HB) | 0), sb = Math.min(SB - 1, (s * SB) | 0);
+    for (let dh = -1; dh <= 1; dh++) for (let ds = -1; ds <= 1; ds++) {
+      const s2 = sb + ds; if (s2 < 0 || s2 >= SB) continue;
+      H[((hb + dh + HB) % HB) * SB + s2] += dh || ds ? (dh && ds ? 0.25 : 0.5) : 1;
+    }
+  }
+  let mx = 0; for (const v of H) if (v > mx) mx = v;
+  return Array.from(H, v => mx ? +(v / mx).toFixed(3) : 0);
+}
+function synthHist(t) { // para colores guardados con la versión anterior
+  const pix = [];
+  for (let dh = -10; dh <= 10; dh += 2) for (let sv = t.s * 0.6; sv <= Math.min(1, t.s * 1.3); sv += 0.04) pix.push([(t.h + dh + 360) % 360, sv]);
+  return buildHist(pix);
+}
+function bhatta(a, b) {
+  let sa = 0, sb = 0, s = 0; for (let i = 0; i < NB; i++) { sa += a[i]; sb += b[i]; }
+  for (let i = 0; i < NB; i++) s += Math.sqrt(a[i] / sa * b[i] / sb);
+  return s;
+}
+S.targets = S.targets.map(t => t.hist ? t : { ...t, hist: synthHist(t), count: t.count || 1 });
+// color de "todo lo demás" (piel, ropa, fondo), aprendido en cada clic: un píxel es pelota solo si su color
+// es mucho más típico de la pelota que de la escena
+S.bgHist = store.get('bgHist', null);
+const densOf = h => { let sum = 0; for (const v of h) sum += v; return h.map(v => sum ? v / sum : 0); };
+function learnBackground(exclude) {
+  if (!lastImg) return;
+  const d = lastImg.data, N = PW * PH, H = new Float32Array(NB); let n = 0;
+  for (let i = 0; i < N; i += 2) {
+    if (exclude[i] || labels[i]) continue;
+    const o = i * 4, c = hsvOf(d[o], d[o + 1], d[o + 2]);
+    if (c.s < 0.25 || c.v < 0.15) continue;   // los grises casi neutros no compiten con ninguna pelota
+    H[binOf(c.h, c.s)]++; n++;
+  }
+  if (!n) return;
+  const dens = Array.from(H, v => v / n);
+  S.bgHist = S.bgHist ? S.bgHist.map((v, i) => 0.5 * v + 0.5 * dens[i]) : dens;
+  store.set('bgHist', S.bgHist.map(v => +v.toFixed(5)));
+}
+
+function detect(t) {
+  const img = pctx.getImageData(0, 0, PW, PH); lastImg = img;
+  const d = img.data, N = PW * PH;
+  if (labels.length !== N) { labels = new Int16Array(N); stackBuf = new Int32Array(N); }
+  labels.fill(0);
+  S.rois = [];
+  const T = S.targets; if (!T.length) return [];
+  const g = gNorm();
+
+  // 1. ventanas de búsqueda: alrededor de donde la física predice cada pelota seguida
+  const active = T.map(() => []);
+  if (S.roiOn) for (const tr of tracks) {
+    if (tr.ci < 0 || tr.ci >= T.length || tr.miss > 6) continue;
+    const dt = Math.max(0, t - tr.lastT);
+    const px = tr.x + tr.vx * dt, py = tr.y + tr.vy * dt + (tr.state === 'air' ? 0.5 * g * dt * dt : 0);
+    const hw = Math.max(tr.r * 3, 0.04) + Math.hypot(tr.vx, tr.vy) * 0.06 + tr.miss * 0.02, hh = hw * PW / PH;
+    const R = { k: tr.ci, px, py,
+      x0: Math.max(0, Math.floor((px - hw) * PW)), x1: Math.min(PW - 1, Math.ceil((px + hw) * PW)),
+      y0: Math.max(0, Math.floor((py - hh) * PH)), y1: Math.min(PH - 1, Math.ceil((py + hh) * PH)) };
+    if (R.x1 > R.x0 && R.y1 > R.y0) { active[tr.ci].push(R); S.rois.push(R); }
+  }
+  // colores con pelotas sin seguir (al inicio o tras perder una): búsqueda en todo el cuadro
+  const globalK = [];
+  T.forEach((tg, k) => { if (active[k].length < (tg.count || 1)) globalK.push(k); });
+
+  // 2. clasificar píxeles solo donde hace falta
+  const req = S.req, bgD = S.bgHist;
+  for (const tg of T) if (!tg._dens) tg._dens = densOf(tg.hist);
+  const classify = (x0, y0, x1, y1, ks) => {
+    for (let y = y0; y <= y1; y++) for (let x = x0, i = y * PW + x0; x <= x1; x++, i++) {
+      if (labels[i]) continue;
+      const o = i * 4, c = hsvOf(d[o], d[o + 1], d[o + 2]);
+      if (c.s < 0.12 || c.v < 0.12) continue;
+      const bin = binOf(c.h, c.s);
+      let best = 0, bk = -1;
+      for (const k of ks) {
+        const p = T[k].hist[bin];
+        if (p >= req && p > best && (!bgD || T[k]._dens[bin] > 2 * bgD[bin])) { best = p; bk = k; }
+      }
+      if (bk >= 0) labels[i] = bk + 1;
+    }
+  };
+  for (const R of S.rois) classify(R.x0, R.y0, R.x1, R.y1, [R.k]);
+  if (globalK.length) classify(0, 0, PW - 1, PH - 1, globalK);
+
+  // 3. manchas conexas con su forma (momentos de segundo orden)
+  const blobs = [];
+  for (let i = 0; i < N; i++) {
+    const L = labels[i]; if (L <= 0) continue;
+    let sp = 0, area = 0, sx = 0, sy = 0, sxx = 0, syy = 0, sxy = 0;
+    stackBuf[sp++] = i; labels[i] = -L;
+    while (sp) {
+      const p = stackBuf[--sp], x = p % PW, y = (p / PW) | 0;
+      area++; sx += x; sy += y; sxx += x * x; syy += y * y; sxy += x * y;
+      if (x > 0 && labels[p - 1] === L) { labels[p - 1] = -L; stackBuf[sp++] = p - 1; }
+      if (x < PW - 1 && labels[p + 1] === L) { labels[p + 1] = -L; stackBuf[sp++] = p + 1; }
+      if (y > 0 && labels[p - PW] === L) { labels[p - PW] = -L; stackBuf[sp++] = p - PW; }
+      if (y < PH - 1 && labels[p + PW] === L) { labels[p + PW] = -L; stackBuf[sp++] = p + PW; }
+    }
+    if (area < S.minArea) continue;
+    const mx = sx / area, my = sy / area;
+    const cxx = sxx / area - mx * mx + 1 / 12, cyy = syy / area - my * my + 1 / 12, cxy = sxy / area - mx * my;
+    const tr2 = cxx + cyy, disc = Math.sqrt(Math.max(0, tr2 * tr2 / 4 - (cxx * cyy - cxy * cxy)));
+    const l1 = tr2 / 2 + disc, l2 = Math.max(0.01, tr2 / 2 - disc);
+    // elipse sólida: área = π·a·b con a = 2√λ1, b = 2√λ2. Una pelota (aunque esté movida) llena su elipse;
+    // un borde de mano o un trozo de cara no.
+    const fill = area / (4 * Math.PI * Math.sqrt(l1 * l2));
+    const k = L - 1, tg = T[k];
+    if (area >= 20 && fill < 0.45) continue;
+    if (tg.areaRel && area < tg.areaRel * N * 0.08) continue;
+    if (tg.areaRel && area > tg.areaRel * N * 5) continue;   // mucho más grande que la pelota: cara, brazo, pared
+    blobs.push({ x: (mx + 0.5) / PW, y: (my + 0.5) / PH, r: Math.sqrt(area / Math.PI) / PW, ci: k, area, fill, elong: Math.sqrt(l1 / l2) });
+  }
+
+  // 4. cada ventana se queda con su mejor mancha; los colores sin seguir toman las mejores libres
+  const kept = [], used = new Set();
+  for (const R of S.rois) {
+    let best = null, bs = -1;
+    for (const b of blobs) {
+      if (b.ci !== R.k || used.has(b)) continue;
+      const bx = b.x * PW, by = b.y * PH;
+      if (bx < R.x0 || bx > R.x1 + 1 || by < R.y0 || by > R.y1 + 1) continue;
+      const sc = b.area * b.fill / (1 + 20 * Math.hypot(b.x - R.px, (b.y - R.py) * PH / PW));
+      if (sc > bs) { bs = sc; best = b; }
+    }
+    if (best) { used.add(best); kept.push(best); }
+  }
+  for (const k of globalK) {
+    const need = (T[k].count || 1) - kept.filter(b => b.ci === k).length;
+    if (need <= 0) continue;
+    blobs.filter(b => b.ci === k && !used.has(b)).sort((a, b) => b.area * b.fill - a.area * a.fill)
+      .slice(0, need).forEach(b => { used.add(b); kept.push(b); });
+  }
+  return kept;
+}
+
+/* Selección por clic: la región crece desde el píxel más saturado cerca del clic
+   mientras el tono se parezca; esa máscara es la "foto" de la pelota. */
+function selectBall(u, v) {
+  if (!lastImg) return null;
+  const d = lastImg.data, N = PW * PH;
+  const cx = Math.round(u * (PW - 1)), cy = Math.round(v * (PH - 1));
+  let seed = -1, bs = -1;
+  for (let y = cy - 3; y <= cy + 3; y++) for (let x = cx - 3; x <= cx + 3; x++) {
+    if (x < 0 || y < 0 || x >= PW || y >= PH) continue;
+    const i = y * PW + x, o = i * 4, c = hsvOf(d[o], d[o + 1], d[o + 2]);
+    if (c.v > 0.15 && c.s * Math.sqrt(c.v) > bs) { bs = c.s * Math.sqrt(c.v); seed = i; }   // el píxel más saturado y luminoso: el centro de la pelota, no el borde ni la piel
+  }
+  if (seed < 0 || bs < 0.18) return null;
+  let o = seed * 4; const c0 = { ...hsvOf(d[o], d[o + 1], d[o + 2]) };
+  const mask = new Uint8Array(N), stack = [seed], pix = [];
+  mask[seed] = 1;
+  let area = 0, sx = 0, sy = 0, hx = 0, hy = 0, ss = 0, sv = 0, minx = PW, maxx = 0, miny = PH, maxy = 0;
+  const cap = N * 0.08;
+  while (stack.length && area < cap) {
+    const p = stack.pop(), x = p % PW, y = (p / PW) | 0;
+    o = p * 4; const c = hsvOf(d[o], d[o + 1], d[o + 2]);
+    pix.push([c.h, c.s]); area++; sx += x; sy += y; ss += c.s; sv += c.v;
+    hx += Math.cos(c.h * Math.PI / 180); hy += Math.sin(c.h * Math.PI / 180);
+    if (x < minx) minx = x; if (x > maxx) maxx = x; if (y < miny) miny = y; if (y > maxy) maxy = y;
+    for (const q of [x > 0 ? p - 1 : -1, x < PW - 1 ? p + 1 : -1, y > 0 ? p - PW : -1, y < PH - 1 ? p + PW : -1]) {
+      if (q < 0 || mask[q]) continue;
+      const oq = q * 4, cq = hsvOf(d[oq], d[oq + 1], d[oq + 2]);
+      let dh = Math.abs(cq.h - c0.h); if (dh > 180) dh = 360 - dh;
+      if (dh <= S.tolH && cq.s >= c0.s * 0.6 && cq.v >= c0.v * 0.3) { mask[q] = 1; stack.push(q); }
+    }
+  }
+  if (area < 4) return null;
+  let h = Math.atan2(hy, hx) * 180 / Math.PI; if (h < 0) h += 360;
+  return { mask, pix, area, h, s: ss / area, v: sv / area, bbox: [minx, miny, maxx, maxy], capped: area >= cap };
+}
+
+// el seguimiento arranca exactamente en la pelota que se tocó, no en la mancha más grande de ese color
+function seedTrack(sel, ci) {
+  const [x0, y0, x1, y1] = sel.bbox;
+  const x = ((x0 + x1) / 2 + 0.5) / PW, y = ((y0 + y1) / 2 + 0.5) / PH;
+  tracks = tracks.filter(t => !(t.ci === ci && Math.hypot(t.x - x, t.y - y) < 0.03));
+  const nt = newTrack({ x, y, r: Math.sqrt(sel.area / Math.PI) / PW, ci }, clock); nt.seeded = true;
+  // si ya hay tantos tracks de ese color como pelotas, el nuevo reemplaza al más perdido
+  const same = tracks.filter(t => t.ci === ci);
+  if (same.length >= (S.targets[ci]?.count || 1)) tracks.splice(tracks.indexOf(same.sort((p, q) => q.miss - p.miss)[0]), 1);
+  tracks.push(nt);
+}
+const flashCv = document.createElement('canvas'), fctx = flashCv.getContext('2d');
+function flashSelection(sel) {
+  flashCv.width = PW; flashCv.height = PH;
+  const im = fctx.createImageData(PW, PH), [r, g, b] = hsv2rgb(sel.h, 1, 1);
+  for (let i = 0; i < sel.mask.length; i++) if (sel.mask[i]) { const o = i * 4; im.data[o] = r; im.data[o + 1] = g; im.data[o + 2] = b; im.data[o + 3] = 230; }
+  fctx.putImageData(im, 0, 0);
+  S.flash = performance.now() + 1600;
+}
+function makeThumb(sel) {
+  const vw = video.videoWidth, vh = video.videoHeight, k = vw / PW;
+  const [x0, y0, x1, y1] = sel.bbox, pad = 2;
+  const sx = Math.max(0, (x0 - pad) * k), sy = Math.max(0, (y0 - pad) * k * (vh / PH) / k);
+  const sw = Math.min(vw - sx, (x1 - x0 + 1 + 2 * pad) * k), sh = Math.min(vh - sy, (y1 - y0 + 1 + 2 * pad) * (vh / PH));
+  const c = document.createElement('canvas'); c.width = c.height = 44;
+  const side = Math.max(sw, sh);
+  c.getContext('2d').drawImage(video, sx + sw / 2 - side / 2, sy + sh / 2 - side / 2, side, side, 0, 0, 44, 44);
+  try { return c.toDataURL('image/jpeg', 0.8); } catch { return null; }
+}
+
+function drawMask() {
+  if (!lastImg) return;
+  const out = mctx.createImageData(PW, PH), o = out.data;
+  const cols = S.targets.map(t => hsv2rgb(t.h, 1, 1));
+  for (let i = 0; i < labels.length; i++) {
+    const L = Math.abs(labels[i]); if (!L) continue;
+    const c = cols[L - 1] || [255, 255, 255];
+    o[i * 4] = c[0]; o[i * 4 + 1] = c[1]; o[i * 4 + 2] = c[2]; o[i * 4 + 3] = 220;
+  }
+  mctx.putImageData(out, 0, 0);
+}
+
+/* ---------- pose (MediaPipe) ---------- */
+async function loadPose() {
+  if (S.landmarker) { try { S.landmarker.close(); } catch {} S.landmarker = null; }
+  setChip('chipPose', 'warn');
+  try {
+    const mp = await import(MP_URL);
+    const fileset = await mp.FilesetResolver.forVisionTasks(MP_WASM);
+    S.landmarker = await mp.PoseLandmarker.createFromOptions(fileset, {
+      baseOptions: { modelAssetPath: MP_MODEL, delegate: 'GPU' }, runningMode: 'VIDEO', numPoses: store.get('numPoses', 1)
+    });
+    setChip('chipPose', 'on'); logLine('Detector de pose listo');
+  } catch (err) {
+    setChip('chipPose', ''); logLine('Pose no disponible, se usa solo la física de las pelotas', '#ffb020');
+    console.warn(err);
+  }
+}
+const BONES = [[11,12],[11,13],[13,15],[12,14],[14,16],[11,23],[12,24],[23,24],[23,25],[25,27],[24,26],[26,28],[15,19],[16,20],[0,11],[0,12]];
+function extractHands(lm) {
+  const out = [];
+  for (const [i, side] of [[15, 'izq'], [16, 'der'], [19, 'izq'], [20, 'der']]) {
+    const p = lm[i]; if (p && (p.visibility ?? 1) > 0.4) out.push({ x: p.x, y: p.y, side });
+  }
+  return out.length ? out : null;
+}
+function drawSkeleton(c, M, color, lw) {
+  const all = S.poses && S.poses.length ? S.poses : (S.pose ? [S.pose] : []);
+  for (const lm of all) drawOneSkeleton(c, M, color, lw, lm);
+}
+function drawOneSkeleton(c, M, color, lw, lm) {
+  if (!lm) return;
+  c.save(); c.globalCompositeOperation = 'source-over'; c.strokeStyle = color; c.lineWidth = lw; c.lineCap = 'round';
+  c.beginPath();
+  for (const [a, b] of BONES) {
+    const p = lm[a], q = lm[b]; if (!p || !q || (p.visibility ?? 1) < 0.4 || (q.visibility ?? 1) < 0.4) continue;
+    c.moveTo(M.x(p.x), M.y(p.y)); c.lineTo(M.x(q.x), M.y(q.y));
+  }
+  c.stroke(); c.restore();
+}
+
+/* =========================================================
+   FÍSICA: tracking, parábolas, eventos
+   ========================================================= */
+let tracks = [], nextId = 1, clock = 0;
+const gNorm = () => S.mPerU ? 9.81 / S.mPerU : G_FALLBACK;
+function resetTracks() {
+  tracks = [];
+  Object.assign(SW, { throws: [], intervals: [], flights: [], beat: null, dwell: null, lastThrowT: -1, pattern: null, balls: null, sync: false, conf: null, counts: [] });
+}
+
+function fitQuad(samples) {
+  const n = samples.length; if (n < 4) return null;
+  let s1 = 0, s2 = 0, s3 = 0, s4 = 0, y0 = 0, y1 = 0, y2 = 0;
+  for (const { t, y } of samples) { const t2 = t * t; s1 += t; s2 += t2; s3 += t2 * t; s4 += t2 * t2; y0 += y; y1 += y * t; y2 += y * t2; }
+  const x = gauss([[s4, s3, s2], [s3, s2, s1], [s2, s1, n]], [y2, y1, y0]);
+  return x && isFinite(x[0]) ? { a: x[0], b: x[1], c: x[2] } : null;
+}
+function pushScale(m) {
+  if (!(m > 0.3 && m < 30)) return;
+  S.scaleSamples.push(m); if (S.scaleSamples.length > 15) S.scaleSamples.shift();
+  const s = [...S.scaleSamples].sort((a, b) => a - b);
+  S.mPerU = s[Math.floor(s.length / 2)];
+}
+
+function newTrack(b, t) {
+  return { id: nextId++, ci: b.ci, x: b.x, y: b.y, vx: 0, vy: 0, r: b.r, lastT: t, miss: 0, born: t, upFrames: 0,
+           trail: [{ x: b.x, y: b.y, t }], state: 'idle', flight: null, nearT: -1 };
+}
+
+function updateTracks(blobs, t, hands) {
+  const g = gNorm();
+  for (const tr of tracks) {
+    const dt = Math.max(0.001, t - tr.lastT);
+    tr.px = tr.x + tr.vx * dt;
+    tr.py = tr.y + tr.vy * dt + (tr.state === 'air' ? 0.5 * g * dt * dt : 0);
+  }
+  const pairs = [];
+  tracks.forEach((tr, i) => blobs.forEach((b, j) => {
+    if (b.ci !== tr.ci) return;
+    const dist = Math.hypot(b.x - tr.px, b.y - tr.py);
+    const gate = 0.07 + Math.hypot(tr.vx, tr.vy) * 0.06 + tr.miss * 0.02;
+    if (dist < gate) pairs.push([dist, i, j]);
+  }));
+  pairs.sort((a, b) => a[0] - b[0]);
+  const usedT = new Set(), usedB = new Set();
+  for (const [, i, j] of pairs) {
+    if (usedT.has(i) || usedB.has(j)) continue;
+    usedT.add(i); usedB.add(j); correct(tracks[i], blobs[j], t, hands);
+  }
+  tracks.forEach((tr, i) => { if (!usedT.has(i)) tr.miss++; });
+  tracks = tracks.filter(tr => { if (tr.miss > 6) { onLost(tr, t, hands); return false; } return true; });
+  // nunca más tracks que pelotas de ese color: una mancha nueva solo reemplaza a un track perdido
+  blobs.forEach((b, j) => {
+    if (usedB.has(j)) return;
+    if (b.ci >= 0) {
+      const max = S.targets[b.ci]?.count || 1, same = tracks.filter(tr => tr.ci === b.ci);
+      if (same.length >= max) {
+        const worst = same.filter(tr => tr.miss >= 2).sort((x, y) => y.miss - x.miss)[0];
+        if (!worst) return;
+        if (worst.state === 'air') onLost(worst, t, hands);
+        tracks.splice(tracks.indexOf(worst), 1);
+      }
+    }
+    tracks.push(newTrack(b, t));
+  });
+  SW.counts.push([t, tracks.filter(tr => tr.miss < 3).length]); if (SW.counts.length > 300) SW.counts.shift();
+}
+
+function correct(tr, b, t, hands) {
+  const dt = Math.max(0.001, t - tr.lastT);
+  const rvx = (b.x - tr.x) / dt, rvy = (b.y - tr.y) / dt;
+  const a = 0.55;
+  tr.vx = tr.vx * (1 - a) + rvx * a;
+  tr.vy = tr.vy * (1 - a) + rvy * a;
+  if (tr.state !== 'air') { tr.prevT = tr.lastT; tr.prevX = tr.x; tr.prevY = tr.y; }  // punto de partida de un lanzamiento
+  tr.x = b.x; tr.y = b.y; tr.r = b.r; tr.lastT = t; tr.miss = 0;
+  tr.trail.push({ x: b.x, y: b.y, t });
+  while (tr.trail.length && t - tr.trail[0].t > 2) tr.trail.shift();
+
+  let near = null, nd = 1e9;
+  if (hands) for (const h of hands) { const d = Math.hypot(h.x - b.x, h.y - b.y); if (d < nd) { nd = d; near = h; } }
+  const isNear = !!near && nd < 0.09;
+  if (isNear) tr.nearT = t;
+  stateMachine(tr, t, hands, isNear, near);
+}
+
+/* ---------- siteswap ----------
+   Definición: el número de un lanzamiento es la cantidad de beats hasta que esa pelota se vuelve a lanzar,
+   o sea n·beat = F + D (vuelo + tiempo en la mano). Impar cruza de mano, par vuelve a la misma.
+   El tiempo en la mano D no se mide pelota por pelota (con pelotas del mismo color la identidad se cruza en
+   las manos): sale del teorema del promedio. Si hay N pelotas, el promedio de los números es N, así que
+   promedio(F) + D = N·beat, contando como 2 los beats sin lanzamiento (pelota retenida).
+   Sincrónico: las dos manos lanzan a la vez cada 2 beats; los números son pares y "x" marca un cruce. */
+const SW = { throws: [], intervals: [], flights: [], beat: null, dwell: null, center: 0.5, lastThrowT: -1,
+  pattern: null, balls: null, sync: false, conf: null, counts: [] };
+const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.floor(s.length / 2)]; };
+const percentile = (a, p) => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.floor(s.length * p))]; };
+const handFromX = x => x < SW.center ? 'der' : 'izq'; // mirando a cámara, la mano derecha aparece a la izquierda de la imagen
+const unitBeat = () => SW.beat ? (SW.sync ? SW.beat / 2 : SW.beat) : null;
+const swText = r => r.value == null ? null : (r.value + (SW.sync && r.cross && r.value % 2 === 0 ? 'x' : ''));
+
+function totalBalls() {
+  const n = S.targets.reduce((a, t) => a + (t.count || 1), 0);
+  if (n) return n;
+  const recent = SW.counts.filter(c => clock - c[0] < 4);
+  return recent.length ? Math.max(...recent.map(c => c[1])) : null;   // simulador: máximo visto a la vez
+}
+
+function updateBeat() {
+  const iv = SW.intervals; if (iv.length < 3) return;
+  const b0 = Math.max(0.12, percentile(iv, 0.3));
+  // cada intervalo es un múltiplo entero del beat (los beats con 2 o 0 no tienen lanzamiento)
+  SW.beat = Math.max(0.12, median(iv.map(x => x / Math.max(1, Math.round(x / b0)))));
+}
+
+// D (tiempo en la mano) en dos pasos:
+// 1. retícula: D es del malabarista, no del patrón, así que (F + D)/beat tiene que caer cerca de un entero
+//    para todos los vuelos medidos. Eso fija D salvo un beat entero.
+// 2. teorema del promedio: entre esos candidatos, el bueno hace que el promedio de los números (contando
+//    los beats sin lanzamiento detectado) sea N. De paso dice con qué valor rellenar esos beats: 2, 1 o 0.
+function estimateD() {
+  const b = unitBeat(), N = totalBalls();
+  const all = SW.throws.filter(r => r.F != null).slice(-16);
+  if (!b) return null;
+  const recs = all.filter(r => !isShort(r.F));           // los pases cortos tienen su propio valor fijo
+  if (recs.length < 4) return SW.dwell ?? b;
+  const lat = SW.sync ? 2 * b : b;   // sincrónico: los números son pares
+  const cost = D => recs.reduce((a, r) => { const x = (r.F + D) / lat, fr = x - Math.round(x); return a + fr * fr; }, 0);
+  let D0 = 0.02, bc = Infinity;
+  for (let D = 0.02; D <= lat + 0.02; D += lat / 120) { const c = cost(D); if (c < bc) { bc = c; D0 = D; } }
+  if (!N) { SW.dwell = D0; return D0; }
+  const span = all[all.length - 1].t - all[0].t;
+  const slots = SW.sync ? 2 * (Math.round(span / (2 * b)) + 1) : Math.round(span / b) + 1;
+  const shortSum = all.filter(r => isShort(r.F)).reduce((a, r) => a + shortValue(r.cross), 0);
+  const K = all.length, G = Math.max(0, slots - K);
+  let pick = null;
+  for (let k = 0; k <= 2; k++) {
+    const D = D0 + k * lat; if (D > 2.4 * b) break;
+    const ns = recs.map(r => SW.sync ? 2 * Math.round((r.F + D) / (2 * b)) : Math.round((r.F + D) / b));
+    if (ns.some(n => n < 1 || n > 9)) continue;
+    const need = N * (K + G) - ns.reduce((a, n) => a + n, 0) - shortSum;   // lo que deben sumar los beats sin lanzamiento
+    let score, fill = 2;
+    if (G === 0) score = Math.abs(need);
+    else {
+      const avg = need / G; fill = Math.max(0, Math.min(2, Math.round(avg)));
+      score = Math.abs(need - fill * G) / G + (avg < -0.35 || avg > 2.35 ? 5 : 0) + (fill === 0 ? 0.3 : 0);
+    }
+    if (!pick || score < pick.score) pick = { D, score, fill };
+  }
+  if (pick && pick.score < 1.5) { SW.dwell = Math.max(0.02, pick.D); SW.gapFill = pick.fill; }
+  else if (SW.dwell == null) SW.dwell = D0;
+  return SW.dwell;
+}
+
+// un vuelo de menos de ~0,6 beat solo puede ser un 1 (o un 2x en sincrónico): cualquier 3 o más vuela al
+// menos un beat, porque el tiempo en la mano nunca pasa de 2 beats. Para un 1 la regla general falla: después de un pase
+// la pelota se relanza antes que el tiempo de mano típico.
+const isShort = F => { const b = unitBeat(); return b && F < 0.6 * b; };
+const shortValue = cross => SW.sync ? 2 : (cross === false ? 2 : 1);
+function valueFrom(F, cross) {
+  const b = unitBeat(); if (!b || F == null) return { n: null, raw: null };
+  if (isShort(F)) { const n = shortValue(cross); return { n, raw: n }; }
+  // con menos de 4 vuelos medidos todavía no hay tiempo en la mano confiable: mejor no mostrar un número que mostrar uno falso
+  if (SW.throws.filter(r => r.F != null).length < 4) return { n: null, raw: null };
+  const D = SW.dwell ?? estimateD() ?? b;
+  const raw = (F + D) / b;
+  let n;
+  if (SW.sync) n = Math.max(2, 2 * Math.round(raw / 2));                       // sincrónico: pares
+  else {
+    n = Math.round(raw);
+    // la paridad (cruce de manos) solo desempata cuando el tiempo es ambiguo
+    if (cross != null && (n % 2 === 1) !== cross && Math.abs(raw - n) > 0.3) n = raw >= n ? n + 1 : n - 1;
+  }
+  if (n < 1 || n > 9) return { n: null, raw };
+  return { n, raw };
+}
+
+function registerThrow(tr, t, hand) {
+  const last = SW.throws[SW.throws.length - 1];
+  const pairGap = Math.max(0.06, 0.25 * (SW.beat || 0.3));
+  const paired = !!last && last.hand !== hand && t - last.t < pairGap;
+  if (paired) last.paired = true;
+  else if (SW.lastThrowT > 0) {
+    const dt = t - SW.lastThrowT;
+    if (dt > 0.1 && dt < 1.5) { SW.intervals.push(dt); if (SW.intervals.length > 20) SW.intervals.shift(); updateBeat(); }
+  }
+  if (!paired) SW.lastThrowT = t;
+  SW.center = SW.center * 0.95 + tr.x * 0.05;
+  const rec = { id: tr.id, ci: tr.ci, t, hand, value: null, F: null, raw: null, cross: null, paired, confirmed: false, catchT: null, catchHand: null };
+  SW.throws.push(rec); if (SW.throws.length > 80) SW.throws.shift();
+  const recent = SW.throws.slice(-10);
+  SW.sync = recent.length >= 6 && recent.filter(r => r.paired).length / recent.length >= 0.6;
+  // con un color único, el relanzamiento de la misma pelota confirma el valor anterior (definición exacta)
+  const prev = tr.lastThrowRec, unique = tr.ci >= 0 && (S.targets[tr.ci]?.count || 1) === 1;
+  const b = unitBeat();
+  if (unique && prev && prev.catchT != null && b) {
+    const n = Math.round((t - prev.t) / b);
+    if (n >= 1 && n <= 9 && prev.value != null && Math.abs(n - prev.value) <= 1 && (SW.sync ? n % 2 === 0 : true)) {
+      if (n !== prev.value) { prev.value = n; updatePattern(); }
+      prev.confirmed = true;
+    }
+  }
+  tr.lastThrowRec = rec; tr.label = null;
+  return rec;
+}
+
+function recentSeq() {
+  const b = unitBeat(); if (!b) return [];
+  // un lanzamiento sin número todavía (en el aire, o cuya atrapada se perdió) es "?", no un 2:
+  // los 2 solo rellenan beats en los que no hubo ningún lanzamiento
+  let recs = SW.throws.slice();
+  while (recs.length && recs[recs.length - 1].value == null) recs.pop();
+  if (!recs.length) return [];
+  const tok = r => r.value == null ? { text: '?', sum: 0, unk: true } : null;
+  if (SW.sync) {
+    const t0 = recs[0].t, slots = new Map();
+    for (const r of recs) {
+      const k = Math.round((r.t - t0) / (2 * b));
+      if (!slots.has(k)) slots.set(k, { izq: null, der: null });
+      slots.get(k)[r.hand] = r;
+    }
+    const keys = [...slots.keys()].sort((x, y) => x - y), out = [];
+    for (let k = keys[0]; k <= keys[keys.length - 1]; k++) {
+      const sl = slots.get(k) || { izq: null, der: null };
+      if ((sl.izq && sl.izq.value == null) || (sl.der && sl.der.value == null)) { out.push({ text: '?', sum: 0, unk: true }); continue; }
+      const txt = h => sl[h] ? swText(sl[h]) : '2', val = h => sl[h] ? sl[h].value : 2;
+      out.push({ text: `(${txt('izq')},${txt('der')})`, sum: val('izq') + val('der') });
+    }
+    return out;
+  }
+  const out = [];
+  for (let i = 0; i < recs.length; i++) {
+    if (i > 0) { const gap = Math.round((recs[i].t - recs[i - 1].t) / b - 0.25), f = SW.gapFill ?? 2; for (let k = 1; k < gap && k < 4; k++) out.push({ text: String(f), sum: f }); }
+    out.push(tok(recs[i]) || { text: String(recs[i].value), sum: recs[i].value });
+  }
+  return out;
+}
+
+function updatePattern() {
+  const seq = recentSeq();
+  if (seq.length < 3) return;
+  const v = seq.slice(SW.sync ? -8 : -14);
+  const slotsPer = SW.sync ? 2 : 1;
+  for (let p = 1; p <= (SW.sync ? 3 : 6); p++) {
+    const L = Math.max(2 * p, SW.sync ? 4 : 6);   // al menos dos períodos y varios lanzamientos seguidos
+    if (v.length < L) break;
+    let ok = true;
+    for (let i = v.length - L; i < v.length; i++) if (v[i].unk || (i >= v.length - L + p && v[i].text !== v[i - p].text)) { ok = false; break; }
+    if (!ok) continue;
+    const period = v.slice(-p), sum = period.reduce((a, x) => a + x.sum, 0);
+    if (sum % (p * slotsPer)) continue;          // promedio entero: requisito de un siteswap válido
+    const texts = period.map(x => x.text);
+    let best = texts.join('');
+    for (let r = 1; r < p; r++) { const s2 = [...texts.slice(r), ...texts.slice(0, r)].join(''); if (s2 > best) best = s2; }
+    SW.patternMiss = 0;
+    if (best !== SW.pattern) {
+      SW.pattern = best; SW.balls = sum / (p * slotsPer);
+      bus.emit('pattern', { pattern: best, balls: SW.balls, sync: SW.sync });
+    }
+    return;
+  }
+  // si el patrón vigente siguiera cumpliéndose, la búsqueda lo habría encontrado: dos fallos seguidos lo borran
+  if (SW.pattern && ++SW.patternMiss >= 2) { SW.pattern = null; SW.balls = null; bus.emit('patternlost', {}); }
+}
+
+function updateConfidence() {
+  const r = SW.throws.filter(x => x.raw != null).slice(-12);
+  if (r.length < 4) { SW.conf = null; return; }
+  // qué tan cerca de un entero cae cada (F + D) / beat: 1 = exacto, 0 = justo en el medio
+  SW.conf = r.reduce((a, x) => a + Math.max(0, 1 - 2 * Math.abs(x.raw - Math.round(x.raw))), 0) / r.length;
+}
+
+function stateMachine(tr, t, hands, isNear, near) {
+  const THROW_V = 0.5; // alturas de cuadro por segundo, hacia arriba
+  if (tr.state !== 'air') {
+    const handOk = !hands || tr.ci < 0 || (t - tr.nearT < 0.35);
+    const fastPass = Math.hypot(tr.vx, tr.vy) > 0.8 && tr.vy < -0.1; // un 1 es casi horizontal
+    tr.upFrames = (tr.vy < -THROW_V || fastPass) ? (tr.upFrames || 0) + 1 : 0;
+    // la pelota tiene que existir hace un rato y subir dos cuadros seguidos: evita lanzamientos fantasma
+    const settled = tr.seeded || t - tr.born > 0.1;
+    if (tr.upFrames >= 2 && settled && handOk) {
+      const t0 = tr.prevT ?? t, y0 = tr.prevY ?? tr.y, x0 = tr.prevX ?? tr.x;
+      const hand = near && isNear ? near.side : handFromX(x0);
+      tr.state = 'air';
+      tr.flight = { t0, y0, x0, samples: [{ t: 0, y: y0 }, { t: t - t0, y: tr.y }], apexed: false, apexY: Math.min(y0, tr.y), maxDown: 0, hand };
+      tr.flight.rec = registerThrow(tr, t0, hand);
+      bus.emit('throw', { id: tr.id, ci: tr.ci, x: x0, y: y0, hand });
+    }
+    return;
+  }
+  const f = tr.flight, el = t - f.t0;
+  f.samples.push({ t: el, y: tr.y });
+  if (tr.y < f.apexY) f.apexY = tr.y;
+
+  if (!f.apexed && tr.vy > 0 && f.samples.length >= 3) {
+    f.apexed = true;
+    const rise = f.y0 - f.apexY;
+    let height = null, estimated = false;
+    if (S.mPerU) height = rise * S.mPerU;
+    else { const q = fitQuad(f.samples); if (q && q.a > 0.3) { height = rise * 9.81 / (2 * q.a); estimated = true; } }
+    // predicción a mitad de vuelo: el vuelo dura ~2 veces el ascenso
+    const pr = valueFrom(2 * el, null);
+    if (pr.n != null && f.rec) { f.rec.value = pr.n; tr.label = swText(f.rec); }
+    bus.emit('apex', { id: tr.id, ci: tr.ci, x: tr.x, y: f.apexY, height, estimated, value: tr.label });
+  }
+  // una pelota que queda quieta cerca de la altura de las manos ya está en una mano (cubre los 1)
+  if (el > 0.08 && f.samples.length >= 4 && Math.hypot(tr.vx, tr.vy) < 0.2 && tr.y > f.y0 - 0.07) {
+    if (!f.apexed) f.apexed = true;
+    finishFlight(tr, t, handFromX(tr.x)); return;
+  }
+  if (f.apexed) {
+    f.maxDown = Math.max(f.maxDown, tr.vy);
+    const caughtByHand = hands && tr.ci >= 0 && isNear && tr.vy > 0 && el > 0.15;
+    const decel = f.maxDown > 0.4 && tr.vy < f.maxDown * 0.35 && el > 0.2;
+    if (caughtByHand || decel) finishFlight(tr, t, isNear && near ? near.side : handFromX(tr.x));
+  }
+  if (tr.state === 'air' && el > 4) { cancelFlight(tr); }
+}
+
+function cancelFlight(tr) {
+  const rec = tr.flight && tr.flight.rec;
+  if (rec) { const i = SW.throws.indexOf(rec); if (i >= 0) SW.throws.splice(i, 1); }
+  tr.state = 'idle'; tr.flight = null; tr.label = null;
+}
+
+function finishFlight(tr, t, catchHand) {
+  const f = tr.flight, ft = t - f.t0;
+  const rise = f.y0 - f.apexY, dx = Math.abs(tr.x - f.x0);
+  // un "vuelo" corto que ni subió ni se desplazó es ruido de la detección, no un lanzamiento
+  if (ft < 0.1 || (rise < 0.012 && dx < 0.04)) { cancelFlight(tr); tr.lastCatchT = t; return; }
+  const q = fitQuad(f.samples);
+  if (q && q.a > 0.2 && f.samples.length >= 6) pushScale(9.81 / (2 * q.a));
+  const hFlight = 9.81 * ft * ft / 8;              // h = g·t²/8, identidad del tiro vertical
+  const hFit = S.mPerU ? rise * S.mPerU : null;
+  const rec = f.rec;
+  if (rec) {
+    rec.catchT = t; rec.catchHand = catchHand; rec.F = ft; rec.cross = rec.hand !== catchHand;
+    estimateD();
+    const { n, raw } = valueFrom(ft, SW.sync ? null : rec.cross);
+    rec.raw = raw;
+    if (!rec.confirmed && n != null) rec.value = n;
+    tr.label = swText(rec);
+    if (rec.value != null) bus.emit('siteswap', { id: tr.id, ci: tr.ci, value: rec.value, text: tr.label, hand: rec.hand, catchHand, height: hFit ?? hFlight });
+    updateConfidence();
+    updatePattern();
+  }
+  tr.lastCatchT = t;
+  bus.emit('catch', { id: tr.id, ci: tr.ci, x: tr.x, y: tr.y, flightTime: ft, height: hFit ?? hFlight, heightFlight: hFlight, hand: catchHand });
+  tr.state = 'idle'; tr.flight = null;
+}
+
+function onLost(tr, t, hands) {
+  if (tr.state !== 'air') return;
+  if (tr.flight.apexed && (tr.y > 0.75 || (tr.vy > 0.6 && tr.y > 0.6))) { bus.emit('drop', { id: tr.id, ci: tr.ci, x: tr.x, y: Math.min(tr.y, 0.97) }); cancelFlight(tr); return; }
+  if (tr.flight.apexed) finishFlight(tr, t, handFromX(tr.x));
+  else cancelFlight(tr);
+}
+
+/* ---------- simulador ---------- */
+function spawnSim(t = clock) {
+  const vy0 = -(1.1 + Math.random() * 0.5), T = 2 * (-vy0) / G_SIM;
+  S.sim.push({ t0: t, pre: 0.25, hold: 0.45, T, x0: 0.35 + Math.random() * 0.3, y0: 0.8, vx: (Math.random() - 0.5) * 0.35, vy0, g: G_SIM });
+}
+// patrón automático: un lanzamiento por beat, manos alternadas.
+// Cada pelota conserva identidad: aterriza, espera en la mano y se relanza justo n beats después.
+const SIM_BEAT = 0.27, SIM_DWELL = 1.3 * SIM_BEAT, SIM_PRE = 0.08, SIM_HANDS = { der: 0.42, izq: 0.58 };
+function spawnSimThrow(t, n, hand, cross = n % 2 === 1, beat = SIM_BEAT) {
+  const x0 = SIM_HANDS[hand];
+  if (n === 0) return;                                   // mano vacía
+  if (n === 2 && !cross) { S.sim.push({ t0: t, pre: 0, hold: 2 * beat, T: 0, x0, y0: 0.85, vx: 0, vy0: 0, g: G_SIM }); return; } // retener
+  const F = Math.max(0.12, n * beat - SIM_DWELL);
+  const x1 = SIM_HANDS[cross ? (hand === 'der' ? 'izq' : 'der') : hand];
+  const hold = Math.max(0.02, n * beat - SIM_PRE - F);
+  S.sim.push({ t0: t, pre: SIM_PRE, hold, T: F, x0, y0: 0.85, vx: (x1 - x0) / F, vy0: -G_SIM * F / 2, g: G_SIM });
+}
+function maybeAutoSpawn(t) {
+  if (!S.autoSim) return;
+  if (t < S.lastSpawn) S.lastSpawn = t;
+  const pat = S.simPattern;
+  if (pat.startsWith('(')) {
+    // sincrónico: las dos manos a la vez cada 2 beats; (izquierda, derecha)
+    const pairs = [...pat.matchAll(/\((\d)(x?),(\d)(x?)\)/g)];
+    if (!pairs.length || t - S.lastSpawn < 2 * SIM_BEAT) return;
+    S.lastSpawn = t;
+    const m = pairs[S.simBeatIdx++ % pairs.length];
+    spawnSimThrow(t, +m[1], 'izq', !!m[2]); spawnSimThrow(t, +m[3], 'der', !!m[4]);
+    return;
+  }
+  if (t - S.lastSpawn >= SIM_BEAT) {
+    S.lastSpawn = t;
+    const k = S.simBeatIdx++;
+    spawnSimThrow(t, +pat[k % pat.length], k % 2 ? 'izq' : 'der');
+  }
+}
+function simBlobs(t) {
+  const out = [];
+  S.sim = S.sim.filter(s => {
+    const el = t - s.t0; if (el < 0) return false;
+    const PRE = s.pre, HOLD = s.hold, T = s.T;
+    let x, y;
+    if (el < PRE) { x = s.x0; y = s.y0; }
+    else if (el < PRE + T) { const e = el - PRE; x = s.x0 + s.vx * e; y = s.y0 + s.vy0 * e + 0.5 * s.g * e * e; }
+    else if (el < PRE + T + HOLD) { x = s.x0 + s.vx * T; y = s.y0; }
+    else return false;
+    out.push({ x, y, r: 0.012, ci: -1, area: 20 });
+    return true;
+  });
+  return out;
+}
+
+/* =========================================================
+   VISUALES: efectos compartidos entre pantalla y proyector
+   ========================================================= */
+const FX = { particles: [], rings: [] };
+function addRing(x, y, color, o = {}) {
+  FX.rings.push({ x, y, color, t: 0, dur: o.dur || 0.7, max: o.max || 0.08, label: o.label || null, width: o.width || 3 });
+}
+function burst(x, y, color, n, speed) {
+  n = Math.round(n);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2, s = speed * (0.3 + Math.random());
+    FX.particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: 0, max: 0.5 + Math.random() * 0.6, color, size: 1.5 + Math.random() * 2 });
+  }
+}
+bus.on('throw', e => { if (S.fx.particles) burst(e.x, e.y, colorFor(e.ci), 14 * S.intensity, 0.25); });
+bus.on('apex', e => { if (S.fx.apex) addRing(e.x, e.y, colorFor(e.ci), { label: e.height != null ? (e.estimated ? '≈ ' : '') + fmtM(e.height) : null, max: 0.07, dur: 0.9 }); });
+bus.on('catch', e => { if (S.fx.apex) addRing(e.x, e.y, '#29e0ff', { max: 0.04, dur: 0.35, width: 2 }); });
+bus.on('drop', e => { addRing(e.x, e.y, '#ff2d6f', { max: 0.25, dur: 1.2, width: 6 }); burst(e.x, e.y, '#ff2d6f', 60 * S.intensity, 0.6); });
+
+function updateFX(dt) {
+  const g = S.grav * gNorm() * 0.5;
+  if (S.fx.particles) {
+    for (const tr of tracks) {
+      if (tr.state !== 'air' || tr.miss) continue;
+      let n = Math.hypot(tr.vx, tr.vy) * 1.2 * S.intensity * dt * 60;
+      const col = colorFor(tr.ci);
+      while (n > 0) {
+        if (n >= 1 || Math.random() < n) FX.particles.push({
+          x: tr.x + (Math.random() - 0.5) * tr.r * 2, y: tr.y + (Math.random() - 0.5) * tr.r * 2,
+          vx: -tr.vx * 0.15 + (Math.random() - 0.5) * 0.12, vy: -tr.vy * 0.15 + (Math.random() - 0.5) * 0.12,
+          life: 0, max: 0.6 + Math.random() * 0.7, color: col, size: 1 + Math.random() * 2.2
+        });
+        n -= 1;
+      }
+    }
+  }
+  for (const p of FX.particles) { p.life += dt; p.vy += g * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vx *= 0.995; }
+  FX.particles = FX.particles.filter(p => p.life < p.max);
+  if (FX.particles.length > 2500) FX.particles.splice(0, FX.particles.length - 2500);
+  for (const r of FX.rings) r.t += dt;
+  FX.rings = FX.rings.filter(r => r.t < r.dur);
+}
+
+function drawFX(c, M) {
+  c.save();
+  c.globalCompositeOperation = 'lighter'; c.lineCap = 'round';
+
+  if (S.fx.trails) for (const tr of tracks) {
+    const pts = tr.trail, col = colorFor(tr.ci);
+    c.strokeStyle = col;
+    for (let i = 1; i < pts.length; i++) {
+      const age = clock - pts[i].t; if (age > S.trailLen || age < 0) continue;
+      const k = 1 - age / S.trailLen;
+      c.globalAlpha = k * 0.9; c.lineWidth = (2 + 10 * k) * M.k;
+      c.beginPath(); c.moveTo(M.x(pts[i - 1].x), M.y(pts[i - 1].y)); c.lineTo(M.x(pts[i].x), M.y(pts[i].y)); c.stroke();
+    }
+    if (!tr.miss && clock - tr.lastT < 0.2) {
+      const cx = M.x(tr.x), cy = M.y(tr.y), R = Math.max(tr.r * M.w * 2.4, 12 * M.k);
+      const gr = c.createRadialGradient(cx, cy, 0, cx, cy, R);
+      gr.addColorStop(0, col); gr.addColorStop(1, 'rgba(0,0,0,0)');
+      c.globalAlpha = 0.85; c.fillStyle = gr; c.beginPath(); c.arc(cx, cy, R, 0, Math.PI * 2); c.fill();
+    }
+  }
+
+  if (S.fx.labels) {
+    c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
+    c.font = `800 ${Math.round(46 * M.k)}px ${FONT.display}`; c.textAlign = 'left'; c.textBaseline = 'alphabetic';
+    for (const tr of tracks) {
+      if (tr.label == null || tr.miss || clock - tr.lastT > 0.2) continue;
+      const cx = M.x(tr.x) + 14 * M.k, cy = M.y(tr.y) - 14 * M.k;
+      c.lineWidth = 6 * M.k; c.strokeStyle = '#000'; c.lineJoin = 'round'; c.strokeText(tr.label, cx, cy);
+      c.fillStyle = '#c6ff1a'; c.fillText(tr.label, cx, cy);
+    }
+    c.globalCompositeOperation = 'lighter';
+  }
+
+  for (const p of FX.particles) {
+    c.globalAlpha = Math.max(0, 1 - p.life / p.max); c.fillStyle = p.color;
+    c.beginPath(); c.arc(M.x(p.x), M.y(p.y), p.size * M.k * 1.4, 0, Math.PI * 2); c.fill();
+  }
+
+  for (const r of FX.rings) {
+    const k = r.t / r.dur, e = 1 - Math.pow(1 - k, 3);
+    const rad = Math.max(2, r.max * M.h * e), cx = M.x(r.x), cy = M.y(r.y);
+    c.globalAlpha = 1 - k; c.strokeStyle = r.color; c.lineWidth = r.width * M.k * 1.5;
+    c.beginPath(); c.arc(cx, cy, rad, 0, Math.PI * 2); c.stroke();
+    if (r.label) {
+      c.globalCompositeOperation = 'source-over';
+      c.fillStyle = r.color; c.font = `500 ${Math.round(15 * M.k)}px ${FONT.mono}`; c.textAlign = 'center';
+      c.fillText(r.label, cx, cy - rad - 10 * M.k);
+      c.globalCompositeOperation = 'lighter';
+    }
+  }
+  c.restore();
+}
+
+/* =========================================================
+   CAPAS: geometría entre pelotas, alturas grandes, historial
+   ========================================================= */
+// las capas usan un reloj propio que nunca retrocede (el del video vuelve a 0 cuando el clip se repite)
+const hudNow = () => performance.now() / 1000;
+const HUD = { apexPts: [], hist: [], lastByTrack: new Map() };
+window.juggleHUD = HUD;
+bus.on('apex', e => {
+  HUD.apexPts.push({ x: e.x, y: e.y, t: hudNow(), ci: e.ci });
+  if (HUD.apexPts.length > 8) HUD.apexPts.shift();
+  if (e.height == null) return;
+  HUD.lastByTrack.set(e.id, { h: e.height, ci: e.ci, x: e.x, t: hudNow(), est: e.estimated, text: e.value ?? null });
+  HUD.hist.push({ id: e.id, ci: e.ci, h: e.height, t: hudNow(), n: null, text: e.value ?? null });
+  if (HUD.hist.length > 60) HUD.hist.shift();
+});
+bus.on('siteswap', e => {
+  for (let i = HUD.hist.length - 1; i >= 0; i--) if (HUD.hist[i].id === e.id) { HUD.hist[i].n = e.value; HUD.hist[i].text = e.text; break; }
+  const lb = HUD.lastByTrack.get(e.id); if (lb) { lb.text = e.text; lb.t = hudNow(); }
+});
+
+function liveTracks() { return tracks.filter(tr => !tr.miss && clock - tr.lastT < 0.25); }
+
+function drawGeometry(c, M) {
+  const L = liveTracks(), col = '#7d5cff';
+  c.save(); c.globalCompositeOperation = 'lighter'; c.lineCap = 'round'; c.lineJoin = 'round';
+  // constelación de apex: cada apex deja un vértice que se desvanece
+  const A = HUD.apexPts.filter(a => hudNow() - a.t < 2.5);
+  for (let i = 1; i < A.length; i++) {
+    const k = 1 - (hudNow() - A[i].t) / 2.5;
+    c.globalAlpha = 0.7 * k; c.strokeStyle = col; c.lineWidth = 3 * M.k;
+    c.beginPath(); c.moveTo(M.x(A[i - 1].x), M.y(A[i - 1].y)); c.lineTo(M.x(A[i].x), M.y(A[i].y)); c.stroke();
+  }
+  for (const b of L) {
+    let best = null, bd = 1e9;
+    for (const a of A) { const d = Math.hypot(a.x - b.x, a.y - b.y); if (d < bd) { bd = d; best = a; } }
+    if (best && bd > 0.02) { c.globalAlpha = 0.45 * (1 - (hudNow() - best.t) / 2.5); c.strokeStyle = col; c.lineWidth = 2 * M.k; c.beginPath(); c.moveTo(M.x(b.x), M.y(b.y)); c.lineTo(M.x(best.x), M.y(best.y)); c.stroke(); }
+  }
+  // triángulos entre pelotas vivas
+  if (L.length >= 3) {
+    c.fillStyle = col;
+    for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) for (let k = j + 1; k < L.length; k++) {
+      c.globalAlpha = 0.06; c.beginPath();
+      c.moveTo(M.x(L[i].x), M.y(L[i].y)); c.lineTo(M.x(L[j].x), M.y(L[j].y)); c.lineTo(M.x(L[k].x), M.y(L[k].y)); c.closePath(); c.fill();
+    }
+  }
+  for (let i = 0; i < L.length; i++) for (let j = i + 1; j < L.length; j++) {
+    const d = Math.hypot(L[i].x - L[j].x, L[i].y - L[j].y);
+    c.globalAlpha = Math.max(0.25, 0.9 - d); c.strokeStyle = col; c.lineWidth = 3.5 * M.k;
+    c.beginPath(); c.moveTo(M.x(L[i].x), M.y(L[i].y)); c.lineTo(M.x(L[j].x), M.y(L[j].y)); c.stroke();
+  }
+  for (const a of A) { c.globalAlpha = 0.8 * (1 - (hudNow() - a.t) / 2.5); c.fillStyle = col; c.beginPath(); c.arc(M.x(a.x), M.y(a.y), 4 * M.k, 0, Math.PI * 2); c.fill(); }
+  c.restore();
+}
+
+function frameBox(M) { const xa = M.x(0), xb = M.x(1); return { x: Math.min(xa, xb), y: M.y(0), w: Math.abs(xb - xa), h: M.y(1) - M.y(0) }; }
+
+function drawBigHeights(c, M) {
+  const B = frameBox(M), alive = new Set(tracks.map(t => t.id));
+  const items = [...HUD.lastByTrack.entries()].filter(([id, v]) => alive.has(id) && hudNow() - v.t < 6)
+    .map(([id, v]) => ({ id, ...v, px: M.x(v.x) })).sort((a, b) => a.px - b.px);
+  const fs = Math.round(B.h * 0.085), minGap = fs * 2.2;
+  for (let i = 1; i < items.length; i++) if (items[i].px - items[i - 1].px < minGap) items[i].px = items[i - 1].px + minGap;
+  c.save(); c.textAlign = 'center'; c.textBaseline = 'top';
+  for (const it of items) {
+    const fresh = Math.max(0, 1 - (hudNow() - it.t) / 0.5);
+    c.globalAlpha = 0.55 + 0.45 * Math.max(fresh, hudNow() - it.t < 4 ? 0.6 : 0);
+    const size = fs * (1 + 0.18 * fresh), x = Math.min(B.x + B.w - fs * 1.3, Math.max(B.x + fs * 1.3, it.px)), y = B.y + B.h * 0.04;
+    c.font = `800 ${Math.round(size * 1.5)}px ${FONT.display}`; c.fillStyle = colorFor(it.ci, 62);
+    c.fillText(it.text ?? '·', x, y);
+    c.font = `500 ${Math.round(fs * 0.3)}px ${FONT.mono}`; c.fillStyle = 'rgba(255,255,255,.6)';
+    c.fillText(it.h != null ? `${it.est ? '≈ ' : ''}${fmt(it.h)} M` : '', x, y + size * 1.5 * 1.0);
+  }
+  c.restore();
+}
+
+function drawHistory(c, M) {
+  const B = frameBox(M), H = B.h * 0.2, y0 = B.y + B.h - H, pad = B.w * 0.02;
+  c.save();
+  c.globalAlpha = 1; c.fillStyle = 'rgba(0,0,0,.66)'; c.fillRect(B.x, y0, B.w, H);
+  c.strokeStyle = 'rgba(255,255,255,.18)'; c.lineWidth = 1; c.beginPath(); c.moveTo(B.x, y0 + 0.5); c.lineTo(B.x + B.w, y0 + 0.5); c.stroke();
+  const fsz = Math.max(10, Math.round(H * 0.095));
+  c.font = `500 ${fsz}px ${FONT.mono}`; c.fillStyle = 'rgba(255,255,255,.62)'; c.textAlign = 'left'; c.textBaseline = 'top';
+  c.fillText('SITESWAP / LANZAMIENTO', B.x + pad, y0 + H * 0.07);
+  const data = HUD.hist.slice(-40);
+  if (!data.length) { c.fillStyle = 'rgba(255,255,255,.4)'; c.fillText('ESPERANDO LANZAMIENTOS', B.x + pad, y0 + H * 0.45); c.restore(); return; }
+  const withN = data.filter(d => d.n != null), maxN = Math.max(5, ...withN.map(d => d.n));
+  const hs = data.filter(d => d.h != null).map(d => d.h);
+  c.textAlign = 'right';
+  c.fillText(`${SW.pattern ? 'PATRÓN ' + SW.pattern + '  ·  ' : ''}${hs.length ? 'MÁX ' + fmt(Math.max(...hs)) + ' M' : ''}`, B.x + B.w - pad, y0 + H * 0.07);
+  const top = y0 + H * 0.3, bottom = y0 + H * 0.72, slot = (B.w - 2 * pad) / 40, bw = slot * 0.66;
+  const yOf = n => bottom - (n / maxN) * (bottom - top);
+  c.strokeStyle = 'rgba(255,255,255,.12)'; c.beginPath();
+  for (let n = 1; n <= maxN; n++) { c.moveTo(B.x + pad, yOf(n) + 0.5); c.lineTo(B.x + B.w - pad, yOf(n) + 0.5); }
+  c.stroke();
+  c.textAlign = 'center';
+  data.forEach((d, i) => {
+    const x = B.x + pad + (40 - data.length + i) * slot + slot / 2;
+    const fresh = Math.max(0, 1 - (hudNow() - d.t) / 0.6);
+    c.globalAlpha = 0.8 + 0.2 * fresh; c.fillStyle = colorFor(d.ci, 56 + 16 * fresh);
+    const yy = d.n != null ? yOf(d.n) : bottom - 2; c.fillRect(x - bw / 2, yy, bw, bottom - yy);
+    if (slot > fsz * 0.9) {
+      c.globalAlpha = 1; c.fillStyle = d.n != null ? '#c6ff1a' : 'rgba(255,255,255,.35)';
+      c.font = `800 ${Math.round(fsz * 1.7)}px ${FONT.display}`; c.fillText(d.text ?? '?', x, bottom + H * 0.03);
+      if (d.h != null && slot > fsz * 2.2) { c.fillStyle = 'rgba(255,255,255,.45)'; c.font = `500 ${Math.round(fsz * 0.7)}px ${FONT.mono}`; c.fillText(fmt(d.h), x, yy - fsz * 0.95); }
+    }
+  });
+  c.restore();
+}
+
+function drawLayers(c, M) {
+  drawExtras(c, M);
+  if (S.fx.geo) drawGeometry(c, M);
+  if (S.fx.big) drawBigHeights(c, M);
+  if (S.fx.hist) drawHistory(c, M);
+}
+
+/* =========================================================
+   FONDO GENERATIVO (Three.js, se carga solo al activarlo)
+   ========================================================= */
+const THREE_URL = 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+const MAXP = 24, MAXR = 12;
+const BG = { on: false, mode: store.get('bgMode', 'grid'), body: true, preview: true, ready: false, loading: false,
+  canvas: document.createElement('canvas'), ripples: [], energy: 0, flash: 0, burst: 0, pulse: 0, hue: 0.55, hueT: 0.55, time: 0,
+  aspect: 0, builtMode: null, geoIdx: 0, nextGeo: -1, morph: 1 };
+S.bgReact = 1;
+
+const GLSL_NOISE = `
+float hash3(vec3 p){ p = fract(p * 0.3183099 + 0.1); p *= 17.0; return fract(p.x * p.y * p.z * (p.x + p.y + p.z)); }
+float noise3(vec3 x){ vec3 i = floor(x), f = fract(x); f = f * f * (3.0 - 2.0 * f);
+  return mix(mix(mix(hash3(i), hash3(i + vec3(1,0,0)), f.x), mix(hash3(i + vec3(0,1,0)), hash3(i + vec3(1,1,0)), f.x), f.y),
+             mix(mix(hash3(i + vec3(0,0,1)), hash3(i + vec3(1,0,1)), f.x), mix(hash3(i + vec3(0,1,1)), hash3(i + vec3(1,1,1)), f.x), f.y), f.z); }`;
+const GLSL_FIELD = `
+uniform vec4 uP[${MAXP}]; uniform int uNP; uniform vec4 uR[${MAXR}];
+uniform float uTime, uEnergy, uReact, uPull;
+varying float vI;
+${GLSL_NOISE}
+vec3 field(vec2 xy){
+  vec2 off = vec2(0.0); float z = 0.0;
+  for (int i = 0; i < ${MAXP}; i++) { if (i >= uNP) break;
+    vec2 d = xy - uP[i].xy; float r = uP[i].w; float g = exp(-dot(d, d) / (r * r));
+    z += uP[i].z * g; off += d * g * uP[i].z * uPull; }
+  for (int i = 0; i < ${MAXR}; i++) { vec4 R = uR[i]; if (R.w <= 0.0) continue;
+    vec2 d = xy - R.xy; float dist = length(d);
+    float w = exp(-pow((dist - R.z * 0.8) / 0.045, 2.0)) * R.w * exp(-R.z * 1.4);
+    z += w; off += d / (dist + 1e-4) * w * 0.05; }
+  return vec3(off * uReact, z * uReact);
+}`;
+const VS_GRID = `${GLSL_FIELD}
+void main(){ vec3 p = position; vec3 f = field(p.xy);
+  float n = (noise3(vec3(p.xy * 4.0, uTime * 0.5)) - 0.5) * 0.03 * uEnergy;
+  p.xy += f.xy + n; vI = f.z + abs(n) * 4.0;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(p.xy, 0.0, 1.0); }`;
+const VS_DOTS = `${GLSL_FIELD}
+void main(){ vec3 p = position; vec3 f = field(p.xy);
+  float n = (noise3(vec3(p.xy * 5.0, uTime * 0.6)) - 0.5) * 0.02 * uEnergy;
+  p.xy += f.xy + n; vI = f.z + abs(n) * 4.0;
+  gl_PointSize = 1.6 + clamp(vI, 0.0, 1.0) * 5.0;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(p.xy, 0.0, 1.0); }`;
+const VS_MESH = `
+uniform vec4 uP[${MAXP}]; uniform int uNP; uniform float uTime, uEnergy, uReact, uPulse, uBurst; varying float vI;
+${GLSL_NOISE}
+void main(){ vec3 n = normalize(normal); vec4 w0 = modelMatrix * vec4(position, 1.0); float push = 0.0;
+  for (int i = 0; i < ${MAXP}; i++) { if (i >= uNP) break; vec2 d = w0.xy - uP[i].xy; float r = uP[i].w; push += uP[i].z * exp(-dot(d, d) / (r * r)); }
+  float d = (noise3(position * 2.5 + vec3(0.0, 0.0, uTime * 0.6)) - 0.5) * (0.06 + 0.4 * uEnergy) * uReact;
+  d += push * 0.3 * uReact + uPulse * 0.15 + uBurst * (noise3(position * 7.0) - 0.3) * 0.9;
+  vI = abs(d) * 2.0 + push * 0.5;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position + n * d, 1.0); }`;
+const FS_LINE = `uniform vec3 uBase, uAcc; uniform float uFlash; varying float vI;
+void main(){ float k = clamp(vI * 2.5, 0.0, 1.0); vec3 c = mix(uBase, uAcc, k) * (0.4 + 1.5 * k) + uFlash * 0.5; gl_FragColor = vec4(c, 1.0); }`;
+const FS_DOT = `uniform vec3 uBase, uAcc; uniform float uFlash; varying float vI;
+void main(){ if (length(gl_PointCoord - 0.5) > 0.5) discard; float k = clamp(vI * 2.5, 0.0, 1.0);
+  vec3 c = mix(uBase, uAcc, k) * (0.45 + 1.5 * k) + uFlash * 0.5; gl_FragColor = vec4(c, 1.0); }`;
+
+async function bgInit() {
+  if (BG.ready || BG.loading) return;
+  BG.loading = true; logLine('Cargando fondo 3D…');
+  try {
+    const T = BG.T = await import(THREE_URL);
+    BG.renderer = new T.WebGLRenderer({ canvas: BG.canvas, antialias: true, preserveDrawingBuffer: true });
+    BG.renderer.setPixelRatio(1); BG.renderer.setClearColor(0x000000, 1);
+    const v4 = n => Array.from({ length: n }, () => new T.Vector4());
+    BG.U = { uP: { value: v4(MAXP) }, uNP: { value: 0 }, uR: { value: v4(MAXR) }, uTime: { value: 0 }, uEnergy: { value: 0 },
+      uReact: { value: 1 }, uPull: { value: 0.9 }, uPulse: { value: 0 }, uBurst: { value: 0 }, uFlash: { value: 0 },
+      uBase: { value: new T.Color(0.82, 0.86, 0.92) }, uAcc: { value: new T.Color(0.3, 0.8, 1) } };
+    BG.scene = new T.Scene();
+    BG.ortho = new T.OrthographicCamera(0, 1, 0, -1, -10, 10);
+    BG.persp = new T.PerspectiveCamera(45, 16 / 9, 0.1, 50); BG.persp.position.set(0, 0, 3);
+    BG.ready = true; logLine('Fondo 3D listo', '#c6ff1a');
+  } catch (err) {
+    console.warn(err); logLine('No se pudo cargar Three.js para el fondo 3D (¿sin conexión?)', '#ff5a5a');
+    BG.on = false; $('#fxBg').checked = false;
+  }
+  BG.loading = false;
+}
+
+const MESH_GEOS = [T => new T.SphereGeometry(0.85, 48, 32), T => new T.IcosahedronGeometry(0.85, 4),
+  T => new T.TorusKnotGeometry(0.55, 0.18, 220, 24), T => new T.TorusGeometry(0.62, 0.26, 36, 110)];
+function bgRebuild(A) {
+  const T = BG.T, U = BG.U;
+  if (BG.obj) { BG.scene.remove(BG.obj); BG.obj.geometry.dispose(); BG.obj.material.dispose(); BG.obj = null; }
+  if (BG.mode === 'grid') {
+    const pos = [], step = 0.028, seg = 0.007;
+    for (let y = 0; y <= 1.0001; y += step) for (let x = 0; x < A; x += seg) pos.push(x, -y, 0, Math.min(A, x + seg), -y, 0);
+    for (let x = 0; x <= A + 1e-4; x += step) for (let y = 0; y < 1; y += seg) pos.push(x, -y, 0, x, -Math.min(1, y + seg), 0);
+    const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+    BG.obj = new T.LineSegments(g, new T.ShaderMaterial({ uniforms: U, vertexShader: VS_GRID, fragmentShader: FS_LINE }));
+    U.uPull.value = 0.9;
+  } else if (BG.mode === 'dots') {
+    const pos = [], step = 0.022;
+    for (let y = step / 2; y < 1; y += step) for (let x = step / 2; x < A; x += step) pos.push(x, -y, 0);
+    const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(pos, 3));
+    BG.obj = new T.Points(g, new T.ShaderMaterial({ uniforms: U, vertexShader: VS_DOTS, fragmentShader: FS_DOT }));
+    U.uPull.value = -0.6; // la gravedad de las pelotas atrae los puntos
+  } else {
+    BG.obj = new T.Mesh(MESH_GEOS[BG.geoIdx](T), new T.ShaderMaterial({ uniforms: U, vertexShader: VS_MESH, fragmentShader: FS_LINE, wireframe: true }));
+  }
+  BG.scene.add(BG.obj); BG.aspect = A; BG.builtMode = BG.mode;
+}
+
+function bgRipple(u, v, amp) { BG.ripples.push({ u, v, age: 0, amp }); if (BG.ripples.length > MAXR) BG.ripples.shift(); }
+bus.on('throw', () => { BG.energy = Math.min(2, BG.energy + 0.25); });
+bus.on('apex', e => { const a = 0.12 + Math.min(0.35, (e.height ?? 0.6) * 0.18); bgRipple(e.x, e.y, a); BG.pulse = Math.min(1.5, BG.pulse + a * 2); });
+bus.on('catch', e => bgRipple(e.x, e.y, 0.06));
+bus.on('drop', e => { bgRipple(e.x, e.y, 0.6); BG.flash = 1; BG.burst = 1; });
+bus.on('pattern', e => {
+  let h = 7; for (const ch of e.pattern) h = (h * 31 + ch.charCodeAt(0)) % 9973;
+  BG.hueT = (h % 100) / 100; BG.flash = 0.6; bgRipple(0.5, 0.5, 0.45);
+  const gi = h % MESH_GEOS.length; if (gi !== BG.geoIdx) BG.nextGeo = gi;
+});
+
+function bgFrame(dt) {
+  if (!BG.on || !BG.ready) return;
+  const T = BG.T, U = BG.U, vw = video.videoWidth || 16, vh = video.videoHeight || 9;
+  const W = 1280, H = Math.round(W * vh / vw), A = W / H;
+  if (BG.canvas.width !== W || BG.canvas.height !== H) BG.renderer.setSize(W, H, false);
+  if (Math.abs(A - BG.aspect) > 1e-3 || BG.builtMode !== BG.mode) bgRebuild(A);
+  BG.time += dt;
+  BG.energy *= Math.exp(-dt * 0.8); BG.flash *= Math.exp(-dt * 3); BG.burst *= Math.exp(-dt * 1.8); BG.pulse *= Math.exp(-dt * 4);
+  const dh = ((BG.hueT - BG.hue + 1.5) % 1) - 0.5; BG.hue = (BG.hue + dh * Math.min(1, dt * 2) + 1) % 1;
+
+  const mesh = BG.mode === 'mesh', hv = 2 * Math.tan(Math.PI / 8) * 3, sc = mesh ? hv : 1;
+  const toW = (u, v) => mesh ? [(u - 0.5) * hv * A, (0.5 - v) * hv] : [u * A, -v];
+  const P = [];
+  for (const tr of liveTracks()) {
+    const [x, y] = toW(tr.x, tr.y), sp = Math.hypot(tr.vx, tr.vy);
+    P.push([x, y, (tr.state === 'air' ? 0.55 : 0.3) + Math.min(0.4, sp * 0.15), (0.05 + Math.min(0.05, sp * 0.02)) * sc]);
+  }
+  if (BG.body && S.pose) {
+    const lm = S.pose, ok = i => lm[i] && (lm[i].visibility ?? 1) > 0.5;
+    const dW = (a, b) => Math.hypot((lm[a].x - lm[b].x) * A, lm[a].y - lm[b].y) * sc;
+    if (ok(0)) { const [x, y] = toW(lm[0].x, lm[0].y); P.push([x, y, 0.45, ok(7) && ok(8) ? dW(7, 8) * 1.4 : 0.09 * sc]); }
+    if (ok(11) && ok(12)) {
+      const hips = ok(23) && ok(24), ids = hips ? [11, 12, 23, 24] : [11, 12];
+      const u = ids.reduce((a, i) => a + lm[i].x, 0) / ids.length, v = ids.reduce((a, i) => a + lm[i].y, 0) / ids.length + (hips ? 0 : 0.08);
+      const [x, y] = toW(u, v); P.push([x, y, 0.25, dW(11, 12) * 0.9]);
+    }
+    for (const i of [15, 16]) if (ok(i)) { const [x, y] = toW(lm[i].x, lm[i].y); P.push([x, y, 0.2, 0.04 * sc]); }
+  }
+  U.uNP.value = Math.min(MAXP, P.length);
+  P.slice(0, MAXP).forEach((q, i) => U.uP.value[i].set(q[0], q[1], q[2], q[3]));
+  for (const r of BG.ripples) r.age += dt;
+  BG.ripples = BG.ripples.filter(r => r.age < 3);
+  for (let i = 0; i < MAXR; i++) {
+    const r = BG.ripples[i];
+    if (r && !mesh) { const [x, y] = toW(r.u, r.v); U.uR.value[i].set(x, y, r.age, r.amp); } else U.uR.value[i].set(0, 0, 0, 0);
+  }
+  U.uTime.value = BG.time; U.uEnergy.value = BG.energy; U.uReact.value = S.bgReact;
+  U.uPulse.value = BG.pulse; U.uBurst.value = BG.burst; U.uFlash.value = BG.flash * 0.6;
+  U.uAcc.value.setHSL(BG.hue, 0.9, 0.6);
+
+  let cam = BG.ortho;
+  if (mesh) {
+    cam = BG.persp; if (cam.aspect !== A) { cam.aspect = A; cam.updateProjectionMatrix(); }
+    if (BG.nextGeo >= 0) { BG.morph -= dt * 3; if (BG.morph <= 0) { BG.geoIdx = BG.nextGeo; BG.nextGeo = -1; bgRebuild(A); } }
+    else BG.morph = Math.min(1, BG.morph + dt * 2.5);
+    BG.obj.rotation.y += dt * (0.15 + BG.energy * 0.8); BG.obj.rotation.x += dt * 0.07;
+    BG.obj.scale.setScalar(0.15 + 0.85 * Math.max(0, BG.morph));
+  } else if (BG.ortho.right !== A) { BG.ortho.right = A; BG.ortho.updateProjectionMatrix(); }
+  BG.renderer.render(BG.scene, cam);
+}
+
+/* ---------- pantalla de la MacBook ---------- */
+function drawStage() {
+  const dpr = window.devicePixelRatio || 1, r = stage.getBoundingClientRect();
+  const cw = Math.round(r.width * dpr), ch = Math.round(r.height * dpr);
+  if (stage.width !== cw || stage.height !== ch) { stage.width = cw; stage.height = ch; }
+  const vw = video.videoWidth || 16, vh = video.videoHeight || 9;
+  const sc = Math.min(r.width / vw, r.height / vh), w = vw * sc, h = vh * sc, x = (r.width - w) / 2, y = (r.height - h) / 2;
+  S.stageRect = { x, y, w, h };
+  const c = sctx;
+  c.setTransform(dpr, 0, 0, dpr, 0, 0); c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
+  c.fillStyle = '#000'; c.fillRect(0, 0, r.width, r.height);
+  const hasVideo = S.source && video.readyState >= 2;
+  const drawFrame = src => { c.save(); if (S.mirror) { c.translate(x + w, y); c.scale(-1, 1); c.drawImage(src, 0, 0, w, h); } else c.drawImage(src, x, y, w, h); c.restore(); };
+  if (hasVideo) drawFrame(video);
+  else { c.strokeStyle = '#1c2228'; c.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1); }
+  if (BG.on && BG.ready && BG.preview) { c.save(); c.globalAlpha = 0.65; c.globalCompositeOperation = 'lighter'; drawFrame(BG.canvas); c.restore(); }
+  if (hasVideo && S.showMask) { drawMask(); c.save(); c.globalAlpha = 0.85; c.imageSmoothingEnabled = false; drawFrame(maskCv); c.restore(); }
+  if (S.flash && performance.now() < S.flash) { c.save(); c.globalAlpha = 0.8 * Math.min(1, (S.flash - performance.now()) / 600); c.imageSmoothingEnabled = false; drawFrame(flashCv); c.restore(); }
+
+  const M = { x: u => x + (S.mirror ? 1 - u : u) * w, y: v => y + v * h, w, h, k: Math.max(0.5, w / 1280) * 1.2 };
+  drawSkeleton(c, M, 'rgba(255,255,255,.55)', 1.5);
+  if (S.showMask) {
+    c.setLineDash([4, 3]); c.lineWidth = 1;
+    for (const R of S.rois) {
+      const xa = M.x(R.x0 / PW), xb = M.x((R.x1 + 1) / PW);
+      c.strokeStyle = colorFor(R.k, 70); c.strokeRect(Math.min(xa, xb), M.y(R.y0 / PH), Math.abs(xb - xa), M.y((R.y1 + 1) / PH) - M.y(R.y0 / PH));
+    }
+    c.setLineDash([]);
+  }
+  c.strokeStyle = 'rgba(255,255,255,.55)'; c.lineWidth = 1;
+  for (const b of S.blobs) { c.beginPath(); c.arc(M.x(b.x), M.y(b.y), Math.max(4, b.r * w * 1.4), 0, Math.PI * 2); c.stroke(); }
+  drawFX(c, M);
+  drawLayers(c, M);
+  if (hasVideo && !S.targets.length) {
+    const msg = video.paused ? 'Haz clic en el centro de cada pelota para registrar su color' : 'Sin colores registrados: pausa con Espacio y haz clic sobre cada pelota';
+    c.font = '600 15px ui-sans-serif, system-ui'; const tw = c.measureText(msg).width;
+    c.fillStyle = 'rgba(10,12,15,.85)'; c.fillRect(x + w / 2 - tw / 2 - 16, y + 14, tw + 32, 36);
+    c.strokeStyle = '#ffb020'; c.lineWidth = 1; c.strokeRect(x + w / 2 - tw / 2 - 16 + .5, y + 14.5, tw + 32, 36);
+    c.fillStyle = '#ffb020'; c.textAlign = 'center'; c.fillText(msg, x + w / 2, y + 37);
+  } else if (hasVideo && video.paused) {
+    c.font = '600 13px ui-sans-serif, system-ui'; c.fillStyle = '#ffb020'; c.textAlign = 'left'; c.fillText('⏸ Pausado · Espacio para seguir', x + 12, y + 24);
+  }
+  c.font = '600 12px ui-sans-serif, system-ui'; c.textAlign = 'left';
+  for (const tr of tracks) {
+    if (tr.miss) continue;
+    c.fillStyle = tr.state === 'air' ? '#29e0ff' : '#ffffff';
+    c.fillText('#' + tr.id, M.x(tr.x) + 10, M.y(tr.y) + 18);
+  }
+}
+
+/* ---------- diagrama escalera (Shannon) ---------- */
+const ladder = $('#ladder'), lctx = ladder.getContext('2d');
+function drawLadder() {
+  const dpr = window.devicePixelRatio || 1, r = ladder.getBoundingClientRect();
+  if (!r.width) return;
+  const W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
+  if (ladder.width !== W || ladder.height !== H) { ladder.width = W; ladder.height = H; }
+  const c = lctx; c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const w = r.width, h = r.height, WINDOW = 4;
+  c.fillStyle = '#000'; c.fillRect(0, 0, w, h);
+  const rail = { der: w * 0.22, izq: w * 0.78 };
+  const ty = t => h - 14 - (clock - t) / WINDOW * (h - 28);
+  c.strokeStyle = '#2a323b'; c.lineWidth = 2;
+  c.beginPath(); c.moveTo(rail.der, 0); c.lineTo(rail.der, h); c.moveTo(rail.izq, 0); c.lineTo(rail.izq, h); c.stroke();
+  if (SW.beat) {
+    c.strokeStyle = '#171c22'; c.lineWidth = 1; c.beginPath();
+    const k0 = Math.ceil((clock - WINDOW) / SW.beat);
+    for (let k = k0; k * SW.beat <= clock; k++) { const y = ty(k * SW.beat); c.moveTo(rail.der, y); c.lineTo(rail.izq, y); }
+    c.stroke();
+  }
+  c.font = '600 11px ui-sans-serif, system-ui'; c.fillStyle = '#8793a0'; c.textAlign = 'center';
+  c.fillText('mano der', rail.der, 11); c.fillText('mano izq', rail.izq, 11);
+  c.lineCap = 'round';
+  for (const rec of SW.throws) {
+    if (clock - rec.t > WINDOW + 2) continue;
+    const x0 = rail[rec.hand] ?? rail.der, y0 = ty(rec.t);
+    let x1, y1;
+    if (rec.catchT != null) { x1 = rail[rec.catchHand] ?? x0; y1 = ty(rec.catchT); }
+    else { const n = rec.value || 3; const odd = n % 2 === 1; x1 = (x0 + (odd ? (x0 === rail.der ? rail.izq : rail.der) : x0)) / 2 + (odd ? 0 : (x0 === rail.der ? 18 : -18)); y1 = ty(clock); }
+    c.strokeStyle = colorFor(rec.ci, 62); c.lineWidth = 2.5;
+    c.beginPath();
+    if (x1 === x0) { c.moveTo(x0, y0); c.quadraticCurveTo(x0 + (x0 === rail.der ? 40 : -40), (y0 + y1) / 2, x1, y1); }
+    else { c.moveTo(x0, y0); c.lineTo(x1, y1); }
+    c.stroke();
+    if (rec.value != null && y0 > 18 && y0 < h) {
+      c.font = '700 13px ui-sans-serif, system-ui'; c.fillStyle = rec.confirmed ? '#c6ff1a' : '#c9d3dd';
+      c.textAlign = rec.hand === 'der' ? 'right' : 'left';
+      c.fillText(swText(rec), x0 + (rec.hand === 'der' ? -8 : 8), y0 + 4);
+    }
+  }
+}
+
+/* =========================================================
+   PROYECCIÓN: ventana aparte con corner pin (homografía)
+   ========================================================= */
+const DEFAULT_CORNERS = [[0, 0], [1, 0], [1, 1], [0, 1]];
+const P = { win: null, cv: null, ctx: null, handles: [], corners: store.get('corners', DEFAULT_CORNERS.map(p => [...p])), drag: -1 };
+const PROJ_HTML = `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Proyección · Juggle Lab</title><style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+canvas{position:absolute;left:0;top:0;transform-origin:0 0}
+.h{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border:2px solid #ffb020;border-radius:50%;background:rgba(255,176,32,.25);cursor:grab;display:none;touch-action:none;color:#ffb020;font:600 12px system-ui;text-align:center;line-height:26px;user-select:none}
+body.calib .h{display:block}
+#help{position:absolute;left:16px;bottom:16px;font:13px/1.6 system-ui;color:#bbb;background:rgba(0,0,0,.75);border:1px solid #333;padding:10px 14px;border-radius:8px;display:none}
+body.calib #help,body.showhelp #help{display:block}
+body:not(.calib):not(.showhelp){cursor:none}
+</style></head><body class="showhelp"><canvas id="c"></canvas>
+<div class="h">1</div><div class="h">2</div><div class="h">3</div><div class="h">4</div>
+<div id="help"><b style="color:#ffb020">Proyección</b><br>F pantalla completa · C calibrar esquinas · R reiniciar esquinas · H ayuda<br>En calibración: arrastra las 4 esquinas hasta que la imagen proyectada coincida con la escena real.</div>
+</body></html>`;
+
+function openProjection() {
+  if (P.win && !P.win.closed) { P.win.focus(); return; }
+  const w = window.open('', 'juggleProj', 'width=960,height=600');
+  if (!w) { logLine('El navegador bloqueó la ventana emergente. Permite ventanas emergentes para esta página.', '#ff5a5a'); return; }
+  w.document.open(); w.document.write(PROJ_HTML); w.document.close();
+  P.win = w; P.cv = w.document.getElementById('c'); P.ctx = P.cv.getContext('2d');
+  P.handles = [...w.document.querySelectorAll('.h')];
+  P.cv.width = 0; resizeProjCanvas();
+  w.addEventListener('resize', applyCornerPin);
+  w.addEventListener('keydown', onProjKey);
+  P.handles.forEach((h, i) => h.addEventListener('pointerdown', e => { P.drag = i; h.setPointerCapture(e.pointerId); e.preventDefault(); }));
+  w.document.addEventListener('pointermove', e => {
+    if (P.drag < 0) return;
+    P.corners[P.drag] = [e.clientX / w.innerWidth, e.clientY / w.innerHeight]; applyCornerPin();
+  });
+  w.document.addEventListener('pointerup', () => { if (P.drag >= 0) { P.drag = -1; store.set('corners', P.corners); } });
+  setTimeout(() => { try { w.document.body.classList.remove('showhelp'); } catch {} }, 7000);
+  syncCalib(); setChip('chipProj', 'on'); logLine('Ventana de proyección abierta. Arrástrala al proyector y pulsa F.');
+}
+
+function onProjKey(e) {
+  const w = P.win, k = e.key.toLowerCase();
+  if (k === 'f') {
+    const d = w.document, el = d.documentElement;
+    if (!(d.fullscreenElement || d.webkitFullscreenElement)) (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+    else (d.exitFullscreen || d.webkitExitFullscreen)?.call(d);
+  } else if (k === 'c') { S.fx.calib = !S.fx.calib; $('#fxCalib').checked = S.fx.calib; syncCalib(); }
+  else if (k === 'r') { P.corners = DEFAULT_CORNERS.map(p => [...p]); store.set('corners', P.corners); applyCornerPin(); }
+  else if (k === 'h') w.document.body.classList.toggle('showhelp');
+}
+function syncCalib() { if (P.win && !P.win.closed) P.win.document.body.classList.toggle('calib', S.fx.calib); }
+
+function resizeProjCanvas() {
+  const vw = video.videoWidth || 16, vh = video.videoHeight || 9;
+  const W = 1280, H = Math.round(W * vh / vw);
+  if (P.cv.width !== W || P.cv.height !== H) { P.cv.width = W; P.cv.height = H; applyCornerPin(); }
+}
+
+function gauss(A, b) {
+  A = A.map(r => [...r]); b = [...b]; const n = b.length;
+  for (let i = 0; i < n; i++) {
+    let m = i; for (let r = i + 1; r < n; r++) if (Math.abs(A[r][i]) > Math.abs(A[m][i])) m = r;
+    [A[i], A[m]] = [A[m], A[i]]; [b[i], b[m]] = [b[m], b[i]];
+    if (Math.abs(A[i][i]) < 1e-12) return null;
+    for (let r = i + 1; r < n; r++) { const f = A[r][i] / A[i][i]; for (let c = i; c < n; c++) A[r][c] -= f * A[i][c]; b[r] -= f * b[i]; }
+  }
+  const x = new Array(n);
+  for (let i = n - 1; i >= 0; i--) { let s = b[i]; for (let c = i + 1; c < n; c++) s -= A[i][c] * x[c]; x[i] = s / A[i][i]; }
+  return x;
+}
+function solveHomography(src, dst) {
+  const A = [], b = [];
+  for (let i = 0; i < 4; i++) {
+    const [x, y] = src[i], [X, Y] = dst[i];
+    A.push([x, y, 1, 0, 0, 0, -x * X, -y * X]); b.push(X);
+    A.push([0, 0, 0, x, y, 1, -x * Y, -y * Y]); b.push(Y);
+  }
+  const h = gauss(A, b); if (!h) return null; h.push(1); return h;
+}
+function applyCornerPin() {
+  if (!P.win || P.win.closed || !P.cv.width) return;
+  const W = P.cv.width, H = P.cv.height, vw = P.win.innerWidth, vh = P.win.innerHeight;
+  const dst = P.corners.map(([u, v]) => [u * vw, v * vh]);
+  const h = solveHomography([[0, 0], [W, 0], [W, H], [0, H]], dst); if (!h) return;
+  P.cv.style.width = W + 'px'; P.cv.style.height = H + 'px';
+  P.cv.style.transform = `matrix3d(${[h[0], h[3], 0, h[6], h[1], h[4], 0, h[7], 0, 0, 1, 0, h[2], h[5], 0, h[8]].join(',')})`;
+  P.handles.forEach((el, i) => { el.style.left = dst[i][0] + 'px'; el.style.top = dst[i][1] + 'px'; });
+}
+
+function drawProjection() {
+  if (!P.win) return;
+  if (P.win.closed) { P.win = null; setChip('chipProj', ''); return; }
+  resizeProjCanvas();
+  const c = P.ctx, W = P.cv.width, H = P.cv.height;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
+  c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
+  syncCalDot();
+  if (drawOverride(c, W, H)) return;
+  if (BG.on && BG.ready) { c.save(); if (S.fx.flip) { c.translate(W, 0); c.scale(-1, 1); } c.drawImage(BG.canvas, 0, 0, W, H); c.restore(); }
+  const M = { x: u => (S.fx.flip ? 1 - u : u) * W, y: v => v * H, w: W, h: H, k: W / 1280 };
+
+  if (S.fx.calib) {
+    if (S.source && video.readyState >= 2) {
+      c.save(); c.globalAlpha = 0.6; if (S.fx.flip) { c.translate(W, 0); c.scale(-1, 1); } c.drawImage(video, 0, 0, W, H); c.restore();
+    }
+    c.strokeStyle = 'rgba(255,176,32,.55)'; c.lineWidth = 1;
+    c.beginPath();
+    for (let i = 1; i < 10; i++) { c.moveTo(W * i / 10, 0); c.lineTo(W * i / 10, H); c.moveTo(0, H * i / 10); c.lineTo(W, H * i / 10); }
+    c.stroke();
+    c.strokeStyle = '#ffb020'; c.lineWidth = 6; c.strokeRect(3, 3, W - 6, H - 6);
+    c.beginPath(); c.moveTo(W / 2 - 30, H / 2); c.lineTo(W / 2 + 30, H / 2); c.moveTo(W / 2, H / 2 - 30); c.lineTo(W / 2, H / 2 + 30); c.stroke();
+  }
+  withLead(() => {
+    if (S.fx.skeleton) drawSkeleton(c, M, 'rgba(120,200,255,.85)', 4);
+    drawFX(c, M);
+    drawLayers(c, M);
+  });
+}
+
+/* =========================================================
+   FUENTES: cámara, video, grabación
+   ========================================================= */
+async function listCameras(selected) {
+  try {
+    const devs = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
+    const sel = $('#camSel'); sel.innerHTML = '';
+    devs.forEach((d, i) => { const o = document.createElement('option'); o.value = d.deviceId; o.textContent = d.label || `Cámara ${i + 1}`; sel.appendChild(o); });
+    if (!devs.length) sel.innerHTML = '<option value="">Sin cámaras</option>';
+    if (selected) sel.value = selected;
+  } catch {}
+}
+function stopSource() {
+  if (rec) rec.stop();
+  if (S.stream) { S.stream.getTracks().forEach(t => t.stop()); S.stream = null; }
+  if (S.fileUrl) { URL.revokeObjectURL(S.fileUrl); S.fileUrl = null; }
+  video.srcObject = null; video.removeAttribute('src');
+  S.source = null; resetTracks();
+}
+async function startCamera() {
+  const id = $('#camSel').value;
+  stopSource();
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { deviceId: id ? { exact: id } : undefined, width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 60 } }, audio: false
+    });
+    S.stream = stream; S.source = 'camera';
+    video.srcObject = stream; await video.play();
+    S.mirror = true; $('#tMirror').checked = true;
+    setChip('chipCam', 'on'); $('#empty').hidden = true; $('#btnCam').textContent = 'Reiniciar cámara';
+    const st = stream.getVideoTracks()[0].getSettings();
+    logLine(`Cámara activa: ${st.width}×${st.height} a ${Math.round(st.frameRate || 0)} fps`);
+    const label = stream.getVideoTracks()[0].label || '';
+    if (/virtual|obs|zoom|camo|mmhmm|teams|snap|ndi|meet/i.test(label)) logLine(`"${label}" parece una cámara virtual. Los fondos virtuales borran pelotas en movimiento: elige la cámara real.`, '#ff5a5a');
+    listCameras(st.deviceId);
+  } catch (err) {
+    setChip('chipCam', 'warn'); logLine('Error de cámara: ' + err.message, '#ff5a5a');
+  }
+}
+$('#fileIn').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  stopSource();
+  S.source = 'file'; S.fileUrl = URL.createObjectURL(f);
+  video.src = S.fileUrl; video.loop = true; video.play();
+  S.mirror = false; $('#tMirror').checked = false;
+  setChip('chipCam', 'on'); $('#empty').hidden = true;
+  logLine('Video cargado: ' + f.name);
+  e.target.value = '';
+});
+
+let rec = null, chunks = [];
+/* Grabación: la cámara tal cual (sirve para volver a analizar el clip) o un lienzo compuesto
+   con los efectos, que se dibuja en cada cuadro solo mientras se graba. */
+const recCv = document.createElement('canvas'), rctx = recCv.getContext('2d');
+let recMode = null;
+function drawRecComposite() {
+  if (!rec || recMode === 'raw') return;
+  const vw = video.videoWidth || 1280, vh = video.videoHeight || 720, sc = Math.min(1, 1280 / vw);
+  const W = Math.round(vw * sc), H = Math.round(vh * sc);
+  if (recCv.width !== W || recCv.height !== H) { recCv.width = W; recCv.height = H; }
+  const c = rctx, mirror = recMode === 'fx' ? S.mirror : S.fx.flip;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
+  c.fillStyle = '#000'; c.fillRect(0, 0, W, H);
+  const drawFrame = src => { c.save(); if (mirror) { c.translate(W, 0); c.scale(-1, 1); } c.drawImage(src, 0, 0, W, H); c.restore(); };
+  if (recMode === 'fx' && S.source && video.readyState >= 2) drawFrame(video);
+  if (BG.on && BG.ready) {
+    c.save(); if (recMode === 'fx') { c.globalAlpha = 0.65; c.globalCompositeOperation = 'lighter'; } drawFrame(BG.canvas); c.restore();
+  }
+  const M = { x: u => (mirror ? 1 - u : u) * W, y: v => v * H, w: W, h: H, k: W / 1280 };
+  if (S.fx.skeleton || recMode === 'fx') drawSkeleton(c, M, recMode === 'fx' ? 'rgba(255,255,255,.55)' : 'rgba(120,200,255,.85)', recMode === 'fx' ? 2 : 4);
+  drawFX(c, M);
+  drawLayers(c, M);
+}
+
+function toggleRec() {
+  if (rec) { rec.stop(); return; }
+  const mode = $('#recMode').value;
+  let stream;
+  if (mode === 'raw') {
+    if (!S.stream) { logLine('Para grabar la cámara sin efectos, inicia la cámara. Con un video cargado o el simulador, elige una opción con efectos.', '#ffb020'); return; }
+    stream = S.stream;
+  } else {
+    if (!S.source && !S.autoSim && !S.sim.length) logLine('Grabando solo efectos: sin cámara ni simulador el clip va a salir negro.', '#ffb020');
+    recMode = mode; rec = {}; drawRecComposite(); rec = null; // primer cuadro antes de capturar
+    stream = recCv.captureStream(30);
+  }
+  const types = ['video/mp4;codecs=avc1', 'video/mp4', 'video/webm;codecs=vp9', 'video/webm'];
+  const mt = types.find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || '';
+  try { rec = new MediaRecorder(stream, mt ? { mimeType: mt, videoBitsPerSecond: 8e6 } : undefined); }
+  catch (err) { logLine('No se pudo grabar: ' + err.message, '#ff5a5a'); rec = null; recMode = null; return; }
+  recMode = mode;
+  chunks = [];
+  rec.ondataavailable = ev => { if (ev.data.size) chunks.push(ev.data); };
+  rec.onstop = () => {
+    const type = rec.mimeType || 'video/webm', blob = new Blob(chunks, { type });
+    const suffix = { raw: '', fx: '-efectos', proj: '-proyeccion' }[recMode] ?? '';
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `malabares-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}${suffix}.${type.includes('mp4') ? 'mp4' : 'webm'}`;
+    a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    if (stream !== S.stream) stream.getTracks().forEach(t => t.stop());
+    logLine(recMode === 'raw' ? 'Clip guardado. Úsalo luego con "Cargar video" para probar sin malabarear.' : 'Clip con efectos guardado.');
+    rec = null; recMode = null; $('#btnRec').classList.remove('active'); $('#btnRec').textContent = '● Grabar clip'; $('#recMode').disabled = false;
+  };
+  rec.start(); $('#btnRec').classList.add('active'); $('#btnRec').textContent = '■ Detener'; $('#recMode').disabled = true;
+}
+
+/* =========================================================
+   UI
+   ========================================================= */
+function renderColors() {
+  const box = $('#colors'); box.innerHTML = '';
+  if (!S.targets.length) { box.innerHTML = '<p class="note">Sin pelotas registradas todavía.</p>'; return; }
+  S.targets.forEach((t, i) => {
+    const [r, g, b] = hsv2rgb(t.h, t.s, t.v);
+    const el = document.createElement('div'); el.className = 'color';
+    const n = t.count || 1;
+    const sw = t.thumb ? `<img class="sw" src="${t.thumb}" alt="" style="object-fit:cover;width:26px;height:26px">` : `<div class="sw" style="background:rgb(${r},${g},${b})"></div>`;
+    el.innerHTML = `${sw}<span>${n} pelota${n > 1 ? 's' : ''} · tono ${Math.round(t.h)}°</span><button title="Una menos">−</button><button title="Una más">+</button><button title="Quitar">✕</button>`;
+    const [bm, bp, bx] = el.querySelectorAll('button');
+    bm.onclick = () => { t.count = Math.max(1, n - 1); store.set('targets', S.targets); renderColors(); };
+    bp.onclick = () => { t.count = Math.min(9, n + 1); store.set('targets', S.targets); renderColors(); };
+    bx.onclick = () => { S.targets.splice(i, 1); store.set('targets', S.targets); resetTracks(); renderColors(); };
+    box.appendChild(el);
+  });
+}
+stage.addEventListener('click', e => {
+  if (!S.source || video.readyState < 2) { logLine('Primero inicia la cámara o carga un video.', '#ffb020'); return; }
+  const R = S.stageRect, rr = stage.getBoundingClientRect();
+  let u = (e.clientX - rr.left - R.x) / R.w, v = (e.clientY - rr.top - R.y) / R.h;
+  if (u < 0 || u > 1 || v < 0 || v > 1) return;
+  if (S.mirror) u = 1 - u;
+  const sel = selectBall(u, v);
+  if (!sel) { logLine('Ese punto tiene poco color. Pausa el cuadro (Espacio) y haz clic en el centro de la pelota.', '#ffb020'); return; }
+  flashSelection(sel);
+  learnBackground(sel.mask);
+  if (sel.capped) logLine('La máscara se desbordó hacia el fondo. Baja la "tolerancia al seleccionar" y vuelve a hacer clic.', '#ffb020');
+  const hist = buildHist(sel.pix);
+  // recortar del modelo los colores que son típicos de la escena (piel, ropa): si la máscara tocó la mano, no se aprende la mano
+  if (S.bgHist) { const dn = densOf(hist); for (let i = 0; i < NB; i++) if (S.bgHist[i] * 2 >= dn[i]) hist[i] = 0; }
+  const same = S.targets.find(t => bhatta(t.hist, hist) > 0.6);
+  if (same) {
+    same.count = Math.min(9, (same.count || 1) + 1);
+    same.hist = same.hist.map((x, i) => Math.max(x, hist[i])); same._dens = null;
+    store.set('targets', S.targets); renderColors();
+    seedTrack(sel, S.targets.indexOf(same));
+    logLine(`Mismo color que una pelota ya registrada: ahora son ${same.count} de ese color`, `hsl(${Math.round(sel.h)} 100% 60%)`);
+    return;
+  }
+  S.targets.push({ h: sel.h, s: sel.s, v: sel.v, hist, areaRel: sel.area / (PW * PH), count: 1, thumb: makeThumb(sel) });
+  store.set('targets', S.targets); renderColors();
+  seedTrack(sel, S.targets.length - 1);
+  logLine(`Pelota registrada: máscara de ${sel.area} px, tono ${Math.round(sel.h)}°`, `hsl(${Math.round(sel.h)} 100% 60%)`);
+});
+
+/* ---------- congelar cuadro para registrar colores con calma ---------- */
+function toggleFreeze() {
+  if (!S.source) return;
+  if (video.paused) { video.play(); $('#btnFreeze').textContent = 'Pausar cuadro'; logLine('Cuadro reanudado'); }
+  else { video.pause(); $('#btnFreeze').textContent = 'Reanudar'; logLine('Cuadro pausado: haz clic en el centro de cada pelota'); }
+}
+
+function bindRange(id, oid, key, show = v => v) {
+  const el = $(id), o = $(oid);
+  const upd = () => { S[key] = parseFloat(el.value); o.textContent = show(S[key]); };
+  el.addEventListener('input', upd); upd();
+}
+bindRange('#sTol', '#oTol', 'tolH', v => v + '°');
+bindRange('#sSat', '#oSat', 'req', v => fmt(v));
+bindRange('#sArea', '#oArea', 'minArea');
+bindRange('#sGrav', '#oGrav', 'grav', v => fmt(v, 1));
+bindRange('#sTrail', '#oTrail', 'trailLen', v => fmt(v));
+bindRange('#sInt', '#oInt', 'intensity', v => fmt(v, 1));
+for (const [id, key] of [['#fxTrails', 'trails'], ['#fxApex', 'apex'], ['#fxParticles', 'particles'], ['#fxSkeleton', 'skeleton'], ['#fxFlip', 'flip'], ['#fxCalib', 'calib'], ['#fxLabels', 'labels'], ['#fxGeo', 'geo'], ['#fxBig', 'big'], ['#fxHist', 'hist']]) {
+  $(id).addEventListener('change', e => { S.fx[key] = e.target.checked; if (key === 'calib') syncCalib(); });
+}
+$('#tMirror').addEventListener('change', e => S.mirror = e.target.checked);
+$('#tMask').addEventListener('change', e => S.showMask = e.target.checked);
+$('#tRoi').addEventListener('change', e => { S.roiOn = e.target.checked; });
+$('#fxBg').addEventListener('change', e => { BG.on = e.target.checked; if (BG.on) bgInit(); });
+$('#bgMode').value = BG.mode;
+$('#bgMode').addEventListener('change', e => { BG.mode = e.target.value; store.set('bgMode', BG.mode); });
+$('#bgBody').addEventListener('change', e => { BG.body = e.target.checked; });
+$('#bgPreview').addEventListener('change', e => { BG.preview = e.target.checked; });
+bindRange('#sReact', '#oReact', 'bgReact', v => fmt(v, 1));
+$('#tAuto').addEventListener('change', e => { S.autoSim = e.target.checked; S.simBeatIdx = 0; if (S.autoSim) $('#empty').hidden = true; });
+$('#simPat').addEventListener('change', e => { S.simPattern = e.target.value; S.simBeatIdx = 0; });
+bus.on('pattern', e => {
+  logLine(`Patrón ${e.pattern} · ${e.balls} pelota${e.balls === 1 ? '' : 's'}`, '#c6ff1a');
+  if (S.fx.apex) { addRing(0.5, 0.45, '#c6ff1a', { max: 0.45, dur: 1.4, width: 5, label: e.pattern }); }
+});
+$('#btnCam').addEventListener('click', startCamera);
+$('#btnRec').addEventListener('click', toggleRec);
+$('#btnFreeze').addEventListener('click', toggleFreeze);
+$('#btnClearColors').addEventListener('click', () => { S.targets = []; S.bgHist = null; store.set('bgHist', null); store.set('targets', S.targets); resetTracks(); renderColors(); logLine('Colores borrados'); });
+$('#btnProj').addEventListener('click', openProjection);
+$('#btnSim').addEventListener('click', () => ($('#empty').hidden = true, spawnSim(S.source === 'file' ? video.currentTime : performance.now() / 1000)));
+window.addEventListener('keydown', e => {
+  if (e.target.matches('input, select')) return;
+  const k = e.key.toLowerCase();
+  if (e.code === 'Space') { e.preventDefault(); toggleFreeze(); return; }
+  if (k === 's') spawnSim(S.source === 'file' ? video.currentTime : performance.now() / 1000);
+  if (k === 'p') openProjection();
+});
+window.addEventListener('beforeunload', () => { if (P.win && !P.win.closed) P.win.close(); });
+
+function updateStats() {
+  $('#vFps').textContent = S.procFps ? Math.round(S.procFps) : '-';
+  const air = tracks.filter(t => t.state === 'air').length;
+  $('#vBalls').textContent = `${tracks.length} / ${air}`;
+  $('#vHeight').textContent = fmtM(S.lastHeight);
+  const now = performance.now(); S.throwTimes = S.throwTimes.filter(x => now - x < 10000);
+  $('#vRate').textContent = Math.round(S.throwTimes.length * 6);
+  $('#vPattern').textContent = SW.pattern ? `${SW.pattern} · ${SW.balls}p` : '-';
+  $('#vBeat').textContent = SW.beat ? `${fmt(unitBeat())} s${SW.sync ? ' · sinc.' : ''}` : '-';
+  $('#vConf').textContent = SW.conf == null ? '-' : `${Math.round(SW.conf * 100)}%`;
+  $('#vConf').className = SW.conf == null ? '' : SW.conf > 0.75 ? 'ok' : SW.conf < 0.5 ? 'bad' : '';
+  $('#vDwell').textContent = SW.dwell == null ? '-' : `${fmt(SW.dwell)} s`;
+  if (S.mPerU) {
+    const vh = video.videoHeight;
+    $('#vScale').textContent = `cuadro ≈ ${fmt(S.mPerU)} m de alto` + (vh ? ` · 1 m ≈ ${Math.round(vh / S.mPerU)} px` : '');
+  }
+}
+
+/* =========================================================
+   LOOP PRINCIPAL
+   ========================================================= */
+const hasVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+let newFrame = false;
+if (hasVFC) { const cb = () => { newFrame = true; video.requestVideoFrameCallback(cb); }; video.requestVideoFrameCallback(cb); }
+
+let lastVT = -1, lastRAF = performance.now(), procCount = 0, procT0 = performance.now();
+function frame(now) {
+  requestAnimationFrame(frame);
+  const dt = Math.min(0.1, (now - lastRAF) / 1000); lastRAF = now;
+  const hasVideo = S.source && video.readyState >= 2 && video.videoWidth > 0;
+  let processed = false;
+
+  if (hasVideo) {
+    const vt = video.currentTime;
+    const fresh = hasVFC ? newFrame : (S.source === 'camera' || vt !== lastVT);
+    if (fresh) {
+      newFrame = false;
+      if (S.source === 'file' && vt < lastVT - 0.05) { resetTracks(); S.sim = []; }
+      lastVT = vt;
+      const t = S.source === 'file' ? vt : now / 1000; clock = t;
+      ensureProcSize();
+      pctx.drawImage(video, 0, 0, PW, PH);
+      let blobs = detect(t);
+      latencyOnFrame(now);
+      if (S.landmarker) { try { const res = S.landmarker.detectForVideo(video, now); S.poses = res.landmarks || []; S.pose = S.poses[0] || null; } catch {} }
+      maybeAutoSpawn(t);
+      blobs = blobs.concat(simBlobs(t));
+      S.blobs = blobs;
+      const hands = (S.poses || []).flatMap(lm => extractHands(lm) || []);
+      updateTracks(blobs, t, hands.length ? hands : null);
+      processed = true;
+    }
+  } else if (S.sim.length || S.autoSim || tracks.length) {
+    const t = now / 1000; clock = t; maybeAutoSpawn(t);
+    const blobs = simBlobs(t); S.blobs = blobs;
+    updateTracks(blobs, t, null); processed = true;
+  } else clock = now / 1000;
+
+  if (processed) procCount++;
+  if (now - procT0 > 500) { S.procFps = procCount * 1000 / (now - procT0); procCount = 0; procT0 = now; updateStats(); }
+  updateFX(dt);
+  bgFrame(dt);
+  extrasTick(dt, now);
+  drawStage();
+  drawLadder();
+  drawProjection();
+  drawRecComposite();
+}
+
+/* =========================================================
+   FUNCIONES EXTRA (cada una con su interruptor en el panel)
+   ========================================================= */
+const FEAT = store.get('features', {});
+const on = n => !!FEAT[n];
+const XT = { override: null };   // la proyección puede quedar tomada por la medición de latencia o la calibración
+
+/* ---------- Shannon: (F + D)·H = (V + D)·N ---------- */
+const SH = { F: [], D: [], V: [], lastThrow: {}, lastCatch: {}, catchById: {} };
+const push20 = (a, v) => { a.push(v); if (a.length > 20) a.shift(); };
+bus.on('throw', e => {
+  const t = e.time / 1000;
+  SH.lastThrow[e.hand] = t;
+  if (SH.catchById[e.id] != null) { const d = t - SH.catchById[e.id]; if (d > 0.02 && d < 2) push20(SH.D, d); }
+});
+bus.on('catch', e => {
+  const t = e.time / 1000;
+  if (e.flightTime > 0.05 && e.flightTime < 3) push20(SH.F, e.flightTime);
+  SH.catchById[e.id] = t;
+  const lt = SH.lastThrow[e.hand]; if (lt != null) { const v = t - lt; if (v > 0.02 && v < 2) push20(SH.V, v); }
+});
+// el teorema vale con promedios para cualquier patrón: en un período, N·T = Σ(F + D) y H·T = Σ(D + V),
+// y las dos sumas tienen la misma cantidad de lanzamientos. Se recorta el mínimo y el máximo (ruido).
+const trimMean = a => { if (a.length < 3) return a.length ? meanOf(a) : null; const s = [...a].sort((x, y) => x - y).slice(1, -1); return meanOf(s); };
+function shannonValues() {
+  const F = trimMean(SH.F), V = trimMean(SH.V), N = SW.balls || totalBalls(), H = 2;
+  // D directo (misma pelota) si hay muestras; si no, el del teorema del promedio
+  const D = SH.D.length >= 4 ? trimMean(SH.D) : SW.dwell;
+  if (F == null || D == null || V == null || !N) return null;
+  return { F, D, V, N, H, L: (F + D) * H, R: (V + D) * N };
+}
+function updateShannonPanel() {
+  const v = shannonValues();
+  const set = (id, t) => { const el = $(id); if (el) el.textContent = t; };
+  if (!v) { set('#shEq', '(F + D) · H = (V + D) · N'); ['#shF', '#shD', '#shV'].forEach(i => set(i, '-')); set('#shN', '-'); return; }
+  const err = Math.abs(v.L - v.R) / Math.max(v.L, v.R) * 100;
+  $('#shEq').innerHTML = `(${fmt(v.F)} + ${fmt(v.D)}) · ${v.H} = <b>${fmt(v.L)}</b> &nbsp;·&nbsp; (${fmt(v.V)} + ${fmt(v.D)}) · ${v.N} = <b>${fmt(v.R)}</b><br><small>${err < 8 ? 'coinciden' : 'difieren'} en ${fmt(err, 0)}%</small>`;
+  set('#shF', fmt(v.F) + ' s'); set('#shD', fmt(v.D) + ' s'); set('#shV', fmt(v.V) + ' s'); set('#shN', `${v.N} · ${v.H}`);
+}
+function drawShannon(c, M) {
+  const v = shannonValues(), B = frameBox(M);
+  const x = B.x + B.w * 0.03, y = B.y + B.h * 0.2, fs = Math.round(B.h * 0.045);
+  c.save(); c.textAlign = 'left'; c.textBaseline = 'top'; c.globalCompositeOperation = 'source-over';
+  c.font = `500 ${Math.round(fs * 0.5)}px ${FONT.mono}`; c.fillStyle = 'rgba(255,255,255,.6)'; c.fillText('TEOREMA DE SHANNON', x, y);
+  c.font = `800 ${fs}px ${FONT.display}`; c.fillStyle = '#c6ff1a';
+  c.fillText('(F + D) · H = (V + D) · N', x, y + fs * 0.75);
+  if (v) {
+    c.font = `600 ${Math.round(fs * 0.62)}px ${FONT.mono}`; c.fillStyle = '#fff';
+    c.fillText(`(${fmt(v.F)} + ${fmt(v.D)}) · ${v.H} = ${fmt(v.L)}`, x, y + fs * 1.95);
+    c.fillText(`(${fmt(v.V)} + ${fmt(v.D)}) · ${v.N} = ${fmt(v.R)}`, x, y + fs * 2.75);
+  }
+  c.restore();
+}
+
+/* ---------- grafo de estados del siteswap (asincrónico) ---------- */
+function asyncValues() { return SW.throws.filter(r => r.value != null).map(r => r.value).slice(-24); }
+function graphModel() {
+  const N = SW.balls || totalBalls(); if (!N || N > 6) return null;
+  const vals = asyncValues(), Hm = Math.min(7, Math.max(N + 2, ...vals.filter(v => v <= 7)));
+  const states = [];
+  for (let m = 0; m < 1 << Hm; m++) { let c = 0; for (let k = 0; k < Hm; k++) if (m >> k & 1) c++; if (c === N) states.push(m); }
+  const ground = (1 << N) - 1;
+  const step = (s, t) => {
+    if (!(s & 1)) return t === 0 ? s >> 1 : null;
+    if (t < 1 || t > Hm) return null;
+    const n = s >> 1; if (n >> (t - 1) & 1) return null;
+    return n | 1 << (t - 1);
+  };
+  // estado actual: recorrer los últimos lanzamientos desde el estado base (rellenando beats vacíos con 2)
+  let cur = ground, lastEdge = null;
+  if (!SW.sync) for (const tok of recentSeq().slice(-16)) {
+    const t = +tok.text; if (!Number.isFinite(t)) { cur = ground; continue; }
+    const nx = step(cur, t); if (nx == null) { cur = ground; lastEdge = null; continue; }
+    lastEdge = [cur, nx, t]; cur = nx;
+  }
+  return { N, Hm, states, ground, step, cur, lastEdge };
+}
+function drawGraph(c, box, small) {
+  const G = graphModel(); const { x, y, w, h } = box;
+  c.save(); c.textAlign = 'center'; c.textBaseline = 'middle';
+  if (!G) { c.font = `500 12px ${FONT.mono}`; c.fillStyle = '#8b8f94'; c.fillText(SW.sync ? 'SOLO PATRONES ASINCRÓNICOS' : 'ESPERANDO PELOTAS', x + w / 2, y + h / 2); c.restore(); return; }
+  const cx = x + w / 2, cy = y + h / 2, R = Math.min(w, h) * 0.38, n = G.states.length;
+  const gi = G.states.indexOf(G.ground);
+  const pos = m => { const i = (G.states.indexOf(m) - gi + n) % n, a = -Math.PI / 2 + i / n * Math.PI * 2; return [cx + R * Math.cos(a), cy + R * Math.sin(a)]; };
+  const pattern = SW.pattern && !SW.sync ? [...SW.pattern].map(Number) : [];
+  for (const s0 of G.states) for (let t = 0; t <= G.Hm; t++) {
+    const s1 = G.step(s0, t); if (s1 == null) continue;
+    const [x0, y0] = pos(s0), [x1, y1] = pos(s1);
+    const isLast = G.lastEdge && G.lastEdge[0] === s0 && G.lastEdge[1] === s1;
+    c.strokeStyle = isLast ? '#ff2d6f' : 'rgba(255,255,255,.14)'; c.lineWidth = isLast ? 3 : 1;
+    c.beginPath();
+    if (s0 === s1) c.arc(x0 + (x0 - cx) * 0.12, y0 + (y0 - cy) * 0.12, 9, 0, Math.PI * 2);
+    else { const mx = (x0 + x1) / 2 + (cy - (y0 + y1) / 2) * 0.15, my = (y0 + y1) / 2 + ((x0 + x1) / 2 - cx) * 0.15; c.moveTo(x0, y0); c.quadraticCurveTo(mx, my, x1, y1); }
+    c.stroke();
+  }
+  const fs = Math.max(7, Math.min(small ? 9 : Math.round(R * 0.11), Math.floor(R * Math.PI / n * 0.85 / (0.62 * G.Hm))));
+  for (const m of G.states) {
+    const [px, py] = pos(m), cur = m === G.cur;
+    c.fillStyle = cur ? '#ff2d6f' : m === G.ground ? '#2b2f33' : '#16181b';
+    c.strokeStyle = cur ? '#ff2d6f' : 'rgba(255,255,255,.35)'; c.lineWidth = 1.5;
+    c.beginPath(); c.arc(px, py, Math.min(fs * 0.36 * G.Hm + 4, R * Math.PI / n * 0.9), 0, Math.PI * 2); c.fill(); c.stroke();
+    let lbl = ''; for (let k = 0; k < G.Hm; k++) lbl += (m >> k & 1) ? '1' : '0';
+    c.font = `600 ${fs}px ${FONT.mono}`; c.fillStyle = cur ? '#111' : '#e9eaec'; c.fillText(lbl, px, py);
+  }
+  c.font = `500 ${fs}px ${FONT.mono}`; c.fillStyle = '#8b8f94';
+  c.fillText(`${G.N} PELOTAS · ALTURA MÁX ${G.Hm}${pattern.length ? ' · ' + SW.pattern : ''}`, cx, y + h - fs);
+  c.restore();
+}
+
+/* ---------- trayectoria fantasma y cronofotografía ---------- */
+function drawGhost(c, M) {
+  const g = gNorm();
+  c.save(); c.setLineDash([6 * M.k, 6 * M.k]); c.lineWidth = 2 * M.k; c.globalCompositeOperation = 'lighter';
+  for (const tr of liveTracks()) {
+    if (tr.state !== 'air' || !tr.flight) continue;
+    const y0 = tr.flight.y0, a = 0.5 * g, bq = tr.vy, cq = tr.y - y0;
+    const disc = bq * bq - 4 * a * cq; if (disc < 0) continue;
+    const T = (-bq + Math.sqrt(disc)) / (2 * a); if (!(T > 0) || T > 3) continue;
+    c.strokeStyle = colorFor(tr.ci, 70); c.globalAlpha = 0.85; c.beginPath();
+    for (let i = 0; i <= 24; i++) { const s = T * i / 24, x = tr.x + tr.vx * s, y = tr.y + tr.vy * s + a * s * s; i ? c.lineTo(M.x(x), M.y(y)) : c.moveTo(M.x(x), M.y(y)); }
+    c.stroke();
+    const lx = M.x(tr.x + tr.vx * T), ly = M.y(y0), r = 12 * M.k;
+    c.setLineDash([]); c.beginPath(); c.moveTo(lx - r, ly - r); c.lineTo(lx + r, ly + r); c.moveTo(lx + r, ly - r); c.lineTo(lx - r, ly + r); c.stroke();
+    c.font = `500 ${Math.round(13 * M.k)}px ${FONT.mono}`; c.fillStyle = '#fff'; c.textAlign = 'center';
+    c.fillText(`${Math.round(T * 1000)} MS`, lx, ly + 26 * M.k); c.setLineDash([6 * M.k, 6 * M.k]);
+  }
+  c.restore();
+}
+function drawChrono(c, M) {
+  const step = +$('#sChStep').value, len = +$('#sChLen').value;
+  c.save(); c.globalCompositeOperation = 'lighter';
+  for (const tr of tracks) {
+    const pts = tr.trail; if (pts.length < 2) continue;
+    let next = clock - len, j = 0;
+    for (let t = Math.ceil((clock - len) / step) * step; t <= clock; t += step) {
+      while (j < pts.length - 1 && pts[j + 1].t < t) j++;
+      const p0 = pts[j], p1 = pts[Math.min(pts.length - 1, j + 1)]; if (!p0 || p0.t > t + step) continue;
+      const k = p1.t > p0.t ? Math.min(1, Math.max(0, (t - p0.t) / (p1.t - p0.t))) : 0;
+      const x = p0.x + (p1.x - p0.x) * k, y = p0.y + (p1.y - p0.y) * k, age = (clock - t) / len;
+      c.globalAlpha = 0.65 * (1 - age); c.strokeStyle = colorFor(tr.ci, 66); c.lineWidth = 2 * M.k;
+      c.beginPath(); c.arc(M.x(x), M.y(y), Math.max(5 * M.k, tr.r * M.w * 1.05), 0, Math.PI * 2); c.stroke();
+    }
+  }
+  c.restore();
+}
+
+/* ---------- espacio de fases: altura contra velocidad vertical ---------- */
+function drawPhase(c, box) {
+  const { x, y, w, h } = box, mPer = S.mPerU || 2.2, g = 9.81;
+  c.save(); c.strokeStyle = 'rgba(255,255,255,.18)'; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(x + w / 2, y + 6); c.lineTo(x + w / 2, y + h - 6); c.moveTo(x + 6, y + h - 18); c.lineTo(x + w - 6, y + h - 18); c.stroke();
+  c.font = `500 10px ${FONT.mono}`; c.fillStyle = '#8b8f94'; c.textAlign = 'left'; c.fillText('ALTURA', x + w / 2 + 4, y + 12);
+  c.textAlign = 'right'; c.fillText('VELOCIDAD ↑', x + w - 8, y + h - 6);
+  const vmax = 6, hmax = 2.5;
+  const X = v => x + w / 2 + v / vmax * (w / 2 - 10), Y = hh => y + h - 18 - hh / hmax * (h - 30);
+  // parábolas teóricas de energía constante: v² = v0² − 2·g·h
+  c.setLineDash([3, 4]); c.strokeStyle = 'rgba(255,255,255,.12)';
+  for (const v0 of [2, 3, 4, 5, 6]) { c.beginPath(); for (let i = -40; i <= 40; i++) { const v = v0 * i / 40, hh = (v0 * v0 - v * v) / (2 * g); i === -40 ? c.moveTo(X(v), Y(hh)) : c.lineTo(X(v), Y(hh)); } c.stroke(); }
+  c.setLineDash([]);
+  for (const tr of tracks) {
+    const pts = tr.trail.filter(p => clock - p.t < 1.6); if (pts.length < 3) continue;
+    const base = Math.max(...pts.map(p => p.y));
+    c.strokeStyle = colorFor(tr.ci, 62); c.lineWidth = 2; c.beginPath();
+    for (let i = 1; i < pts.length; i++) {
+      const dt = pts[i].t - pts[i - 1].t; if (dt <= 0) continue;
+      const v = -(pts[i].y - pts[i - 1].y) / dt * mPer, hh = (base - pts[i].y) * mPer;
+      i === 1 ? c.moveTo(X(v), Y(hh)) : c.lineTo(X(v), Y(hh));
+    }
+    c.stroke();
+  }
+  c.restore();
+}
+
+/* ---------- sonido: notas por atrapada y metrónomo ---------- */
+const AU = { ctx: null, master: null };
+function audio() {
+  if (!AU.ctx) { const A = window.AudioContext || window.webkitAudioContext; if (!A) return null; AU.ctx = new A(); AU.master = AU.ctx.createGain(); AU.master.connect(AU.ctx.destination); }
+  if (AU.ctx.state === 'suspended') AU.ctx.resume();
+  return AU.ctx;
+}
+const SCALES = { penta: [0, 2, 4, 7, 9], major: [0, 2, 4, 5, 7, 9, 11], minor: [0, 2, 3, 5, 7, 8, 10] };
+const TIMBRES = ['triangle', 'sine', 'square', 'sawtooth'];
+function tone(freq, { type = 'triangle', dur = 0.35, vol = 0.3, when = 0 } = {}) {
+  const ctx = audio(); if (!ctx) return;
+  const t0 = ctx.currentTime + when, o = ctx.createOscillator(), gn = ctx.createGain(), lp = ctx.createBiquadFilter();
+  o.type = type; o.frequency.value = freq; lp.type = 'lowpass'; lp.frequency.value = 2400;
+  gn.gain.setValueAtTime(0.0001, t0); gn.gain.exponentialRampToValueAtTime(vol, t0 + 0.008); gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(lp); lp.connect(gn); gn.connect(AU.master); o.start(t0); o.stop(t0 + dur + 0.05);
+}
+function noteFor(e) {
+  const mode = $('#muScale').value;
+  if (mode === 'harm') return e.value ? 110 * e.value : null;   // serie armónica: n · 110 Hz
+  const sc = SCALES[mode], h = e.height ?? 0.5, deg = Math.max(0, Math.min(14, Math.round(h * 5)));
+  return 220 * Math.pow(2, (sc[deg % sc.length] + 12 * Math.floor(deg / sc.length)) / 12);
+}
+bus.on('siteswap', e => {
+  if (!on('music')) return;
+  const f = noteFor(e); if (!f) return;
+  AU.master && (AU.master.gain.value = +$('#sMuVol').value);
+  tone(f, { type: TIMBRES[(e.ci + 4) % TIMBRES.length], vol: 0.25 * +$('#sMuVol').value + 0.02 });
+});
+bus.on('throw', () => { if (on('music') && $('#muThrow').checked) tone(90, { type: 'sine', dur: 0.08, vol: 0.12 * +$('#sMuVol').value }); });
+bus.on('pattern', e => {
+  if (!on('music') || !$('#muChord').checked) return;
+  const vals = (e.pattern.match(/\d/g) || []).map(Number);
+  [...new Set(vals)].forEach((n, i) => tone(110 * Math.max(1, n), { type: 'sine', dur: 1.2, vol: 0.12 * +$('#sMuVol').value, when: i * 0.03 }));
+});
+const ME = { errs: [], anchor: null, nextClick: 0 };
+function metroBeat() { return $('#meMode').value === 'fixed' ? 60 / +$('#sMeBpm').value : SW.beat; }
+bus.on('throw', e => {
+  if (!on('metro')) return;
+  const b = metroBeat(); if (!b) return;
+  const t = e.time / 1000;
+  if (ME.anchor == null || $('#meMode').value === 'follow' && ME.errs.length < 2) ME.anchor = t;
+  let ph = ((t - ME.anchor) / b) % 1; if (ph < 0) ph += 1; if (ph > 0.5) ph -= 1;
+  const ms = ph * b * 1000; ME.errs.push(ms); if (ME.errs.length > 24) ME.errs.shift();
+  if ($('#meMode').value === 'follow') ME.anchor += ph * b * 0.3;   // en modo seguir, la grilla se acomoda de a poco
+  $('#meErr').textContent = `${ms > 0 ? '+' : ''}${Math.round(ms)} ms`;
+  $('#meMean').textContent = `${Math.round(ME.errs.reduce((a, x) => a + Math.abs(x), 0) / ME.errs.length)} ms`;
+  $('#meNeedle').style.left = `${50 + Math.max(-48, Math.min(48, ph * 96))}%`;
+});
+function metroTick() {
+  if (!on('metro') || !$('#meSound').checked) return;
+  const b = metroBeat(), ctx = AU.ctx; if (!b || !ctx) return;
+  const now = performance.now() / 1000;
+  if (ME.anchor == null) ME.anchor = now;
+  const k = Math.ceil((now - ME.anchor) / b), tNext = ME.anchor + k * b;
+  if (tNext - now < 0.1 && tNext > ME.nextClick + b * 0.5) { ME.nextClick = tNext; tone(k % 2 ? 1400 : 1900, { type: 'square', dur: 0.03, vol: 0.08, when: Math.max(0, tNext - now) }); }
+}
+
+/* ---------- coach ---------- */
+const CO = store.get('coach', { best: 0 });
+const CS = { streak: 0, throws: 0, drops: 0, heights: { der: [], izq: [] }, all: [], byVal: {}, heat: new Float32Array(32 * 18), handById: {} };
+// la regularidad de altura se mide por número de siteswap: en un 531 que el 5 suba más que el 1 no es irregularidad
+bus.on('siteswap', e => { if (e.height == null || !e.value) return; const a = CS.byVal[e.value] ||= []; a.push(e.height); if (a.length > 20) a.shift(); });
+bus.on('throw', e => { CS.throws++; CS.streak++; CS.handById[e.id] = e.hand; if (CS.streak > CO.best) { CO.best = CS.streak; store.set('coach', CO); } });
+bus.on('drop', () => { CS.drops++; CS.streak = 0; });
+bus.on('apex', e => { if (e.height == null) return; CS.all.push(e.height); if (CS.all.length > 60) CS.all.shift(); const hd = CS.handById[e.id]; if (hd) { CS.heights[hd].push(e.height); if (CS.heights[hd].length > 30) CS.heights[hd].shift(); } });
+bus.on('catch', e => { const gx = Math.min(31, Math.max(0, Math.floor(e.x * 32))), gy = Math.min(17, Math.max(0, Math.floor(e.y * 18))); CS.heat[gy * 32 + gx]++; });
+const stdOf = a => { if (a.length < 2) return null; const m = a.reduce((x, y) => x + y, 0) / a.length; return Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / (a.length - 1)); };
+const meanOf = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+function coachStats() {
+  let wsum = 0, cvs = 0;
+  for (const a of Object.values(CS.byVal)) { if (a.length < 3) continue; const m = meanOf(a), sd = stdOf(a); if (m > 0.03) { cvs += sd / m * a.length; wsum += a.length; } }
+  const rs = stdOf(SW.intervals.slice(-16).filter(x => SW.beat && Math.round(x / SW.beat) === 1));
+  return { streak: CS.streak, best: CO.best, cvH: wsum ? cvs / wsum : null, rJit: rs != null ? rs * 1000 : null,
+    der: meanOf(CS.heights.der), izq: meanOf(CS.heights.izq), throws: CS.throws, drops: CS.drops };
+}
+function updateCoachPanel() {
+  const st = coachStats();
+  $('#coStreak').textContent = st.streak; $('#coBest').textContent = st.best;
+  $('#coH').textContent = st.cvH == null ? '-' : `${Math.round(st.cvH * 100)}%`;
+  $('#coR').textContent = st.rJit == null ? '-' : `${Math.round(st.rJit)} ms`;
+  $('#coHands').textContent = st.der == null || st.izq == null ? '-' : `${fmt(st.der)} · ${fmt(st.izq)}`;
+  $('#coCount').textContent = `${st.throws} · ${st.drops}`;
+  const cv = $('#heatCv'), c = cv.getContext('2d'), r = cv.getBoundingClientRect();
+  if (!r.width) return;
+  const dpr = devicePixelRatio || 1; cv.width = r.width * dpr; cv.height = r.height * dpr; c.setTransform(dpr, 0, 0, dpr, 0, 0);
+  c.fillStyle = '#000'; c.fillRect(0, 0, r.width, r.height);
+  const mx = Math.max(1, ...CS.heat), cw = r.width / 32, ch = r.height / 18;
+  for (let i = 0; i < CS.heat.length; i++) {
+    const v = CS.heat[i] / mx; const gx = i % 32, gy = Math.floor(i / 32), xx = S.mirror ? 31 - gx : gx;
+    c.fillStyle = v ? `rgba(198,255,26,${0.15 + 0.85 * v})` : 'rgba(255,255,255,.05)';
+    c.beginPath(); c.arc(xx * cw + cw / 2, gy * ch + ch / 2, Math.min(cw, ch) * 0.36, 0, Math.PI * 2); c.fill();
+  }
+}
+function coachReport() {
+  const st = coachStats(), d = new Date();
+  const md = `# Sesión de malabares · ${d.toLocaleString('es-AR')}
+
+| Métrica | Valor |
+|---|---|
+| Lanzamientos | ${st.throws} |
+| Caídas | ${st.drops} |
+| Racha actual / mejor | ${st.streak} / ${st.best} |
+| Regularidad de altura (desvío relativo) | ${st.cvH == null ? '-' : Math.round(st.cvH * 100) + '%'} |
+| Regularidad de ritmo (desvío entre lanzamientos) | ${st.rJit == null ? '-' : Math.round(st.rJit) + ' ms'} |
+| Altura media mano der / izq | ${st.der == null ? '-' : fmt(st.der) + ' m'} / ${st.izq == null ? '-' : fmt(st.izq) + ' m'} |
+| Beat | ${SW.beat ? fmt(unitBeat()) + ' s' : '-'} |
+| Tiempo en la mano | ${SW.dwell ? fmt(SW.dwell) + ' s' : '-'} |
+| Último patrón | ${SW.pattern ?? '-'} |
+
+Siteswap de los últimos lanzamientos: ${recentSeq().map(x => x.text).join(' ')}
+`;
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
+  a.download = `sesion-malabares-${d.toISOString().slice(0, 10)}.md`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+
+/* ---------- validez de un siteswap (asincrónico) ---------- */
+function validSiteswap(str) {
+  if (!/^\d+$/.test(str)) return { ok: false, msg: 'Escribe solo números (ej. 441). Los desafíos y el profesor usan patrones asincrónicos.' };
+  const v = [...str].map(Number), p = v.length, sum = v.reduce((a, b) => a + b, 0);
+  if (sum % p) return { ok: false, msg: `No es válido: el promedio (${fmt(sum / p, 2)}) tiene que ser entero.` };
+  const land = new Set(v.map((n, i) => (i + n) % p));
+  if (land.size !== p) return { ok: false, msg: 'No es válido: dos pelotas caerían en el mismo beat.' };
+  return { ok: true, balls: sum / p, msg: `Válido · ${sum / p} pelotas` };
+}
+
+/* ---------- desafíos ---------- */
+const CH = { active: false, type: 'height', hits: 0, tries: 0, run: 0, best: 0, pat: [], idx: 0, goal: 12, done: false, flash: 0 };
+function challengeStatus() {
+  if (!CH.active) return 'Sin desafío activo';
+  if (CH.type === 'height') return `Objetivo ${fmt(+$('#sChTarget').value)} m · aciertos ${CH.hits}/${CH.tries} · racha ${CH.run} (mejor ${CH.best})`;
+  return CH.done ? `¡Logrado! ${CH.pat.join('')} × ${CH.goal}` : `${CH.pat.join('')} · ${CH.idx}/${CH.goal} seguidos`;
+}
+bus.on('apex', e => {
+  if (!CH.active || CH.type !== 'height' || e.height == null) return;
+  const tgt = +$('#sChTarget').value, tol = +$('#sChTol').value / 100;
+  CH.tries++;
+  if (Math.abs(e.height - tgt) <= tol) { CH.hits++; CH.run++; CH.best = Math.max(CH.best, CH.run); CH.flash = 1; } else CH.run = 0;
+  $('#chStatus').textContent = challengeStatus();
+});
+bus.on('siteswap', e => {
+  if (!CH.active || CH.type !== 'siteswap' || CH.done) return;
+  const p = CH.pat.length, want = CH.pat[CH.idx % p];
+  if (e.value === want) CH.idx++;
+  else { const i = CH.pat.indexOf(e.value); CH.idx = i === 0 ? 1 : 0; }   // reiniciar, o empezar de nuevo si este es el primero
+  if (CH.idx >= CH.goal) { CH.done = true; CH.flash = 1.5; if (on('music')) [3, 4, 5, 6].forEach((n, i) => tone(110 * n, { type: 'sine', dur: 0.8, vol: 0.15, when: i * 0.09 })); }
+  $('#chStatus').textContent = challengeStatus();
+});
+function drawChallenge(c, M) {
+  if (!CH.active) return;
+  const B = frameBox(M);
+  c.save(); c.textAlign = 'center'; c.globalCompositeOperation = 'source-over';
+  if (CH.type === 'height' && S.mPerU) {
+    // línea a la altura objetivo, medida desde el nivel promedio de lanzamiento
+    const lv = SW.throws.length ? median(tracks.filter(t => t.flight).map(t => t.flight.y0).concat(tracks.map(t => t.prevY).filter(v => v != null))) : null;
+    const base = lv ?? 0.8, yv = base - +$('#sChTarget').value / S.mPerU, tol = +$('#sChTol').value / 100 / S.mPerU;
+    c.fillStyle = `rgba(198,255,26,${0.12 + 0.25 * CH.flash})`; c.fillRect(B.x, M.y(yv - tol), B.w, M.y(yv + tol) - M.y(yv - tol));
+    c.strokeStyle = '#c6ff1a'; c.lineWidth = 3 * M.k; c.setLineDash([14 * M.k, 8 * M.k]);
+    c.beginPath(); c.moveTo(B.x, M.y(yv)); c.lineTo(B.x + B.w, M.y(yv)); c.stroke(); c.setLineDash([]);
+    c.font = `800 ${Math.round(30 * M.k)}px ${FONT.display}`; c.fillStyle = '#c6ff1a'; c.textAlign = 'right';
+    c.fillText(`${fmt(+$('#sChTarget').value)} M · ${CH.hits}/${CH.tries}`, B.x + B.w - 20 * M.k, M.y(yv) - 12 * M.k);
+  } else if (CH.type === 'siteswap') {
+    const fs = Math.round(B.h * 0.06);
+    c.font = `800 ${fs}px ${FONT.display}`; c.fillStyle = CH.done ? '#c6ff1a' : '#ff2d6f';
+    c.fillText(CH.done ? `¡${CH.pat.join('')} LOGRADO!` : `${CH.pat.join('')}  ${CH.idx}/${CH.goal}`, B.x + B.w / 2, B.y + B.h * 0.16);
+    const w = B.w * 0.3, x = B.x + B.w / 2 - w / 2, y = B.y + B.h * 0.19;
+    c.fillStyle = 'rgba(255,255,255,.15)'; c.fillRect(x, y, w, 6 * M.k);
+    c.fillStyle = CH.done ? '#c6ff1a' : '#ff2d6f'; c.fillRect(x, y, w * Math.min(1, CH.idx / CH.goal), 6 * M.k);
+  }
+  c.restore();
+}
+
+/* ---------- profesor de patrones: animación a partir de la notación ---------- */
+const TE = { t0: performance.now() / 1000 };
+function drawTeacher(c, box, pattern, speed) {
+  const { x, y, w, h } = box, vv = validSiteswap(pattern);
+  c.save(); c.textAlign = 'center';
+  if (!vv.ok) { c.font = `500 11px ${FONT.mono}`; c.fillStyle = '#ff2d6f'; c.fillText(vv.msg.toUpperCase(), x + w / 2, y + h / 2); c.restore(); return; }
+  const v = [...pattern].map(Number), p = v.length, b = 0.32 / speed, D = 0.55 * b, t = (performance.now() / 1000 - TE.t0);
+  const maxN = Math.max(...v), Fmax = Math.max(0.12, maxN * b - D), hand = k => (k % 2 ? 0.66 : 0.34);
+  const yH = y + h * 0.86, peak = h * 0.72, g = 8 * peak / (Fmax * Fmax);
+  c.fillStyle = '#3a3e43'; [0.34, 0.66].forEach(u => { c.beginPath(); c.ellipse(x + u * w, yH + 10, w * 0.07, 6, 0, 0, Math.PI * 2); c.fill(); });
+  const kNow = Math.floor(t / b);
+  for (let k = kNow - maxN - 2; k <= kNow; k++) {
+    const n = v[((k % p) + p) % p]; if (n === 0) continue;
+    const tk = k * b, F = n === 2 ? 0 : Math.max(0.12, n * b - D);
+    const x0 = x + hand(k) * w, x1 = x + hand(k + n) * w;
+    let px, py;
+    if (n !== 2 && t >= tk && t < tk + F) { const s = t - tk, vy = g * F / 2; px = x0 + (x1 - x0) * s / F; py = yH - (vy * s - 0.5 * g * s * s); }
+    else if (t >= tk + F && t < tk + n * b) { px = x1; py = yH; }   // en la mano hasta su próximo lanzamiento
+    else continue;
+    c.fillStyle = ['#ff2d6f', '#c6ff1a', '#5b2bff', '#ff2d6f', '#e9eaec', '#29d3ff', '#ffb020'][((k % 7) + 7) % 7];
+    c.beginPath(); c.arc(px, py, Math.max(4, w * 0.018), 0, Math.PI * 2); c.fill();
+  }
+  c.font = `800 ${Math.round(h * 0.14)}px ${FONT.display}`; c.fillStyle = '#e9eaec'; c.textAlign = 'left';
+  c.fillText(pattern, x + 10, y + h * 0.16);
+  c.font = `500 10px ${FONT.mono}`; c.fillStyle = '#8b8f94'; c.fillText(vv.msg.toUpperCase(), x + 10, y + h * 0.16 + 16);
+  c.restore();
+}
+function updateTeacherCompare() {
+  const pat = $('#tePattern').value.trim(), seq = recentSeq().map(x => x.text).filter(x => /^\d$/.test(x)).slice(-12);
+  if (!seq.length) { $('#teCompare').textContent = 'Tu secuencia: -'; return; }
+  let best = 0;
+  if (validSiteswap(pat).ok) for (let r = 0; r < pat.length; r++) {
+    let m = 0; seq.forEach((d, i) => { if (d === pat[(i + r) % pat.length]) m++; }); best = Math.max(best, m);
+  }
+  $('#teCompare').innerHTML = `Tu secuencia: <b>${seq.join('')}</b> · coincide ${Math.round(best / seq.length * 100)}%`;
+}
+
+/* ---------- escenas por patrón ---------- */
+const SC = { list: store.get('scenes', {}) };
+function sceneInputs() { return [...document.querySelectorAll('[data-tab="visual"] input, [data-tab="visual"] select')].filter(el => el.id && !['fxCalib', 'fxFlip'].includes(el.id)); }
+function snapshotScene() { const o = {}; for (const el of sceneInputs()) o[el.id] = el.type === 'checkbox' ? el.checked : el.value; return o; }
+function applyScene(sc) {
+  for (const [id, v] of Object.entries(sc)) {
+    const el = document.getElementById(id); if (!el) continue;
+    if (el.type === 'checkbox') { if (el.checked !== v) { el.checked = v; el.dispatchEvent(new Event('change')); } }
+    else if (el.value !== v) { el.value = v; el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input')); }
+  }
+}
+function renderScenes() {
+  const box = $('#scList'); box.innerHTML = '';
+  const names = Object.keys(SC.list);
+  if (!names.length) { box.innerHTML = '<p class="note">Sin escenas guardadas.</p>'; return; }
+  for (const n of names) {
+    const el = document.createElement('div'); el.className = 'item';
+    el.innerHTML = `<span></span><button title="Aplicar ahora">Aplicar</button><button title="Borrar">✕</button>`;
+    el.querySelector('span').textContent = `${n}${SW.pattern === n ? ' · activa' : ''}`;
+    const [ba, bx] = el.querySelectorAll('button');
+    ba.onclick = () => applyScene(SC.list[n]);
+    bx.onclick = () => { delete SC.list[n]; store.set('scenes', SC.list); renderScenes(); };
+    box.appendChild(el);
+  }
+}
+bus.on('pattern', e => {
+  if (!$('#scName').matches(':focus')) $('#scName').value = e.pattern;
+  if (on('scenes') && SC.list[e.pattern]) { applyScene(SC.list[e.pattern]); logLine(`Escena ${e.pattern} aplicada`, '#ff2d6f'); }
+  renderScenes();
+});
+
+/* ---------- latencia: adelanto y medición ---------- */
+const LAT = { measuring: false, flashOn: false, flashT: 0, samples: [], base: null, waiting: false, next: 0, count: 0 };
+function withLead(fn) {
+  const lead = on('latency') ? +$('#sLead').value / 1000 : 0;
+  if (!lead) return fn();
+  const g = gNorm(), saved = tracks.map(t => [t.x, t.y]);
+  for (const t of tracks) {
+    if (t.miss) continue;
+    t.x += t.vx * lead;
+    t.y += t.state === 'air' ? t.vy * lead + 0.5 * g * lead * lead : t.vy * lead * 0.5;
+  }
+  try { fn(); } finally { tracks.forEach((t, i) => { if (saved[i]) { t.x = saved[i][0]; t.y = saved[i][1]; } }); }
+}
+function frameLuma() {
+  if (!lastImg) return null; const d = lastImg.data; let s = 0, n = 0;
+  for (let i = 0; i < d.length; i += 16) { s += d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11; n++; }
+  return s / n;
+}
+function startLatency() {
+  if (!P.win || P.win.closed) { $('#latStatus').textContent = 'Abre la ventana de proyección primero'; return; }
+  if (!S.stream && S.source !== 'file') { $('#latStatus').textContent = 'Inicia la cámara apuntando a la proyección'; return; }
+  Object.assign(LAT, { measuring: true, flashOn: false, samples: [], base: null, waiting: false, next: performance.now() + 800, count: 0 });
+  XT.override = 'latency'; $('#latStatus').textContent = 'Midiendo…';
+}
+function latencyOnFrame(now) {
+  if (!LAT.measuring) return;
+  const L = frameLuma(); if (L == null) return;
+  if (!LAT.flashOn) LAT.base = LAT.base == null ? L : LAT.base * 0.8 + L * 0.2;
+  if (LAT.waiting && L > LAT.base + Math.max(12, LAT.base * 0.25)) {
+    LAT.samples.push(now - LAT.flashT); LAT.waiting = false;
+    $('#latStatus').textContent = `Midiendo… ${LAT.samples.length}/6`;
+  }
+}
+function latencyTick(now) {
+  if (!LAT.measuring) return;
+  if (!LAT.flashOn && now > LAT.next) { LAT.flashOn = true; LAT.flashT = now; LAT.waiting = true; LAT.count++; }
+  else if (LAT.flashOn && now - LAT.flashT > 450) { LAT.flashOn = false; LAT.waiting = false; LAT.next = now + 500 + Math.random() * 300; }
+  if (LAT.count > 8 || LAT.samples.length >= 6) {
+    if (LAT.flashOn && now - LAT.flashT < 450) return;
+    LAT.measuring = false; XT.override = null;
+    if (LAT.samples.length >= 3) {
+      const ms = Math.round(median(LAT.samples));
+      $('#sLead').value = Math.min(250, ms); $('#sLead').dispatchEvent(new Event('input'));
+      $('#latStatus').textContent = `Latencia del lazo: ${ms} ms (adelanto ajustado)`;
+    } else $('#latStatus').textContent = 'No se vio el parpadeo: ¿la cámara ve la proyección?';
+  }
+}
+
+/* ---------- calibración automática por puntos proyectados ---------- */
+const CAL = { running: false, dot: null };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function captureLuma(ms = 450) {
+  await sleep(ms);
+  if (!lastImg) return null;
+  const d = lastImg.data, out = new Float32Array(PW * PH);
+  for (let i = 0; i < out.length; i++) out[i] = d[i * 4] * 0.3 + d[i * 4 + 1] * 0.59 + d[i * 4 + 2] * 0.11;
+  return out;
+}
+async function autoCalibrate() {
+  if (!P.win || P.win.closed) { $('#calStatus').textContent = 'Abre la proyección en pantalla completa primero'; return; }
+  if (!S.source) { $('#calStatus').textContent = 'Inicia la cámara apuntando a la proyección'; return; }
+  if (CAL.running) return;
+  CAL.running = true; XT.override = 'calib'; $('#calStatus').textContent = 'Calibrando…';
+  const targets = [[0.15, 0.15], [0.85, 0.15], [0.85, 0.85], [0.15, 0.85]], found = [];
+  try {
+    CAL.dot = null; const base = await captureLuma(700);
+    for (const [wx, wy] of targets) {
+      CAL.dot = [wx, wy]; const img = await captureLuma(600);
+      if (!img || !base) throw new Error('sin imagen');
+      let mx = 0; const diff = new Float32Array(img.length);
+      for (let i = 0; i < img.length; i++) { diff[i] = img[i] - base[i]; if (diff[i] > mx) mx = diff[i]; }
+      if (mx < 25) throw new Error('no se vio el punto');
+      let sx = 0, sy = 0, n = 0;
+      for (let i = 0; i < diff.length; i++) if (diff[i] > mx * 0.6) { sx += i % PW; sy += Math.floor(i / PW); n++; }
+      found.push([(sx / n + 0.5) / PW, (sy / n + 0.5) / PH]);
+      $('#calStatus').textContent = `Punto ${found.length}/4 encontrado`;
+    }
+    CAL.dot = null;
+    // homografía cámara → ventana; las esquinas del lienzo (en coordenadas de cámara) van a donde la cámara las vería
+    const Hm = solveHomography(found, targets);
+    if (!Hm) throw new Error('puntos degenerados');
+    const ap = (u, v) => { const z = Hm[6] * u + Hm[7] * v + Hm[8]; return [(Hm[0] * u + Hm[1] * v + Hm[2]) / z, (Hm[3] * u + Hm[4] * v + Hm[5]) / z]; };
+    const flip = S.fx.flip;
+    P.corners = [[0, 0], [1, 0], [1, 1], [0, 1]].map(([a, b2]) => ap(flip ? 1 - a : a, b2));
+    store.set('corners', P.corners); applyCornerPin();
+    $('#calStatus').textContent = 'Calibrado ✓ (ajusta a mano con C si hace falta)';
+  } catch (err) {
+    $('#calStatus').textContent = `No se pudo calibrar: ${err.message}. Revisa que la cámara vea toda la proyección.`;
+  } finally { CAL.running = false; CAL.dot = null; XT.override = null; }
+}
+
+/* ---------- conexiones: WebSocket + puente con OSC y control remoto ---------- */
+const NET = { ws: null, retry: null };
+function netStatus(t, ok) { const el = $('#netStatus'); el.textContent = t; el.className = 'eq ' + (ok ? 'ok' : ''); }
+function netConnect() {
+  netDisconnect();
+  let ws; try { ws = new WebSocket($('#netUrl').value.trim()); } catch (err) { netStatus('Dirección inválida'); return; }
+  NET.ws = ws; netStatus('Conectando…');
+  ws.onopen = () => { netStatus('Conectado', true); ws.send(JSON.stringify({ type: 'hello', role: 'lab', controls: controlList() })); };
+  ws.onclose = () => { if (NET.ws === ws) { netStatus('Desconectado · reintento en 3 s'); NET.retry = setTimeout(() => on('net') && netConnect(), 3000); } };
+  ws.onerror = () => netStatus('Sin conexión (¿está corriendo el puente?)');
+  ws.onmessage = ev => { try { netCommand(JSON.parse(ev.data)); } catch {} };
+}
+function netDisconnect() { clearTimeout(NET.retry); if (NET.ws) { const w = NET.ws; NET.ws = null; try { w.close(); } catch {} } netStatus('Desconectado'); }
+bus.on('*', e => {
+  if (!NET.ws || NET.ws.readyState !== 1) return;
+  const { type, time, ...rest } = e;
+  NET.ws.send(JSON.stringify({ type: 'event', address: `/juggle/${type}`, event: type, t: time / 1000, ...rest }));
+});
+function controlList() {
+  const out = [];
+  for (const el of document.querySelectorAll('aside input[type=checkbox][id], aside input[type=checkbox][data-feat-toggle], aside input[type=range][id], aside select[id], aside button[id]')) {
+    const id = el.id || 'feat:' + el.dataset.featToggle;
+    const label = (el.closest('label')?.textContent || el.closest('.card')?.querySelector('h2 span, h2')?.textContent || el.textContent || id).trim().slice(0, 48);
+    const tab = el.closest('.card')?.dataset.tab;
+    if (['fileIn', 'netBridge'].includes(id)) continue;
+    out.push({ id, label, tab, kind: el.tagName === 'BUTTON' ? 'button' : el.type === 'checkbox' ? 'toggle' : el.type === 'range' ? 'range' : 'select',
+      value: el.type === 'checkbox' ? el.checked : el.value, min: el.min, max: el.max, step: el.step, options: el.tagName === 'SELECT' ? [...el.options].map(o => [o.value, o.textContent]) : undefined });
+  }
+  return out;
+}
+function netCommand(m) {
+  if (m.type !== 'cmd') return;
+  const el = m.id?.startsWith('feat:') ? document.querySelector(`[data-feat-toggle="${m.id.slice(5)}"]`) : document.getElementById(m.id);
+  if (!el || !el.closest('aside')) return;
+  if (el.tagName === 'BUTTON') el.click();
+  else if (el.type === 'checkbox') { el.checked = m.value ?? !el.checked; el.dispatchEvent(new Event('change')); }
+  else { el.value = m.value; el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input')); }
+}
+function downloadBridge() {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([BRIDGE_SRC], { type: 'text/javascript' })); a.download = 'juggle-bridge.mjs'; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+
+/* ---------- dibujar las capas extra ---------- */
+function drawExtras(c, M) {
+  if (on('chrono')) drawChrono(c, M);
+  if (on('ghost')) drawGhost(c, M);
+  if (on('challenge')) drawChallenge(c, M);
+  const B = frameBox(M);
+  if (on('shannon') && $('#shProj').checked) drawShannon(c, M);
+  if (on('graph') && $('#grProj').checked) { const s2 = B.h * 0.36; drawPanelBox(c, { x: B.x + B.w - s2 - B.w * 0.02, y: B.y + B.h * 0.2, w: s2, h: s2 }, b => drawGraph(c, b, true)); }
+  if (on('phase') && $('#phProj').checked) { const s2 = B.h * 0.3; drawPanelBox(c, { x: B.x + B.w * 0.02, y: B.y + B.h * 0.48, w: s2 * 1.3, h: s2 }, b => drawPhase(c, b)); }
+  if (on('teacher') && $('#teProj').checked) { const s2 = B.h * 0.3; drawPanelBox(c, { x: B.x + B.w - s2 * 1.4 - B.w * 0.02, y: B.y + B.h * 0.6, w: s2 * 1.4, h: s2 }, b => drawTeacher(c, b, $('#tePattern').value.trim(), +$('#sTeSpeed').value)); }
+}
+function drawPanelBox(c, b, fn) {
+  c.save(); c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1;
+  c.fillStyle = 'rgba(0,0,0,.6)'; c.fillRect(b.x, b.y, b.w, b.h); c.strokeStyle = 'rgba(255,255,255,.2)'; c.lineWidth = 1; c.strokeRect(b.x + 0.5, b.y + 0.5, b.w - 1, b.h - 1);
+  fn(b); c.restore();
+}
+function panelCanvas(id) {
+  const cv = $(id), r = cv.getBoundingClientRect(); if (!r.width) return null;
+  const dpr = devicePixelRatio || 1;
+  if (cv.width !== Math.round(r.width * dpr) || cv.height !== Math.round(r.height * dpr)) { cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr); }
+  const c = cv.getContext('2d'); c.setTransform(dpr, 0, 0, dpr, 0, 0); c.fillStyle = '#000'; c.fillRect(0, 0, r.width, r.height);
+  return { c, box: { x: 0, y: 0, w: r.width, h: r.height } };
+}
+let xtSlow = 0;
+function extrasTick(dt, now) {
+  latencyTick(now); metroTick();
+  if (on('graph')) { const pc = panelCanvas('#graphCv'); if (pc) drawGraph(pc.c, pc.box, false); }
+  if (on('phase')) { const pc = panelCanvas('#phaseCv'); if (pc) drawPhase(pc.c, pc.box); }
+  if (on('teacher')) { const pc = panelCanvas('#teachCv'); if (pc) drawTeacher(pc.c, pc.box, $('#tePattern').value.trim(), +$('#sTeSpeed').value); }
+  CH.flash = Math.max(0, CH.flash - dt);
+  if ((xtSlow += dt) > 0.4) {
+    xtSlow = 0;
+    if (on('shannon')) updateShannonPanel();
+    if (on('coach')) updateCoachPanel();
+    if (on('teacher')) updateTeacherCompare();
+  }
+}
+// la proyección puede quedar tomada: parpadeo para medir latencia o punto de calibración
+function drawOverride(c, W, H) {
+  if (XT.override === 'latency') { c.fillStyle = LAT.flashOn ? '#fff' : '#000'; c.fillRect(0, 0, W, H); return true; }
+  if (XT.override === 'calib') { c.fillStyle = '#000'; c.fillRect(0, 0, W, H); return true; }
+  return false;
+}
+function syncCalDot() {
+  if (!P.win || P.win.closed) return;
+  let el = P.win.document.getElementById('calDot');
+  if (!el) { el = P.win.document.createElement('div'); el.id = 'calDot'; el.style.cssText = 'position:fixed;width:5vmin;height:5vmin;margin:-2.5vmin 0 0 -2.5vmin;border-radius:50%;background:#fff;z-index:9;display:none'; P.win.document.body.appendChild(el); }
+  if (CAL.dot) { el.style.display = 'block'; el.style.left = CAL.dot[0] * 100 + 'vw'; el.style.top = CAL.dot[1] * 100 + 'vh'; } else el.style.display = 'none';
+}
+
+/* ---------- pestañas e interruptores ---------- */
+function showTab(tab) {
+  document.querySelectorAll('[data-tab-btn]').forEach(b => { b.classList.toggle('on', b.dataset.tabBtn === tab); b.setAttribute('aria-selected', b.dataset.tabBtn === tab); });
+  document.querySelectorAll('aside .card[data-tab]').forEach(c => { c.hidden = !(c.dataset.tab === tab || c.dataset.tab === '*'); });
+  store.set('tab', tab);
+}
+document.querySelectorAll('[data-tab-btn]').forEach(b => b.addEventListener('click', () => showTab(b.dataset.tabBtn)));
+function setFeature(name, val) {
+  FEAT[name] = val; store.set('features', FEAT);
+  document.querySelector(`.card[data-feat="${name}"]`)?.classList.toggle('off', !val);
+  if (name === 'music' || name === 'metro') { if (val) audio(); }
+  if (name === 'net') val ? netConnect() : netDisconnect();
+  if (name === 'scenes') renderScenes();
+}
+document.querySelectorAll('[data-feat-toggle]').forEach(inp => {
+  const n = inp.dataset.featToggle;
+  inp.checked = !!FEAT[n];
+  document.querySelector(`.card[data-feat="${n}"]`)?.classList.toggle('off', !FEAT[n]);
+  inp.addEventListener('change', () => setFeature(n, inp.checked));
+});
+if (FEAT.net) setTimeout(netConnect, 500);
+showTab(store.get('tab', 'captura'));
+
+/* ---------- controles de los paneles extra ---------- */
+bindRange('#sChStep', '#oChStep', '_chStep', v => fmt(v)); bindRange('#sChLen', '#oChLen', '_chLen', v => fmt(v, 1));
+bindRange('#sMuVol', '#oMuVol', '_muVol', v => Math.round(v * 100) + '%'); bindRange('#sMeBpm', '#oMeBpm', '_meBpm');
+bindRange('#sChTarget', '#oChTarget', '_chT', v => fmt(v)); bindRange('#sChTol', '#oChTol', '_chTol');
+bindRange('#sTeSpeed', '#oTeSpeed', '_teS', v => fmt(v)); bindRange('#sLead', '#oLead', '_lead', v => v + ' ms');
+$('#meMode').addEventListener('change', () => { ME.anchor = null; ME.errs = []; });
+$('#coReset').addEventListener('click', () => { Object.assign(CS, { streak: 0, throws: 0, drops: 0, heights: { der: [], izq: [] }, all: [], byVal: {}, heat: new Float32Array(32 * 18) }); updateCoachPanel(); });
+$('#coReport').addEventListener('click', coachReport);
+const chValid = () => { const v = validSiteswap($('#chPattern').value.trim()); $('#chValid').textContent = v.msg; $('#chValid').className = 'note ' + (v.ok ? 'ok' : 'bad'); return v; };
+$('#chType').addEventListener('change', e => { $('#chHeightBox').hidden = e.target.value !== 'height'; $('#chSwBox').hidden = e.target.value !== 'siteswap'; CH.active = false; $('#chStart').textContent = 'Empezar'; $('#chStatus').textContent = challengeStatus(); chValid(); });
+$('#chPattern').addEventListener('input', chValid);
+$('#chStart').addEventListener('click', () => {
+  if (CH.active) { CH.active = false; $('#chStart').textContent = 'Empezar'; $('#chStatus').textContent = challengeStatus(); return; }
+  const type = $('#chType').value;
+  if (type === 'siteswap') { const v = chValid(); if (!v.ok) return; }
+  Object.assign(CH, { active: true, type, hits: 0, tries: 0, run: 0, best: 0, pat: [...$('#chPattern').value.trim()].map(Number), idx: 0, goal: Math.max(3, +$('#chGoal').value || 12), done: false });
+  $('#chStart').textContent = 'Terminar'; $('#chStatus').textContent = challengeStatus();
+});
+$('#teUse').addEventListener('click', () => {
+  $('#chType').value = 'siteswap'; $('#chType').dispatchEvent(new Event('change'));
+  $('#chPattern').value = $('#tePattern').value.trim(); chValid();
+  if (!on('challenge')) { document.querySelector('[data-feat-toggle="challenge"]').checked = true; setFeature('challenge', true); }
+  showTab('entreno');
+});
+$('#tePattern').addEventListener('input', () => { TE.t0 = performance.now() / 1000; });
+$('#scSave').addEventListener('click', () => {
+  const name = ($('#scName').value || SW.pattern || '').trim();
+  if (!name) { logLine('Escribe el patrón de la escena (o espera a que se detecte uno)', '#ffb020'); return; }
+  SC.list[name] = snapshotScene(); store.set('scenes', SC.list); renderScenes(); logLine(`Escena guardada para ${name}`, '#ff2d6f');
+});
+$('#latMeasure').addEventListener('click', startLatency);
+$('#autoCal').addEventListener('click', autoCalibrate);
+$('#netBridge').addEventListener('click', downloadBridge);
+$('#netUrl').addEventListener('change', () => { if (on('net')) netConnect(); });
+$('#numPoses').value = String(store.get('numPoses', 1));
+$('#numPoses').addEventListener('change', e => { store.set('numPoses', +e.target.value); loadPose(); });
+renderScenes(); chValid();
+
+const BRIDGE_SRC = document.getElementById('bridgeSrc').textContent;
+// relleno de los deslizadores hasta el valor actual
+const rangeFill = el => el.style.setProperty('--p', ((el.value - el.min) / ((el.max - el.min) || 1) * 100) + '%');
+document.querySelectorAll('input[type=range]').forEach(rangeFill);
+document.addEventListener('input', e => { if (e.target.matches('input[type=range]')) rangeFill(e.target); });
+
+renderColors();
+listCameras();
+loadPose();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
