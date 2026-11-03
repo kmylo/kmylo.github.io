@@ -3,130 +3,204 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>Neon Vektor</title>
+<title>Pulsar Race</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&family=VT323&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#07020d; --ink:#f4ecff; --quiet:#a596c7;
-    --accent:#29e3ff; --accent2:#ff2bd6; --panel:rgba(12,4,24,.72);
-    --line:color-mix(in srgb, var(--accent) 38%, transparent);
-    --good:#5dff9a; --bad:#ff5470;
+    --bg:#07020d; --ink:#f4ecff; --quiet:#a596c7; --yel:#ffe14a;
+    --accent:#29e3ff; --accent2:#ff2bd6; --panel:rgba(12,4,24,.78);
+    --line:color-mix(in srgb, var(--accent) 45%, transparent);
+    --good:#5dff9a; --bad:#ff5470; --hot:#ff2bd6;
+    --px:"Press Start 2P",monospace; --ui:Silkscreen,monospace; --term:VT323,monospace;
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);overflow:hidden;
-    font:15px/1.35 "Chakra Petch",ui-sans-serif,system-ui,sans-serif;-webkit-user-select:none;user-select:none}
+    font:20px/1.2 var(--term);-webkit-user-select:none;user-select:none;-webkit-font-smoothing:none}
   canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block}
   .hidden{display:none!important}
-  .disp{font-family:Orbitron,"Chakra Petch",sans-serif;letter-spacing:.06em}
-  .cut{clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px))}
+  .disp{font-family:var(--px);letter-spacing:.02em}
+  /* esquinas escalonadas, como un sprite */
+  .cut{clip-path:polygon(0 6px,6px 6px,6px 0,calc(100% - 6px) 0,calc(100% - 6px) 6px,100% 6px,100% calc(100% - 6px),calc(100% - 6px) calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,6px calc(100% - 6px),0 calc(100% - 6px))}
   button{font:inherit;color:inherit}
 
   /* HUD */
   #hud{position:fixed;inset:0;pointer-events:none}
-  .box{position:absolute;background:var(--panel);border:1px solid var(--line);padding:8px 14px;backdrop-filter:blur(4px)}
-  #hPos{left:16px;top:16px;min-width:120px}
-  #hPos .big{font-size:34px;font-weight:900;line-height:1}
-  #hPos .big small{font-size:16px;color:var(--quiet)}
-  .lbl{font-size:11px;letter-spacing:.2em;color:var(--quiet);text-transform:uppercase}
-  #hTime{left:50%;top:16px;transform:translateX(-50%);text-align:center;min-width:220px}
-  #hTime .big{font-size:24px;font-weight:800}
-  #hTime .sub{font-size:12px;color:var(--quiet)}
-  #delta{font-size:15px;font-weight:800;margin-top:2px;min-height:19px}
-  #delta.good{color:var(--good);text-shadow:0 0 10px rgba(93,255,154,.5)} #delta.bad{color:var(--bad);text-shadow:0 0 10px rgba(255,84,112,.5)}
-  #hSpeed{right:16px;bottom:18px;text-align:right;min-width:210px}
-  #hSpeed .big{font-size:52px;font-weight:900;line-height:1;color:var(--accent);text-shadow:0 0 18px color-mix(in srgb, var(--accent) 60%, transparent)}
-  #hSpeed .big small{font-size:14px;color:var(--quiet);margin-left:4px}
-  .bar{height:8px;background:rgba(255,255,255,.08);margin-top:8px;position:relative;overflow:hidden}
-  .bar i{position:absolute;left:0;top:0;bottom:0;width:50%;background:linear-gradient(90deg,var(--accent2),var(--accent));box-shadow:0 0 12px var(--accent2)}
-  #mini{position:absolute;right:16px;top:16px;width:170px;height:170px;background:var(--panel);border:1px solid var(--line)}
-  #toast{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);font-size:clamp(26px,6vw,60px);font-weight:900;
-    color:var(--ink);text-shadow:0 0 24px var(--accent2),0 0 4px #fff;opacity:0;transition:opacity .25s;white-space:nowrap}
+  .box{position:absolute;background:var(--panel);border:2px solid var(--line);padding:10px 14px}
+  #hPos{left:16px;top:16px;min-width:128px}
+  #hPos .big{font-size:26px;line-height:1;margin-top:6px;text-shadow:3px 3px 0 rgba(0,0,0,.6)}
+  #hPos .big small{font-size:12px;color:var(--quiet)}
+  .lbl{font:400 11px var(--ui);letter-spacing:.12em;color:var(--quiet);text-transform:uppercase}
+  #hTime{left:50%;top:16px;transform:translateX(-50%);text-align:center;min-width:240px}
+  #hTime .big{font-size:18px;text-shadow:2px 2px 0 rgba(0,0,0,.6)}
+  #hTime .sub{font:18px var(--term);color:var(--quiet);margin-top:4px}
+  #delta{font:13px var(--px);margin-top:6px;min-height:15px}
+  #delta.good{color:var(--good)} #delta.bad{color:var(--bad)}
+  #hSpeed{right:16px;bottom:18px;text-align:right;min-width:220px}
+  #hSpeed .big{font-size:38px;line-height:1;color:var(--accent);text-shadow:4px 4px 0 color-mix(in srgb, var(--accent2) 70%, #000)}
+  #hSpeed .big small{font-size:11px;color:var(--quiet);margin-left:6px;text-shadow:none}
+  .bar{height:14px;background:rgba(255,255,255,.07);margin-top:8px;position:relative;overflow:hidden;border:2px solid rgba(255,255,255,.18)}
+  .bar i{position:absolute;left:2px;top:2px;bottom:2px;width:50%;background:repeating-linear-gradient(90deg,var(--accent) 0 8px,transparent 8px 11px)}
+  #mini{position:absolute;right:16px;top:16px;width:170px;height:170px;background:var(--panel);border:2px solid var(--line)}
+  #toast{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);font-size:clamp(16px,4.4vw,44px);
+    color:var(--yel);text-shadow:4px 4px 0 var(--accent2),8px 8px 0 rgba(0,0,0,.55);opacity:0;transition:opacity .2s steps(2);white-space:nowrap}
   #toast.on{opacity:1;animation:gl .45s steps(2) 2}
   @keyframes gl{
-    0%{transform:translate(-50%,-50%);text-shadow:3px 0 var(--accent2),-3px 0 var(--accent)}
+    0%{transform:translate(-50%,-50%);text-shadow:4px 0 var(--accent2),-4px 0 var(--accent)}
     25%{transform:translate(-51%,-50%) skewX(-8deg);clip-path:inset(10% 0 40% 0)}
     50%{transform:translate(-49%,-50%) skewX(6deg);clip-path:inset(50% 0 5% 0);text-shadow:-4px 0 var(--accent2),4px 0 var(--accent)}
     75%{clip-path:inset(0 0 0 0)} 100%{transform:translate(-50%,-50%)}}
-  .jp{font-family:sans-serif;font-size:9px;letter-spacing:.1em;opacity:.55;margin-left:8px;text-transform:none}
-  #boot{position:absolute;left:16px;top:50%;transform:translateY(-50%);font:600 12.5px "Chakra Petch",monospace;color:var(--accent);
-    line-height:1.75;text-shadow:0 0 8px var(--accent);white-space:pre;text-transform:uppercase;letter-spacing:.08em}
-  body.t-d9 .disp{text-shadow:1.5px 0 rgba(255,43,214,.45),-1.5px 0 rgba(41,227,255,.35)}
-  #count{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);font-size:clamp(90px,20vw,190px);font-weight:900;
-    color:var(--accent);text-shadow:0 0 40px var(--accent)}
-  #ghostTag{position:absolute;left:16px;top:118px;font-size:11px;letter-spacing:.16em;color:var(--quiet)}
+  .jp{font-family:sans-serif;font-size:9px;letter-spacing:.1em;opacity:.5;margin-left:8px;text-transform:none}
+  #boot{position:absolute;left:16px;top:50%;transform:translateY(-50%);font:20px var(--term);color:var(--accent);
+    line-height:1.15;text-shadow:0 0 8px var(--accent);white-space:pre;text-transform:uppercase;letter-spacing:.06em}
+  body.t-d9 #hud .disp{text-shadow:2px 0 rgba(255,43,214,.45),-2px 0 rgba(41,227,255,.35)}
+  #count{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);font-size:clamp(70px,15vw,150px);
+    color:var(--yel);text-shadow:7px 7px 0 var(--accent2),14px 14px 0 rgba(0,0,0,.5)!important}
+  #ghostTag{position:absolute;left:16px;top:128px;font:400 11px var(--ui);letter-spacing:.12em;color:var(--quiet)}
   #vign{position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.6) 100%)}
   #scan{position:fixed;inset:0;pointer-events:none;opacity:.07;background:repeating-linear-gradient(0deg,#000 0 1px,transparent 1px 3px)}
 
   /* Menú */
   .screen{position:fixed;inset:0;display:grid;place-items:center;padding:16px;overflow:auto;
     background:linear-gradient(180deg,rgba(7,2,13,.1),rgba(7,2,13,.7))}
-  .card{width:min(520px,100%);background:var(--panel);border:1px solid var(--line);padding:24px;backdrop-filter:blur(8px)}
+  .card{width:min(540px,100%);background:var(--panel);border:2px solid var(--line);padding:24px}
   .menu{width:min(1040px,100%);display:flex;flex-direction:column;gap:16px;padding:8px 0}
-  h1{margin:0;font-size:clamp(36px,7vw,58px);font-weight:900;line-height:.95;
-    background:linear-gradient(90deg,var(--accent2),#b35cff 45%,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;
-    filter:drop-shadow(0 0 18px color-mix(in srgb, var(--accent2) 45%, transparent))}
-  .kicker{font-size:12px;letter-spacing:.32em;color:var(--accent);text-transform:uppercase;margin-bottom:6px}
+  h1{margin:0;font-size:clamp(26px,6.2vw,64px);line-height:1.2;font-weight:400;
+    background:linear-gradient(180deg,var(--yel) 0 54%,var(--accent2) 54% 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(5px 5px 0 #1a0526) drop-shadow(0 0 22px color-mix(in srgb, var(--accent2) 35%, transparent))}
+  .kicker{font:400 12px var(--ui);letter-spacing:.2em;color:var(--accent);text-transform:uppercase;margin-bottom:12px}
   .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-  .tcard{pointer-events:auto;cursor:pointer;text-align:left;background:var(--panel);border:1px solid rgba(255,255,255,.12);padding:12px;
-    backdrop-filter:blur(8px);transition:border-color .2s, transform .2s}
-  .tcard:hover{transform:translateY(-2px)}
-  .tcard.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),0 0 24px color-mix(in srgb, var(--accent) 35%, transparent)}
-  .tcard canvas{width:100%;height:96px;display:block;margin-bottom:10px}
-  .tcard .nm{font:800 15px Orbitron,sans-serif;letter-spacing:.05em}
-  .tcard .pl{font-size:12px;color:var(--quiet);margin:2px 0 8px}
+  .tcard{pointer-events:auto;cursor:pointer;text-align:left;background:var(--panel);border:2px solid rgba(255,255,255,.14);padding:12px;transition:transform .15s steps(2)}
+  .tcard:hover{transform:translateY(-3px)}
+  .tcard.on{border-color:var(--accent);background:color-mix(in srgb, var(--accent) 10%, var(--panel))}
+  .tcard canvas{width:100%;height:96px;display:block;margin-bottom:10px;image-rendering:pixelated}
+  .tcard .nm{font:11px/1.45 var(--px)}
+  .tcard .pl{font:18px var(--term);color:var(--quiet);margin:4px 0 8px}
   .chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
-  .chip{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border:1px solid rgba(255,255,255,.18);color:var(--ink)}
-  .times{font-size:12px;color:var(--quiet);display:grid;grid-template-columns:auto 1fr;gap:1px 10px}
-  .times b{color:var(--ink);font-weight:600;text-align:right;font-variant-numeric:tabular-nums}
+  .chip{font:400 10px var(--ui);letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border:2px solid rgba(255,255,255,.18);color:var(--ink)}
+  .times{font:17px var(--term);color:var(--quiet);display:grid;grid-template-columns:auto 1fr;gap:0 10px}
+  .times b{color:var(--ink);font-weight:400;text-align:right}
   .opts{display:flex;gap:12px;flex-wrap:wrap}
-  .seg{display:flex;align-items:center;gap:0;background:var(--panel);border:1px solid var(--line);padding:4px;backdrop-filter:blur(6px)}
+  .seg{display:flex;align-items:center;gap:0;background:var(--panel);border:2px solid var(--line);padding:4px}
   .seg .lbl{padding:0 10px 0 8px}
-  .seg button{pointer-events:auto;cursor:pointer;border:0;background:transparent;padding:8px 12px;font:700 12px Orbitron,sans-serif;letter-spacing:.08em;color:var(--quiet)}
+  .seg button{pointer-events:auto;cursor:pointer;border:0;background:transparent;padding:8px 12px;font:700 12px var(--ui);letter-spacing:.06em;color:var(--quiet);text-transform:uppercase}
   .seg button.on{background:var(--accent);color:#0b0614}
   .seg button:disabled{opacity:.35;cursor:not-allowed}
   .btn{pointer-events:auto;display:inline-flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;border:0;
-    padding:13px 24px;font:800 15px Orbitron,sans-serif;letter-spacing:.12em;color:#13021f;
-    background:linear-gradient(90deg,var(--accent2),var(--accent));box-shadow:0 0 24px color-mix(in srgb, var(--accent2) 45%, transparent)}
-  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+    padding:17px 26px 20px;font:13px var(--px);color:#fff;background:var(--accent2);text-shadow:2px 2px 0 rgba(0,0,0,.4);
+    box-shadow:inset 0 -6px 0 rgba(0,0,0,.35),inset 0 4px 0 rgba(255,255,255,.22)}
+  .btn:hover{filter:brightness(1.12)} .btn:active{box-shadow:inset 0 -2px 0 rgba(0,0,0,.35);padding:19px 26px 18px}
+  .btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line);text-shadow:none}
   .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-  .hint{font-size:12.5px;color:var(--quiet)}
-  #res .place{font-size:72px;font-weight:900;line-height:1;color:var(--accent);text-shadow:0 0 30px var(--accent)}
-  #res table{width:100%;border-collapse:collapse;margin:14px 0 18px;font-size:14px}
-  #res td{padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07)}
-  #res td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+  .hint{font:18px var(--term);color:var(--quiet)}
+  .pz{font-size:clamp(20px,5vw,34px);color:var(--accent);text-shadow:4px 4px 0 color-mix(in srgb, var(--accent) 35%, #000);margin:4px 0 18px}
+  #res .place{font-size:52px;line-height:1;color:var(--yel);text-shadow:5px 5px 0 var(--accent2),10px 10px 0 rgba(0,0,0,.5)}
+  #res table{width:100%;border-collapse:collapse;margin:14px 0 18px;font:20px var(--term)}
+  #res td{padding:4px 0;border-bottom:2px dotted rgba(255,255,255,.1)}
+  #res td:last-child{text-align:right}
 
   #topbtns{position:fixed;right:200px;top:16px;display:flex;gap:8px}
-  .mini-btn{pointer-events:auto;cursor:pointer;background:var(--panel);border:1px solid var(--line);color:var(--ink);
-    font:700 12px Orbitron,sans-serif;letter-spacing:.1em;padding:8px 10px}
+  .mini-btn{pointer-events:auto;cursor:pointer;background:var(--panel);border:2px solid var(--line);color:var(--ink);
+    font:700 11px var(--ui);letter-spacing:.08em;padding:8px 10px}
+
+  /* Carga */
+  #load{background:var(--bg);z-index:5}
+  #load .wrap{display:flex;flex-direction:column;align-items:center;gap:22px}
+  #load h1{font-size:clamp(22px,5vw,44px)}
+  #loadTxt{font:14px var(--px);color:#fff}
+  #loadTxt::after{content:'_';animation:blink 1s steps(1) infinite}
+  @keyframes blink{50%{opacity:0}}
+  .lbar{width:min(440px,80vw);height:30px;border:3px solid #fff;padding:4px;background:#000}
+  .lbar i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,#4fe03a 0 12px,transparent 12px 16px)}
 
   /* Temas de HUD */
   body.t-erg{--quiet:#c98a7a;--ink:#ffe9e0}
-  body.t-erg .disp{text-shadow:2px 0 rgba(255,40,30,.55),-2px 0 rgba(255,140,40,.35)}
+  body.t-erg #hud .disp{text-shadow:2px 0 rgba(255,40,30,.55),-2px 0 rgba(255,140,40,.35)}
   body.t-erg #scan{opacity:.14}
-  body.t-erg .box,body.t-erg #mini{border-width:1px 0;background:linear-gradient(90deg,rgba(40,4,2,.7),rgba(20,2,0,.35))}
-  body.t-kryo,body.t-bahia{--quiet:#b8c4d6}
+  body.t-erg .box,body.t-erg #mini{border-width:2px 0;background:linear-gradient(90deg,rgba(40,4,2,.75),rgba(20,2,0,.4))}
+  body.t-kryo{--quiet:#9fb3d6}
+  body.t-bahia{--quiet:#b8c4d6}
 
   /* Táctil */
   #touch{position:fixed;left:0;right:0;bottom:14px;display:flex;justify-content:space-between;padding:0 14px;pointer-events:none}
   #touch .g{display:flex;gap:12px;pointer-events:auto}
-  .tb{width:74px;height:74px;display:grid;place-items:center;font:800 14px Orbitron,sans-serif;color:var(--ink);
-    background:rgba(20,6,38,.55);border:1px solid var(--line);touch-action:none}
+  .tb{width:74px;height:74px;display:grid;place-items:center;font:10px var(--px);color:var(--ink);
+    background:rgba(20,6,38,.55);border:2px solid var(--line);touch-action:none}
   .tb.on{background:color-mix(in srgb, var(--accent2) 40%, transparent);border-color:var(--accent2)}
   @media (pointer:fine){#touch{display:none}}
-  @media (max-width:900px){ .cards{grid-template-columns:repeat(2,1fr)} }
+
+  /* ===== Menú como ficha técnica: papel, tinta, un color de señal, códigos y marcas ===== */
+  #menu{background:radial-gradient(ellipse at center,rgba(7,2,13,.15),rgba(7,2,13,.6))}
+  .sheet{--ink2:#f2eef8;--paper:#0d0a14;position:relative;width:min(1100px,100%);background:rgba(10,6,18,.16);color:var(--ink2);text-shadow:0 1px 2px rgba(0,0,0,.55);
+    padding:20px 26px 16px 40px;display:flex;flex-direction:column;gap:14px;
+    clip-path:polygon(0 0,calc(100% - 30px) 0,100% 30px,100% 100%,30px 100%,0 calc(100% - 30px))}
+  .sheet::before{content:'';position:absolute;inset:0;pointer-events:none;border:1px solid rgba(255,255,255,.14);clip-path:inherit}
+  .sheet .deco{position:absolute;pointer-events:none;color:var(--ink2)}
+  .sheet .vtx{position:absolute;left:10px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;font:400 9px var(--ui);letter-spacing:.3em;opacity:.75}
+  .sheet .vtx b{display:inline-block;background:var(--hot);width:6px;margin:8px 0;height:44px}
+  .sheet .cx{position:absolute;font:14px var(--term);opacity:.55}
+  .top{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:end;border-bottom:3px solid var(--ink2);padding-bottom:12px}
+  .kick{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font:700 11px var(--ui);letter-spacing:.08em;margin-bottom:10px;text-transform:uppercase}
+  .tag{display:inline-block;background:var(--hot);color:#121014;text-shadow:none;padding:3px 9px 3px 12px;font:700 11px var(--ui);letter-spacing:.06em;text-transform:uppercase;
+    clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
+  .tag.ink{background:var(--ink2);color:var(--paper)}
+  .sheet h1{color:var(--ink2);background:none;-webkit-background-clip:border-box;background-clip:border-box;filter:none;font-size:clamp(24px,5.4vw,60px);
+    text-shadow:5px 5px 0 var(--hot)}
+  .spec{display:grid;grid-template-columns:auto auto;gap:2px 16px;align-items:center;font:17px var(--term);text-transform:uppercase}
+  .spec .big2{font:22px var(--px);line-height:1}
+  .spec .boxes{font:14px var(--term);letter-spacing:2px}
+  .spec .glyph{grid-column:1/3;font:14px var(--px);letter-spacing:6px;opacity:.85}
+  .sheet .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .tcard{--ink2:#121014;text-shadow:none;pointer-events:auto;cursor:pointer;text-align:left;background:#f7f6f2;border:2px solid var(--ink2);padding:0;color:var(--ink2);transition:transform .12s steps(2)}
+  .tcard:hover{transform:translate(-3px,-3px);box-shadow:3px 3px 0 var(--ink2)}
+  .sheet .tcard.on{box-shadow:6px 6px 0 var(--hot);transform:translate(-3px,-3px);background:#f7f6f2;border-color:var(--ink2)}
+  .tcard .hd{display:flex;align-items:center;gap:8px;border-bottom:2px solid var(--ink2);padding:6px 8px;min-height:40px}
+  .tcard.on .hd{background:var(--hot)}
+  .tcard .no{font:16px var(--px);color:var(--hot)} .tcard.on .no{color:var(--ink2)}
+  .tcard .nm{font:9px/1.5 var(--px);flex:1}
+  .tcard .slab{position:relative;background:#0d0a14;margin:8px}
+  .tcard canvas{width:100%;height:88px;display:block;image-rendering:pixelated}
+  .slab .cr{position:absolute;width:8px;height:8px;border:2px solid var(--hot)}
+  .slab .cr.a{left:-3px;top:-3px;border-width:2px 0 0 2px}.slab .cr.b{right:-3px;top:-3px;border-width:2px 2px 0 0}
+  .slab .cr.c{left:-3px;bottom:-3px;border-width:0 0 2px 2px}.slab .cr.d{right:-3px;bottom:-3px;border-width:0 2px 2px 0}
+  .slab .sx{position:absolute;right:6px;bottom:2px;font:14px var(--term);color:#9a90b0}
+  .tcard .pl{font:17px var(--term);color:#55505c;margin:0 8px 6px}
+  .tcard .chips{display:flex;gap:4px;flex-wrap:wrap;margin:0 8px 6px}
+  .tcard .chip{font:700 9px var(--ui);letter-spacing:.05em;text-transform:uppercase;padding:1px 5px;border:1.5px solid var(--ink2);color:var(--ink2)}
+  .tcard .rows{margin:0 8px 6px}
+  .tcard .rows div{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;border-bottom:1.5px solid var(--ink2);font:17px var(--term);padding:2px 0;text-transform:uppercase}
+  .tcard .rows em{font-style:normal;opacity:.6}
+  .tcard .rows b{font-weight:400;background:var(--hot);color:var(--ink2);min-width:82px;text-align:center;padding:0 4px}
+  .tcard .ft{display:flex;justify-content:space-between;gap:6px;align-items:center;font:400 9px var(--ui);letter-spacing:.06em;padding:5px 8px;border-top:1.5px dashed var(--ink2)}
+  .sheet .opts{display:flex;gap:10px;flex-wrap:wrap}
+  .sheet .seg{display:flex;align-items:center;background:rgba(10,6,18,.35);border:2px solid var(--ink2);padding:3px}
+  .sheet .seg .lbl{padding:0 10px 0 6px;color:var(--ink2);font-weight:700}
+  .sheet .seg button{pointer-events:auto;cursor:pointer;border:0;background:transparent;padding:7px 11px;font:700 11px var(--ui);letter-spacing:.06em;color:#b9b1c6;text-transform:uppercase}
+  .sheet .seg button.on{background:var(--ink2);color:var(--paper);text-shadow:none}
+  .sheet .seg button:disabled{opacity:.35;cursor:not-allowed}
+  .launch{display:grid;grid-template-columns:minmax(260px,1.3fr) 1fr;gap:12px;align-items:stretch}
+  .go{pointer-events:auto;cursor:pointer;border:0;background:var(--hot);color:#121014;text-shadow:none;font:clamp(14px,2.2vw,22px) var(--px);letter-spacing:.06em;
+    padding:16px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:inset 0 -6px 0 rgba(0,0,0,.22)}
+  .go:hover{filter:brightness(1.08)} .go:active{box-shadow:inset 0 -2px 0 rgba(0,0,0,.22)}
+  .stat{border:2px solid var(--ink2);padding:6px 10px;display:flex;flex-direction:column;justify-content:center;gap:2px;
+    background:rgba(10,6,18,.35) repeating-linear-gradient(135deg,transparent 0 6px,rgba(255,255,255,.05) 6px 7px)}
+  .stat .s1{font:700 11px var(--ui);letter-spacing:.08em;text-transform:uppercase}
+  .stat .hint{font:16px var(--term);color:#cfc8da}
+  .micro{display:flex;justify-content:space-between;gap:10px;font:400 9px var(--ui);letter-spacing:.12em;text-transform:uppercase;opacity:.75}
+  @media (max-width:900px){ .cards,.sheet .cards{grid-template-columns:repeat(2,1fr)} .spec{display:none} .launch{grid-template-columns:1fr} }
   @media (max-width:720px){
     .screen{place-items:start center}
-    .cards{grid-template-columns:1fr 1fr;gap:8px}
-    .tcard canvas{height:70px}
-    .tcard .times{display:none}
+    .sheet{padding:14px 12px 12px 30px;gap:10px}
+    .sheet .cards{grid-template-columns:1fr 1fr;gap:8px}
+    .tcard canvas{height:64px}
+    .tcard .rows,.tcard .ft,.stat .hint,.micro .m2{display:none}
     #mini{width:120px;height:120px}
     #topbtns{right:16px;top:146px;flex-direction:column}
     #hSpeed{bottom:104px;min-width:170px}
-    #hSpeed .big{font-size:40px}
+    #hSpeed .big{font-size:28px}
     #hTime{top:auto;bottom:104px;left:16px;transform:none;text-align:left;min-width:0}
-    #ghostTag{top:auto;bottom:196px}
+    #ghostTag{top:auto;bottom:206px}
   }
 </style>
 <script type="importmap">
@@ -141,53 +215,68 @@
 <div id="vign"></div><div id="scan"></div>
 
 <div id="hud" class="hidden">
-  <div id="hPos" class="box cut disp"><div class="lbl"><span id="posLbl">Posición</span><span class="jp">ポジション</span></div><div class="big"><span id="pos">1</span><small id="posOf">/4</small></div>
-    <div class="lbl" style="margin-top:6px">Vuelta <span id="lap" style="color:var(--ink)">1/3</span></div></div>
-  <div id="ghostTag" class="disp"></div>
-  <div id="hTime" class="box cut disp"><div class="big" id="time">00:00.000</div><div id="delta"></div><div class="sub" id="split">Mejor vuelta: --</div></div>
-  <div id="hSpeed" class="box cut disp"><div class="big"><span id="spd">0</span><small>KM/H</small></div>
-    <div class="lbl" style="margin-top:6px">Impulso<span class="jp">ブースト</span></div><div class="bar"><i id="boost"></i></div></div>
+  <div id="hPos" class="box cut"><div class="lbl"><span id="posLbl">Posición</span><span class="jp">ポジション</span></div><div class="big disp"><span id="pos">1</span><small id="posOf">/4</small></div>
+    <div class="lbl" style="margin-top:8px"><span data-i18n="lap">Vuelta</span> <span id="lap" style="color:var(--ink)">1/3</span></div></div>
+  <div id="ghostTag"></div>
+  <div id="hTime" class="box cut"><div class="big disp" id="time">00:00.000</div><div id="delta"></div><div class="sub" id="split">--</div></div>
+  <div id="hSpeed" class="box cut"><div class="big disp"><span id="spd">0</span><small>KM/H</small></div>
+    <div class="lbl" style="margin-top:8px"><span data-i18n="boost">Impulso</span><span class="jp">ブースト</span></div><div class="bar"><i id="boost"></i></div></div>
   <div id="boot"></div>
   <canvas id="mini" class="cut"></canvas>
-  <div id="topbtns"><button class="mini-btn" id="bGhost">FANTASMA</button><button class="mini-btn" id="bMusic">MÚSICA</button><button class="mini-btn" id="bPause">II</button></div>
+  <div id="topbtns"><button class="mini-btn" id="bGhost" data-i18n="bGhost">FANTASMA</button><button class="mini-btn" id="bMusic" data-i18n="bMusic">MÚSICA</button><button class="mini-btn" id="bPause">II</button></div>
   <div id="toast" class="disp"></div>
   <div id="count" class="disp"></div>
 </div>
 
 <div id="menu" class="screen">
-  <div class="menu">
-    <div><div class="kicker disp">Liga antigravedad · temporada 2099</div><h1 class="disp">NEON VEKTOR</h1></div>
+  <div class="sheet">
+    <div class="vtx">PULSAR//RACE <b></b> SA/CT_II <b></b> パルサー・レース</div>
+    <div class="cx" style="right:14px;top:44px">+</div><div class="cx" style="right:14px;bottom:44px">+</div>
+    <div class="top">
+      <div><div class="kick"><span class="tag">↘ PR-09</span><span data-i18n="kicker">Liga antigravedad · temporada 2099</span><span class="boxes">[×][×][×]</span></div>
+        <h1 class="disp">PULSAR RACE</h1></div>
+      <div class="spec"><span class="big2">2099</span><span id="specBc"></span>
+        <span>パルサー・レース</span><span class="boxes">//:009</span>
+        <span class="tag ink" data-i18n="circuits">4 CIRCUITOS</span><span class="boxes">▮▮▯ 01/04</span>
+        <span class="glyph">::{}&lt;{}&gt;-_</span></div>
+    </div>
     <div class="cards" id="cards"></div>
     <div class="opts">
-      <div class="seg" id="segMode"><span class="lbl">Modo</span><button data-v="race">Carrera</button><button data-v="tt">Contrarreloj</button></div>
-      <div class="seg" id="segGhost"><span class="lbl">Fantasma</span><button data-v="off">Apagado</button><button data-v="ref">Liga</button><button data-v="pb">Tu mejor</button></div>
+      <div class="seg" id="segMode"><span class="lbl" data-i18n="mode">Modo</span><button data-v="race" data-i18n="race">Carrera</button><button data-v="tt" data-i18n="tt">Contrarreloj</button></div>
+      <div class="seg" id="segGhost"><span class="lbl" data-i18n="ghost">Fantasma</span><button data-v="off" data-i18n="off">Apagado</button><button data-v="ref" data-i18n="ref">Liga</button><button data-v="pb" data-i18n="pb">Tu mejor</button></div>
+      <div class="seg" id="segLang"><span class="lbl" data-i18n="lang">Idioma</span><button data-v="es">ES</button><button data-v="en">EN</button></div>
     </div>
-    <div class="row"><button class="btn" id="bStart">CORRER</button>
-      <span class="hint">W/↑ acelerar · A D girar · S frenar · Espacio impulso · G fantasma · P pausa · M música</span></div>
+    <div class="launch"><button class="go" id="bStart"><span data-i18n="start">CORRER</span><span>&gt;&gt;&gt;</span></button>
+      <div class="stat"><span class="s1" data-i18n="status">Estado: activo · listo &gt;&gt;&gt;</span><span class="hint" data-i18n="hint"></span></div></div>
+    <div class="micro"><span>● REC 00.15 ■ 00.05 ■ 00.19.90_</span><span class="m2" data-i18n="micro">Liga antigravedad // división 6 // pista certificada</span><span>//:009</span></div>
   </div>
 </div>
 
 <div id="pause" class="screen hidden">
   <div class="card cut" style="text-align:center">
-    <div class="kicker disp">Pausa</div>
-    <div class="row" style="justify-content:center;margin-top:12px"><button class="btn" id="bResume">SEGUIR</button>
-      <button class="btn ghost" id="bRestart">REINICIAR</button><button class="btn ghost" id="bQuit">MENÚ</button></div>
+    <div class="disp pz" data-i18n="paused">PAUSA...</div>
+    <div class="row" style="justify-content:center"><button class="btn cut" id="bResume" data-i18n="resume">SEGUIR</button>
+      <button class="btn ghost cut" id="bRestart" data-i18n="restart">REINICIAR</button><button class="btn ghost cut" id="bQuit" data-i18n="menu">MENÚ</button></div>
   </div>
 </div>
 
 <div id="res" class="screen hidden">
   <div class="card cut">
-    <div class="kicker disp" id="rKick">Carrera terminada</div>
+    <div class="kicker" id="rKick"></div>
     <div class="place disp" id="rPlace">1º</div>
-    <div class="disp" id="rTime" style="font-size:20px;margin-top:6px"></div>
+    <div class="disp" id="rTime" style="font-size:14px;margin-top:16px;line-height:1.5"></div>
     <table id="rTable"></table>
-    <div class="row"><button class="btn" id="bAgain">OTRA VEZ</button><button class="btn ghost" id="bMenu">MENÚ</button></div>
+    <div class="row"><button class="btn cut" id="bAgain" data-i18n="again">OTRA VEZ</button><button class="btn ghost cut" id="bMenu" data-i18n="menu">MENÚ</button></div>
   </div>
+</div>
+
+<div id="load" class="screen">
+  <div class="wrap"><h1 class="disp">PULSAR RACE</h1><div id="loadTxt">LOADING</div><div class="lbar"><i id="loadBar"></i></div></div>
 </div>
 
 <div id="touch" class="hidden">
   <div class="g"><div class="tb" data-k="left">◀</div><div class="tb" data-k="right">▶</div></div>
-  <div class="g"><div class="tb" data-k="brake">FRENO</div><div class="tb" data-k="boost">BOOST</div></div>
+  <div class="g"><div class="tb" data-k="brake" data-i18n="brake">FRENO</div><div class="tb" data-k="boost">BOOST</div></div>
 </div>
 
 <script type="module">
@@ -206,19 +295,23 @@ let TRACK = null, PADS = [];
 // Cada circuito: puntos de control [x, y, z] y tramos especiales en unidades de punto de control.
 const CIRCUITS = [
   { id: 'd9', name: 'Distrito 9', place: 'Megaciudad · noche', tags: ['Noche', 'Lluvia', 'Neón'], theme: 'city', assist: 0.45,
+    en: { name: 'District 9', place: 'Megacity · night', tags: ['Night', 'Rain', 'Neon'], tunnelName: 'DATA TUNNEL', barrelName: 'CORKSCREW' },
     cp: [[0, 0, 0], [0, 4, -200], [40, 12, -380], [180, 24, -470], [340, 30, -430], [420, 22, -300], [380, 12, -160], [430, 8, -30], [560, 18, 20],
       [680, 40, -60], [760, 60, -220], [860, 64, -360], [980, 50, -300], [1020, 36, -120], [960, 24, 80], [820, 14, 200], [620, 10, 260],
       [420, 30, 240], [240, 20, 280], [80, 6, 220], [-20, 0, 120]],
     tunnel: [4.2, 6.1], tunnelName: 'TÚNEL DE DATOS', barrel: [11.9, 13.0], barrelName: 'TIRABUZÓN' },
-  { id: 'kryo', name: 'Estación Kryo', place: 'Glaciar · mediodía', tags: ['Día', 'Nieve', 'Hielo'], theme: 'arctic', assist: 0.36,
+  { id: 'kryo', name: 'Estación Kryo', place: 'Glaciar · noche', tags: ['Noche', 'Nieve', 'Hielo'], theme: 'arctic', assist: 0.36,
+    en: { name: 'Kryo Station', place: 'Glacier · night', tags: ['Night', 'Snow', 'Ice'], tunnelName: 'ICE TUNNEL' },
     cp: [[0, 4, 0], [190, 14, -170], [420, 22, -250], [640, 30, -210], [760, 34, -40], [700, 38, 150], [480, 42, 230], [250, 44, 140],
       [0, 44, -10], [-250, 42, -150], [-480, 34, -230], [-700, 22, -150], [-760, 12, 40], [-640, 6, 210], [-420, 2, 250], [-190, 2, 160]],
     tunnel: [2.2, 3.9], tunnelName: 'TÚNEL DE HIELO', barrel: null, cross: 'PASO ELEVADO' },
-  { id: 'erg', name: 'Erg Rojo', place: 'Desierto · anochecer', tags: ['Atardecer', 'Arena', 'Chatarra'], theme: 'desert', assist: 0.42,
+  { id: 'erg', name: 'Erg Rojo', place: 'Desierto · anochecer', tags: ['Atardecer', 'Fuego', 'Chatarra'], theme: 'desert', assist: 0.42,
+    en: { name: 'Red Erg', place: 'Desert · dusk', tags: ['Dusk', 'Fire', 'Scrap'], tunnelName: 'CANYON OF ARCHES' },
     cp: [[0, 8, 0], [60, 14, -260], [260, 22, -420], [520, 10, -380], [700, 18, -520], [960, 26, -480], [1100, 14, -260], [1040, 6, -20],
       [880, 12, 120], [980, 20, 320], [860, 10, 520], [600, 6, 480], [420, 16, 300], [220, 10, 380], [40, 18, 300], [-80, 12, 140]],
     tunnel: [3.1, 5.0], tunnelName: 'CAÑÓN DE LOS ARCOS', barrel: null, storm: [8.6, 11.4] },
   { id: 'bahia', name: 'Bahía Solar', place: 'Costa · día despejado', tags: ['Día', 'Sol', 'Mar'], theme: 'coast', assist: 0.45,
+    en: { name: 'Solar Bay', place: 'Coast · clear day', tags: ['Day', 'Sun', 'Sea'], tunnelName: 'CLIFF TUNNEL', barrelName: 'BAY ROLL' },
     cp: [[0, 10, 0], [-40, 16, -240], [60, 30, -440], [300, 46, -520], [520, 40, -420], [600, 20, -220], [760, 12, -120], [980, 24, -180],
       [1160, 40, -60], [1180, 30, 180], [1000, 16, 320], [760, 8, 300], [540, 14, 420], [300, 28, 380], [120, 20, 240]],
     tunnel: [2.3, 3.7], tunnelName: 'TÚNEL DEL ACANTILADO', barrel: [9.5, 10.5], barrelName: 'GIRO SOBRE LA BAHÍA' },
@@ -387,35 +480,83 @@ const THEMES = {
     road: { base: '#100b1c', grid: 'rgba(140,110,255,.10)', l: '#ff2bd6', r: '#29e3ff', c: '#b8f6ff', m: 'rgba(143,91,255,.55)', glow: 1.25, paint: 0.25, rough: 0.35, metal: 0.55 },
     rails: [NEON.pink, NEON.cyan], railK: 1.9, barrier: 0.16, gates: [NEON.pink, NEON.cyan], gateK: 2.2, ring: 'hex', ringCols: [NEON.pink, NEON.cyan], ringK: [1.9, 1.15],
     pad: NEON.amber, padK: 2.2, fx: [0.0032, 0.028, 0.06], holo: true, wet: true, ghost: 0x7ff6ff, css: ['#29e3ff', '#ff2bd6', 'rgba(12,4,24,.72)'], light: NEON.cyan, lightK: 22, weather: 'rain', ground: -70, traffic: true, night: true,
-    words: [['NEON VEKTOR', 'liga antigravedad'], ['ゼロ・グラビティ', 'zero-g drinks'], ['SYN//APSE', 'implantes en 24 h'], ['夜行', 'night line 09'],
-      ['HYPERLANE', 'sin límite de velocidad'], ['VOID CORP', 'el futuro ya vendido'], ['ネオン', 'distrito 9'], ['OVERCLOCK', 'más rápido que vos'],
-      ['KAIROS', 'tiempo a crédito'], ['サイバー', 'ramen 24/7'], ['DRIFT//OR//DIE', 'temporada 2099'], ['HOLO-TAXI', 'llegá antes de salir']],
+    words: [['PULSAR RACE', 'liga antigravedad', 'anti-grav league'], ['ゼロ・グラビティ', 'zero-g drinks', 'zero-g drinks'], ['SYN//APSE', 'implantes en 24 h', 'implants in 24 h'], ['夜行', 'night line 09', 'night line 09'],
+      ['HYPERLANE', 'sin límite de velocidad', 'no speed limit'], ['VOID CORP', 'el futuro ya vendido', 'the future, sold out'], ['ネオン', 'distrito 9', 'district 9'], ['OVERCLOCK', 'más rápido que vos', 'faster than you'],
+      ['KAIROS', 'tiempo a crédito', 'time on credit'], ['サイバー', 'ramen 24/7', 'ramen 24/7'], ['DRIFT//OR//DIE', 'temporada 2099', 'season 2099'], ['HOLO-TAXI', 'llegá antes de salir', 'arrive before you leave']],
   },
   arctic: {
-    sky: { top: [0.30, 0.42, 0.62], hor: [0.80, 0.85, 0.90], glow: [1, 1, 1], glowAmt: 0.12, sun: [0.4, 0.5, -0.6], sunCol: [1, 0.95, 0.85], stars: 0 },
-    fog: 0xc9d4df, fogD: 0.0021, fogTunnel: 0x9fd8ff, hemi: [0xdfefff, 0x8090a0, 1.6], sun: [0xfff4e6, 2.6], exposure: 0.95, bloom: [0.35, 0.4, 0.92],
-    road: { base: '#5d6b7c', grid: 'rgba(255,255,255,.10)', l: '#2aa8ff', r: '#2aa8ff', c: '#ffffff', m: 'rgba(255,255,255,.35)', glow: 0.35, paint: 1, rough: 0.18, metal: 0.25 },
-    rails: [0x3ab6ff, 0xff6a2a], railK: 1.3, barrier: 0.12, gates: [0xff6a2a, 0x3ab6ff], gateK: 1.4, ring: 'ice', ringCols: [0xbfe8ff, 0x6fc8ff], ringK: [1.4, 1.1],
-    pad: 0xff6a2a, padK: 1.5, fx: [0.0015, 0.03, 0], holo: false, ghost: 0x1f5fff, css: ['#3ab6ff', '#ff6a2a', 'rgba(14,24,38,.72)'], light: 0x9fd8ff, lightK: 8, weather: 'snow', ground: -30, traffic: false, night: false,
-    words: [['KRYO', 'estación 4'], ['PELIGRO', 'hielo en pista'], ['NORD//LINE', 'cargas polares'], ['-42 °C', 'abrigate'], ['AURORA', 'combustible frío']],
+    sky: { top: [0.003, 0.008, 0.03], hor: [0.10, 0.17, 0.30], glow: [0.6, 0.75, 1], glowAmt: 0.12, sun: [0.45, 0.3, -0.6], sunCol: [0.7, 0.8, 1], stars: 0.6 },
+    fog: 0x15223c, fogD: 0.0021, fogTunnel: 0x1d3656, hemi: [0x86a4d8, 0x141c30, 1.6], sun: [0xb0c8ff, 1.4], exposure: 1.05, bloom: [0.55, 0.5, 0.7],
+    road: { base: '#1d2532', grid: 'rgba(190,220,255,.06)', l: '#eaf4ff', r: '#eaf4ff', c: '#ff3a7a', m: 'rgba(200,225,255,.22)', glow: 0.75, paint: 0.55, rough: 0.22, metal: 0.45 },
+    rails: [0xcfe6ff, 0xcfe6ff], railK: 1.4, barrier: 0.08, gates: [0xff3a7a, 0xdcecff], gateK: 1.9, ring: 'ice', ringCols: [0xff3a7a, 0xbfe0ff], ringK: [1.9, 1.05],
+    pad: 0x39f0ff, padK: 2.4, fx: [0.0018, 0.03, 0.03], holo: false, ghost: 0xbfe6ff, css: ['#cfe6ff', '#ff3a7a', 'rgba(6,12,28,.76)'], light: 0xbfe0ff, lightK: 14, weather: 'snow', ground: -30, traffic: false, night: true,
+    hues: [340, 212], lamps: { col: 0xff3a7a, every: 46 },
+    words: [['KRYO', 'estación 4', 'station 4'], ['PELIGRO', 'hielo en pista', 'ice on track', 'DANGER'], ['NORD//LINE', 'cargas polares', 'polar freight'], ['-42 °C', 'abrigate', 'bundle up'], ['AURORA', 'combustible frío', 'cold fuel']],
   },
   desert: {
-    sky: { top: [0.035, 0.03, 0.045], hor: [0.42, 0.19, 0.09], glow: [1, 0.45, 0.2], glowAmt: 0.22, sun: [-0.7, 0.04, -0.5], sunCol: [1, 0.45, 0.2], stars: 0.35 },
-    fog: 0x4a2a1a, fogD: 0.0032, fogTunnel: 0x5a2416, hemi: [0xb08a70, 0x2a120a, 1.2], sun: [0xff9a5a, 1.6], exposure: 1.05, bloom: [0.55, 0.5, 0.7],
+    sky: { top: [0.02, 0.008, 0.014], hor: [0.40, 0.10, 0.045], glow: [1, 0.3, 0.09], glowAmt: 0.3, sun: [-0.7, 0.04, -0.5], sunCol: [1, 0.34, 0.1], stars: 0.35 },
+    fog: 0x3c160c, fogD: 0.0032, fogTunnel: 0x4a1a0e, hemi: [0x9e6c58, 0x2a0e08, 1.2], sun: [0xff7a3a, 1.6], exposure: 1.05, bloom: [0.55, 0.5, 0.7],
     road: { base: '#24170f', grid: 'rgba(255,140,80,.07)', l: '#ff4a2a', r: '#ff4a2a', c: '#ffb070', m: 'rgba(255,120,60,.35)', glow: 0.9, paint: 0.4, rough: 0.55, metal: 0.45 },
     rails: [0xff3a22, 0xff3a22], railK: 1.6, barrier: 0.1, gates: [0xff3a22, 0xff8a2a], gateK: 1.6, ring: 'arch', ringCols: [0x8a4a2c, 0x6e3a22], ringK: [1, 1],
-    pad: 0xff8a2a, padK: 1.8, fx: [0.003, 0.035, 0.08], holo: true, ghost: 0xffb070, css: ['#ff3a22', '#ff9a3a', 'rgba(26,6,2,.7)'], light: 0xff7a3a, lightK: 14, weather: 'sand', ground: null, traffic: false, night: true,
-    words: [['ZONA MUERTA', 'no detenerse'], ['SAL-9', 'pozo abandonado'], ['RECUPERADORES', 'compramos chatarra']],
+    pad: 0x3ae8ff, padK: 2.4, fx: [0.003, 0.035, 0.08], holo: true, ghost: 0xffb070, css: ['#ff3a22', '#ff9a3a', 'rgba(26,6,2,.7)'], light: 0xff7a3a, lightK: 14, weather: 'sand', ground: null, traffic: false, night: true, fire: true,
+    words: [['ZONA MUERTA', 'no detenerse', 'do not stop', 'DEAD ZONE'], ['SAL-9', 'pozo abandonado', 'abandoned well'], ['RECUPERADORES', 'compramos chatarra', 'we buy scrap', 'SCAVENGERS']],
   },
   coast: {
     sky: { top: [0.10, 0.32, 0.78], hor: [0.70, 0.84, 0.95], glow: [1, 0.9, 0.7], glowAmt: 0.15, sun: [0.3, 0.55, 0.8], sunCol: [1, 0.92, 0.75], stars: 0 },
     fog: 0xb5d2e8, fogD: 0.0014, fogTunnel: 0x302a24, hemi: [0xbfe0ff, 0x6a5a40, 1.5], sun: [0xfff1d6, 3.0], exposure: 0.92, bloom: [0.3, 0.4, 0.95],
     road: { base: '#3a3d44', grid: 'rgba(255,255,255,.05)', l: '#ffffff', r: '#ffffff', c: '#ffc23a', m: 'rgba(255,255,255,.4)', glow: 0.2, paint: 1, rough: 0.6, metal: 0.15 },
     rails: [0xff5a3a, 0x18c8d8], railK: 1.2, barrier: 0.1, gates: [0xff5a3a, 0x18c8d8], gateK: 1.3, ring: 'square', ringCols: [0xfff0d0, 0xffc070], ringK: [1.6, 1.2],
-    pad: 0xffc23a, padK: 1.5, fx: [0.0015, 0.025, 0], holo: false, ghost: 0x1f5fff, css: ['#18c8d8', '#ff5a3a', 'rgba(10,22,36,.7)'], light: 0xffd9a0, lightK: 6, weather: 'none', ground: -25, traffic: false, night: false,
-    words: [['BAHÍA SOLAR', 'gran premio'], ['SOL//NET', 'conectado al mar'], ['MARINA 7', 'amarras libres'], ['ÓRBITA BAR', 'atardecer 19 h'], ['VELA ROJA', 'regata 2099'], ['AGUA VIVA', 'bebida oficial']],
+    pad: 0xff2bd6, padK: 1.1, fx: [0.0015, 0.025, 0], holo: false, ghost: 0x1f5fff, css: ['#18c8d8', '#ff5a3a', 'rgba(10,22,36,.7)'], light: 0xffd9a0, lightK: 6, weather: 'none', ground: -25, traffic: false, night: false,
+    words: [['BAHÍA SOLAR', 'gran premio', 'grand prix', 'SOLAR BAY'], ['SOL//NET', 'conectado al mar', 'wired to the sea'], ['MARINA 7', 'amarras libres', 'free moorings'], ['ÓRBITA BAR', 'atardecer 19 h', 'sunset 7 pm', 'ORBIT BAR'], ['VELA ROJA', 'regata 2099', 'regatta 2099', 'RED SAIL'], ['AGUA VIVA', 'bebida oficial', 'official drink', 'JELLYFISH']],
   },
 };
+
+// ================== Idioma ==================
+const I18N = {
+  es: {
+    kicker: 'Liga antigravedad · temporada 2099', mode: 'Modo', race: 'Carrera', tt: 'Contrarreloj', ghost: 'Fantasma', off: 'Apagado', ref: 'Liga', pb: 'Tu mejor', lang: 'Idioma',
+    start: 'CORRER', hint: 'W/↑ acelerar · A D girar · S frenar · Espacio impulso · G fantasma · P pausa · M música',
+    paused: 'PAUSA...', resume: 'SEGUIR', restart: 'REINICIAR', menu: 'MENÚ', again: 'OTRA VEZ', brake: 'FRENO', loading: 'CARGANDO',
+    position: 'Posición', lap: 'Vuelta', boost: 'Impulso', bestLap: 'Mejor vuelta', bGhost: 'FANTASMA', bMusic: 'MÚSICA',
+    yourRec: 'Tu récord', league: 'Liga', length: 'Largo',
+    gTag: 'FANTASMA', gOff: 'FANTASMA: APAGADO', gNone: 'FANTASMA: SIN RÉCORD TODAVÍA', gPb: 'TU MEJOR', gRef: 'LIGA', tGhostOff: 'FANTASMA APAGADO',
+    go: '¡YA!', lastLap: 'ÚLTIMA VUELTA', lapN: 'VUELTA', pad: '¡IMPULSO!', finish: 'META', win: '¡GANASTE!', storm: 'TORMENTA DE ARENA', highScore: '¡RÉCORD!',
+    newRec: '¡Nuevo récord!', rec: 'Récord', recShort: '¡récord!', recLower: 'récord', vsLeague: 'Contra la liga', vsPrev: 'Contra tu récord anterior',
+    saved: 'Fantasma guardado: elegí "Tu mejor" para correr contra él.', notSaved: 'No se pudo guardar el fantasma en este navegador.',
+    selected: 'ELEGIDO', status: 'Estado: activo · listo >>>', micro: 'Liga antigravedad // división 6 // pista certificada', circuits: '4 CIRCUITOS',
+    boot: ['PULSAR//OS 9.2 · arrancando', 'enlace neural ......... OK', 'antigravedad ......... estable'], circuit: 'circuito .............', ready: 'listo.',
+  },
+  en: {
+    kicker: 'Anti-grav league · season 2099', mode: 'Mode', race: 'Race', tt: 'Time trial', ghost: 'Ghost', off: 'Off', ref: 'League', pb: 'Your best', lang: 'Language',
+    start: 'RACE', hint: 'W/↑ thrust · A D steer · S brake · Space boost · G ghost · P pause · M music',
+    paused: 'PAUSED...', resume: 'RESUME', restart: 'RESTART', menu: 'MENU', again: 'AGAIN', brake: 'BRAKE', loading: 'LOADING',
+    position: 'Position', lap: 'Lap', boost: 'Boost', bestLap: 'Best lap', bGhost: 'GHOST', bMusic: 'MUSIC',
+    yourRec: 'Your record', league: 'League', length: 'Length',
+    gTag: 'GHOST', gOff: 'GHOST: OFF', gNone: 'GHOST: NO RECORD YET', gPb: 'YOUR BEST', gRef: 'LEAGUE', tGhostOff: 'GHOST OFF',
+    go: 'GO!', lastLap: 'FINAL LAP', lapN: 'LAP', pad: 'BOOST!', finish: 'FINISH', win: 'YOU WIN!!!', storm: 'SANDSTORM', highScore: 'HIGH SCORE!',
+    newRec: 'New record!', rec: 'Record', recShort: 'record!', recLower: 'record', vsLeague: 'Against the league', vsPrev: 'Against your previous record',
+    saved: 'Ghost saved: pick "Your best" to race against it.', notSaved: 'Could not save the ghost in this browser.',
+    selected: 'SELECTED', status: 'Status: active · ready >>>', micro: 'Anti-grav league // division 6 // certified track', circuits: '4 CIRCUITS',
+    boot: ['PULSAR//OS 9.2 · booting', 'neural link ........... OK', 'anti-gravity .......... stable'], circuit: 'circuit ..............', ready: 'ready.',
+  },
+};
+let lang = (navigator.language || 'es').toLowerCase().startsWith('es') ? 'es' : 'en';
+const say = k => I18N[lang][k] ?? I18N.es[k];
+const tx = (def, k) => (lang === 'en' && def.en && def.en[k]) || def[k];
+const pxs = s => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+function barcode(seed, w, h) {
+  let x = 0, s = seed * 7919 + 13, r = '';
+  const rnd = () => (s = (s * 9301 + 49297) % 233280) / 233280;
+  while (x < w) { const bw = 1 + Math.floor(rnd() * 3); if (rnd() > 0.3) r += `<rect x="${x}" y="0" width="${bw}" height="${h}"/>`; x += bw + 1; }
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="currentColor" style="display:block">${r}</svg>`;
+}
+const ordinal = p => lang === 'en' ? ['1ST', '2ND', '3RD', '4TH'][p - 1] || p + 'TH' : `${p}º`;
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => { const v = say(el.dataset.i18n); el.textContent = el.closest('.btn,.disp,.tb,.go') ? pxs(v) : v; });
+  document.querySelectorAll('#segLang button').forEach(b => b.classList.toggle('on', b.dataset.v === lang));
+  const lt = document.querySelector('#loadTxt'); if (lt) lt.textContent = say('loading');
+}
 
 // ================== Render base ==================
 const $ = s => document.querySelector(s);
@@ -470,6 +611,89 @@ function canvasTex(w, h, draw, repeat) {
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
   if (repeat) t.wrapS = t.wrapT = THREE.RepeatWrapping;
   t.anisotropy = 4;
+  return t;
+}
+// Reloj compartido por los shaders del escenario (ventanas, fuego).
+const sceneTime = { value: 0 };
+// Ventanas que viven: cada una tiene su estado (prendida o apagada), unas pocas se prenden y apagan despacio,
+// otras respiran o parpadean como tubos viejos. Todo en el shader estándar, sin texturas animadas.
+function liveWindows(mat) {
+  mat.onBeforeCompile = sh => {
+    sh.uniforms.uTime = sceneTime;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying float vSeed; varying vec3 vObjN;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSeed = float(gl_InstanceID); vObjN = normal;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
+      uniform float uTime; varying float vSeed; varying vec3 vObjN;
+      float wh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }`)
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+      {
+        vec2 cell = floor(vEmissiveMapUv * vec2(16., 32.));
+        vec2 key = cell + vec2(vSeed * 3.7 + vObjN.x * 11. + vObjN.z * 23., vSeed * 1.31 + vObjN.y * 5.);
+        float a = wh(key), b = wh(key + 17.3), c = wh(key + 41.9);
+        float lit = step(0.7, a);
+        if (b < 0.09) lit = step(0.5, fract(uTime * (0.025 + c * 0.05) + a * 7.));
+        float bright = 0.5 + 1.9 * pow(c, 3.);
+        float breathe = 0.86 + 0.14 * sin(uTime * (0.35 + b * 0.8) + a * 40.);
+        float flick = b > 0.982 ? 0.3 + 0.7 * step(0.3, wh(vec2(floor(uTime * 13.), a))) : 1.;
+        totalEmissiveRadiance *= max(lit * bright * breathe * flick, 0.025);
+      }`);
+  };
+  return mat;
+}
+// Fuego procedural: un plano que mira siempre a la cámara (girando sólo en vertical) con ruido que sube.
+function flameMaterial() {
+  return new THREE.ShaderMaterial({
+    uniforms: { time: sceneTime }, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    vertexShader: `varying vec2 vUv; varying float vSeed, vFade;
+      void main(){
+        vUv = uv; vSeed = float(gl_InstanceID);
+        vec3 c = (modelMatrix * instanceMatrix * vec4(0., 0., 0., 1.)).xyz;
+        float sc = length(instanceMatrix[0].xyz);
+        vec3 tc = cameraPosition - c; tc.y = 0.; tc = normalize(tc + vec3(1e-4, 0., 0.));
+        vec3 right = vec3(tc.z, 0., -tc.x);
+        vec3 p = c + right * position.x * sc + vec3(0., 1., 0.) * (position.y + 0.5) * sc * 1.7;
+        vFade = exp(-length(cameraPosition - c) * 0.0011);
+        gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.);
+      }`,
+    fragmentShader: `uniform float time; varying vec2 vUv; varying float vSeed, vFade;
+      float hh(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float vn(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3. - 2. * f);
+        return mix(mix(hh(i), hh(i + vec2(1., 0.)), f.x), mix(hh(i + vec2(0., 1.)), hh(i + vec2(1., 1.)), f.x), f.y); }
+      void main(){
+        float t = time * 1.5 + vSeed * 3.17; vec2 uv = vUv;
+        float n = vn(vec2(uv.x * 4. + vSeed, uv.y * 3. - t * 2.2)) * 0.62 + vn(vec2(uv.x * 9. - vSeed, uv.y * 7. - t * 3.6)) * 0.38;
+        float x = (uv.x - 0.5) * 2. + (n - 0.5) * 1.1 * uv.y + sin(uv.y * 6. - t * 3.) * 0.12 * uv.y;
+        float w = pow(1. - uv.y, 0.7) * 0.8 + 0.06;
+        float shape = (1. - abs(x) / w) * smoothstep(0., 0.1, uv.y);
+        float heat = clamp((shape - uv.y * (0.55 + n * 0.75)) * 2.1, 0., 1.);
+        vec3 col = mix(vec3(0.5, 0.03, 0.0), vec3(1.0, 0.32, 0.03), smoothstep(0.05, 0.45, heat));
+        col = mix(col, vec3(1.0, 0.7, 0.25), smoothstep(0.7, 1.0, heat));
+        float flick = 0.85 + 0.15 * sin(time * 9. + vSeed * 2.1);
+        gl_FragColor = vec4(col * heat * 1.25 * flick * vFade, 1.);
+      }`,
+  });
+}
+// Grietas brillantes (para lava en la arena y en el asfalto). Se dibujan con copias desplazadas para que el mosaico no corte.
+function crackTex(w, h, n, opts = {}) {
+  const t = canvasTex(w, h, (g) => {
+    g.fillStyle = '#000'; g.fillRect(0, 0, w, h); g.lineCap = 'round'; g.lineJoin = 'round';
+    const paths = [];
+    for (let k = 0; k < n; k++) {
+      let x = opts.cx ? w * (0.5 + (Math.random() - 0.5) * opts.cx) : Math.random() * w, y = Math.random() * h, a = opts.along ? Math.PI / 2 + (Math.random() - 0.5) : Math.random() * 6.28;
+      const pts = [[x, y]], steps = 8 + Math.floor(Math.random() * 16);
+      for (let j = 0; j < steps; j++) {
+        a += (Math.random() - 0.5) * 1.3; const st = 4 + Math.random() * (opts.step || 12);
+        x += Math.cos(a) * st; y += Math.sin(a) * st; pts.push([x, y]);
+        if (Math.random() < 0.12) paths.push({ pts: [[x, y], [x + Math.cos(a + 1.2) * st * 1.6, y + Math.sin(a + 1.2) * st * 1.6]], w: 1 });
+      }
+      paths.push({ pts, w: 1 + Math.random() * (opts.width || 2.2) });
+    }
+    for (const [ox, oy] of [[0, 0], [w, 0], [-w, 0], [0, h], [0, -h]]) for (const p of paths) {
+      g.beginPath(); p.pts.forEach(([x, y], i) => i ? g.lineTo(x + ox, y + oy) : g.moveTo(x + ox, y + oy));
+      g.shadowColor = '#ff3a08'; g.shadowBlur = 8; g.strokeStyle = '#d82a04'; g.lineWidth = p.w + 1.5; g.stroke();
+      g.shadowBlur = 0; g.strokeStyle = '#ffb040'; g.lineWidth = Math.max(0.7, p.w * 0.45); g.stroke();
+    }
+  }, true);
   return t;
 }
 const glowTex = canvasTex(64, 64, (c, w, h) => { const g = c.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, w / 2); g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(1, 'rgba(255,255,255,0)'); c.fillStyle = g; c.fillRect(0, 0, w, h); });
@@ -578,6 +802,12 @@ function buildRoad(th) {
     roadMat.roughnessMap = pud; roadMat.roughness = 0.9; roadMat.metalness = 0.65;
   }
   strip(-W, 0, W, 0, 10, roadMat);
+  if (th.fire) {
+    const cm = new THREE.MeshBasicMaterial({ map: crackTex(256, 1024, 7, { cx: 0.7, along: true, step: 22, width: 2.6 }), color: hdr(0xffffff, 1.4), transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2 });
+    strip(-W + 1, 0.02, W - 1, 0.02, 140, cm);
+    animated.push(() => cm.color.setScalar(1.15 + 0.35 * Math.sin(clock * 1.3) + 0.1 * Math.sin(clock * 5.1)));
+  }
   const under = new THREE.MeshStandardMaterial({ color: th.night ? 0x0a0612 : 0x6a7078, roughness: 0.6, metalness: 0.5, side: THREE.DoubleSide });
   strip(-W - 0.6, -1.4, W + 0.6, -1.4, 10, under);
   for (const sg of [-1, 1]) {
@@ -612,8 +842,11 @@ function buildTrackProps(th) {
   const ban = canvasTex(1024, 128, (g, w, h) => {
     for (let x = 0; x < w; x += 32) for (let y = 0; y < h; y += 32) { g.fillStyle = ((x + y) / 32) % 2 ? '#fff' : '#111'; g.fillRect(x, y, 32, 32); }
     g.fillStyle = 'rgba(10,4,16,.88)'; g.fillRect(150, 14, w - 300, h - 28);
-    g.fillStyle = css[0]; g.font = '900 60px Orbitron, Arial Black, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.shadowColor = css[0]; g.shadowBlur = 18; g.fillText(def.name.toUpperCase(), w / 2, h / 2 + 2);
+    const nm = pxs(tx(def, 'name').toUpperCase()); let fs = 52;
+    g.font = `${fs}px "Press Start 2P", monospace`; while (g.measureText(nm).width > w - 340 && fs > 20) { fs -= 2; g.font = `${fs}px "Press Start 2P", monospace`; }
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillStyle = css[1]; g.fillText(nm, w / 2 + 5, h / 2 + 7);
+    g.fillStyle = css[0]; g.shadowColor = css[0]; g.shadowBlur = 14; g.fillText(nm, w / 2, h / 2 + 2);
   });
   const bm = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: ban, side: THREE.DoubleSide, color: hdr(0xffffff, th.night ? 1.3 : 1) }));
   frameMatrix(0, 0, 15, 2 * W + 6, (2 * W + 6) / 8, 1).decompose(bm.position, bm.quaternion, bm.scale); world.add(bm);
@@ -650,10 +883,28 @@ function buildTrackProps(th) {
     for (let k = 0; k < 3; k++) { const y = 40 + k * 70; g.beginPath(); g.moveTo(14, y + 50); g.lineTo(w / 2, y); g.lineTo(w - 14, y + 50); g.lineTo(w - 34, y + 62); g.lineTo(w / 2, y + 26); g.lineTo(34, y + 62); g.closePath(); g.fill(); }
   });
   const pg = new THREE.PlaneGeometry(1, 1); pg.rotateX(-Math.PI / 2);
-  const pads = new THREE.InstancedMesh(pg, new THREE.MeshBasicMaterial({ map: chev, color: hdr(th.pad, th.padK), transparent: true,
-    blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }), PADS.length);
-  PADS.forEach((p, i) => pads.setMatrixAt(i, frameMatrix(p.s, p.d, 0.08, 5.5, 1, 9)));
-  world.add(pads);
+  const padHex = '#' + new THREE.Color(th.pad).getHexString();
+  const plateTex = canvasTex(128, 256, (g, w, h) => {
+    g.clearRect(0, 0, w, h); g.fillStyle = 'rgba(4,2,8,.78)'; g.fillRect(6, 6, w - 12, h - 12);
+    g.strokeStyle = padHex; g.lineWidth = 6; g.strokeRect(9, 9, w - 18, h - 18);
+    g.fillStyle = padHex; for (let y = 22; y < h - 20; y += 22) { g.fillRect(14, y, 6, 10); g.fillRect(w - 20, y, 6, 10); }
+  });
+  const plate = new THREE.InstancedMesh(pg, new THREE.MeshBasicMaterial({ map: plateTex, transparent: true, depthWrite: false, side: THREE.DoubleSide,
+    polygonOffset: true, polygonOffsetFactor: -1 }), PADS.length);
+  // La luz corre de flecha en flecha para que se lea de lejos.
+  const padMat = new THREE.ShaderMaterial({
+    uniforms: { map: { value: chev }, time: sceneTime, col: { value: hdr(th.pad, th.padK) } },
+    transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: th.night ? THREE.AdditiveBlending : THREE.NormalBlending,
+    polygonOffset: true, polygonOffsetFactor: -2,
+    vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * instanceMatrix * vec4(position, 1.); }`,
+    fragmentShader: `uniform sampler2D map; uniform float time; uniform vec3 col; varying vec2 vUv;
+      void main(){ float a = texture2D(map, vUv).a;
+        float run = pow(fract(vUv.y + time * 1.8), 4.);
+        gl_FragColor = vec4(col * (0.55 + 1.1 * run) * a, a); }`,
+  });
+  const pads = new THREE.InstancedMesh(pg, padMat, PADS.length);
+  PADS.forEach((p, i) => { plate.setMatrixAt(i, frameMatrix(p.s, p.d, 0.06, 6.4, 1, 10.4)); pads.setMatrixAt(i, frameMatrix(p.s, p.d, 0.09, 5.5, 1, 9)); });
+  world.add(plate, pads);
   // Pilares hasta el suelo (donde la pista está "derecha")
   if (th.ground != null) {
     const sup = [];
@@ -699,8 +950,9 @@ function towersScene(th, day) {
       g.fillStyle = '#000'; g.fillRect(0, 0, w, h);
       for (let y = 4; y < h; y += 8) for (let x = 4; x < w; x += 8) {
         const r = Math.random();
-        if (r < 0.2) { g.globalAlpha = 0.45 + Math.random() * 0.55; g.fillStyle = r < 0.04 ? '#ff2bd6' : r < 0.08 ? '#29e3ff' : r < 0.15 ? '#ffb46a' : '#8f7bff'; g.fillRect(x, y, 5, 4); }
+        g.globalAlpha = 0.6 + Math.random() * 0.4; g.fillStyle = r < 0.12 ? '#ff2bd6' : r < 0.24 ? '#29e3ff' : r < 0.62 ? '#ffc27a' : r < 0.82 ? '#fff0d8' : '#8f7bff'; g.fillRect(x, y, 5, 4);
       }
+      g.globalAlpha = 1;
     }
   }, true);
   win.repeat.set(1, 3);
@@ -711,7 +963,7 @@ function towersScene(th, day) {
     return clearOfTrack(x, z, Math.max(w, d) * 0.72, g0 + h) ? { x, z, w, d, h } : null;
   });
   const mat = day ? new THREE.MeshStandardMaterial({ map: win, roughness: 0.35, metalness: 0.35 })
-    : new THREE.MeshStandardMaterial({ color: 0x0c0916, roughness: 0.75, metalness: 0.35, emissive: 0xffffff, emissiveMap: win, emissiveIntensity: 1.1 });
+    : liveWindows(new THREE.MeshStandardMaterial({ color: 0x0c0916, roughness: 0.75, metalness: 0.35, emissive: 0xffffff, emissiveMap: win, emissiveIntensity: 1.25 }));
   const mesh = new THREE.InstancedMesh(box1, mat, towers.length);
   towers.forEach((b, i) => mesh.setMatrixAt(i, _m.compose(_v.set(b.x, g0, b.z), _q.identity(), _sc.set(b.w, b.h, b.d))));
   world.add(mesh);
@@ -848,6 +1100,22 @@ function coastScene(th) {
   towersScene(th, true);
 }
 
+// Faroles a los costados con su mancha de luz sobre la pista (luz falsa, aditiva: no cuesta luces reales).
+function roadLamps(col, every) {
+  const list = [];
+  for (let s = 12; s < TRACK.L; s += every) for (const sg of [-1, 1]) list.push({ s: s + (sg > 0 ? every / 2 : 0), sg });
+  const pole = new THREE.InstancedMesh(boxC, new THREE.MeshStandardMaterial({ color: 0x1a2030, roughness: 0.6, metalness: 0.6 }), list.length);
+  const head = new THREE.InstancedMesh(boxC, new THREE.MeshBasicMaterial({ color: hdr(col, 3.2) }), list.length);
+  const pg = new THREE.PlaneGeometry(1, 1); pg.rotateX(-Math.PI / 2);
+  const pool = new THREE.InstancedMesh(pg, new THREE.MeshBasicMaterial({ map: glowTex, color: hdr(col, 0.3), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }), list.length);
+  list.forEach((l, i) => {
+    pole.setMatrixAt(i, frameMatrix(l.s, l.sg * (W + 1.3), 3.4, 0.35, 6.8, 0.35));
+    head.setMatrixAt(i, frameMatrix(l.s, l.sg * (W - 0.4), 6.8, 3.6, 0.22, 0.5));
+    pool.setMatrixAt(i, frameMatrix(l.s, l.sg * (W - 4.5), 0.05, 15, 1, 17));
+  });
+  world.add(pole, head, pool);
+}
+
 function arcticScene(th) {
   const g0 = th.ground, B = trackBounds();
   const snow = new THREE.Mesh(new THREE.PlaneGeometry(9000, 9000), new THREE.MeshStandardMaterial({ color: 0xeef3f8, roughness: 1 }));
@@ -866,7 +1134,7 @@ function arcticScene(th) {
     return clearOfTrack(x, z, 4, g0 + h, 10) ? { x, z, h } : null;
   });
   const pg = new THREE.ConeGeometry(1, 1, 6); pg.translate(0, 0.5, 0);
-  const pm = new THREE.InstancedMesh(pg, new THREE.MeshStandardMaterial({ color: 0x1f3d33, roughness: 0.9, flatShading: true }), pines.length);
+  const pm = new THREE.InstancedMesh(pg, new THREE.MeshStandardMaterial({ color: 0x18242f, roughness: 0.9, flatShading: true }), pines.length);
   pines.forEach((o, i) => pm.setMatrixAt(i, _m.compose(_v.set(o.x, g0, o.z), _q.identity(), _sc.set(o.h * 0.28, o.h, o.h * 0.28))));
   world.add(pm);
   const caps = new THREE.InstancedMesh(pg, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, flatShading: true }), pines.length);
@@ -875,7 +1143,7 @@ function arcticScene(th) {
   // Módulos de la estación y cúpulas
   const mods = scatter(26, 2000, () => { const x = rand(B.minX - 150, B.maxX + 150), z = rand(B.minZ - 150, B.maxZ + 150), w = rand(24, 50), d = rand(16, 30), h = rand(10, 22); return clearOfTrack(x, z, Math.max(w, d) * 0.7, g0 + h, 14) ? { x, z, w, d, h } : null; });
   const md = new THREE.InstancedMesh(box1, new THREE.MeshStandardMaterial({ color: 0x8c96a3, roughness: 0.5, metalness: 0.6 }), mods.length);
-  const stripe = new THREE.InstancedMesh(boxC, new THREE.MeshBasicMaterial({ color: hdr(0xff8a3a, 1.6) }), mods.length);
+  const stripe = new THREE.InstancedMesh(boxC, new THREE.MeshBasicMaterial({ color: hdr(0xff3a7a, 2.4) }), mods.length);
   const domes = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3, metalness: 0.2 }), mods.length);
   mods.forEach((o, i) => {
     md.setMatrixAt(i, _m.compose(_v.set(o.x, g0, o.z), _q.identity(), _sc.set(o.w, o.h, o.d)));
@@ -885,9 +1153,14 @@ function arcticScene(th) {
   world.add(md, stripe, domes);
   // Agujas de hielo
   const sp = scatter(60, 3000, () => { const x = rand(B.minX - 300, B.maxX + 300), z = rand(B.minZ - 300, B.maxZ + 300), h = rand(30, 90); return clearOfTrack(x, z, 8, g0 + h, 14) ? { x, z, h } : null; });
-  const sm = new THREE.InstancedMesh(new THREE.OctahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ color: 0xa8dcff, roughness: 0.05, metalness: 0.1, emissive: 0x0d3a66, transparent: true, opacity: 0.88, flatShading: true }), sp.length);
+  const sm = new THREE.InstancedMesh(new THREE.OctahedronGeometry(1, 0), new THREE.MeshStandardMaterial({ color: 0xcfe6ff, roughness: 0.05, metalness: 0.1, emissive: 0x0a2240, transparent: true, opacity: 0.88, flatShading: true }), sp.length);
   sp.forEach((o, i) => sm.setMatrixAt(i, _m.compose(_v.set(o.x, g0 + o.h * 0.35, o.z), _q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), i), _sc.set(o.h * 0.12, o.h * 0.7, o.h * 0.12))));
   world.add(sm);
+  // Ventanas cálidas en los módulos y faroles rosas en la pista
+  const wins = new THREE.InstancedMesh(boxC, new THREE.MeshBasicMaterial({ color: hdr(0xffd2a0, 1.5) }), mods.length * 2);
+  mods.forEach((o, i) => { for (const sg of [-1, 1]) wins.setMatrixAt(i * 2 + (sg > 0 ? 1 : 0), _m.compose(_v.set(o.x + sg * o.w * 0.2, g0 + o.h * 0.38, o.z), _q.identity(), _sc.set(o.w * 0.22, o.h * 0.14, o.d * 1.01))); });
+  world.add(wins);
+  roadLamps(th.lamps.col, th.lamps.every);
 }
 
 function desertScene(th) {
@@ -907,7 +1180,10 @@ function desertScene(th) {
     g.strokeStyle = 'rgba(60,30,15,.25)'; for (let y = 0; y < h; y += 9) { g.beginPath(); g.moveTo(0, y); for (let x = 0; x <= w; x += 16) g.lineTo(x, y + Math.sin(x * 0.08 + y) * 3); g.stroke(); }
   }, true);
   sandTex.repeat.set(60, 60);
-  world.add(new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ map: sandTex, roughness: 1, metalness: 0 })));
+  const lava = crackTex(512, 512, 10, { step: 16, width: 2.4 }); lava.repeat.set(16, 16);
+  const sandMat = new THREE.MeshStandardMaterial({ map: sandTex, roughness: 1, metalness: 0, emissive: 0xffffff, emissiveMap: lava, emissiveIntensity: 1 });
+  world.add(new THREE.Mesh(geo, sandMat));
+  animated.push(() => { sandMat.emissiveIntensity = 0.95 + 0.3 * Math.sin(clock * 0.8) + 0.08 * Math.sin(clock * 4.3); });
   const far = new THREE.Mesh(new THREE.PlaneGeometry(12000, 12000), new THREE.MeshStandardMaterial({ color: 0x5a3622, roughness: 1 }));
   far.rotation.x = -Math.PI / 2; far.position.y = -36; world.add(far);
   // Mesetas lejanas
@@ -924,6 +1200,12 @@ function desertScene(th) {
   // Restos de naves semienterrados
   const metal = new THREE.MeshStandardMaterial({ color: 0x2c2522, roughness: 0.8, metalness: 0.6, side: THREE.DoubleSide });
   const wrecks = scatter(7, 2000, () => { const x = rand(B.minX - 250, B.maxX + 250), z = rand(B.minZ - 250, B.maxZ + 250); return clearOfTrack(x, z, 60, height(x, z) + 40, 20) ? { x, z } : null; });
+  const fireList = [], halo = [];
+  for (const w of wrecks) {
+    const y = height(w.x, w.z);
+    for (let k = 0; k < 6; k++) fireList.push({ x: w.x + rand(-28, 28), y: y + rand(0, 6), z: w.z + rand(-28, 28), s: rand(9, 22) });
+    halo.push(w.x, y + 14, w.z);
+  }
   for (const w of wrecks) {
     const g = new THREE.Group(), y = height(w.x, w.z);
     const hull = new THREE.Mesh(new THREE.CylinderGeometry(14, 18, 110, 12, 1, true, 0, Math.PI * 1.15), metal);
@@ -933,13 +1215,46 @@ function desertScene(th) {
     g.position.set(w.x, y + 2, w.z); g.rotation.y = rand(0, 6.28); g.rotation.z = rand(-0.25, 0.25);
     world.add(g);
   }
-  // Balizas a lo largo de la pista
+  // Antorchas a lo largo de la pista, con su mancha de luz naranja sobre el asfalto
   const bea = [];
-  for (let s = 0; s < TRACK.L; s += 55) for (const sg of [-1, 1]) bea.push({ s, sg });
-  const poles = new THREE.InstancedMesh(boxC, new THREE.MeshStandardMaterial({ color: 0x1a1210, roughness: 0.8 }), bea.length);
-  const lamps = new THREE.InstancedMesh(boxC, new THREE.MeshBasicMaterial({ color: hdr(0xff6a2a, 3) }), bea.length);
-  bea.forEach((b, i) => { poles.setMatrixAt(i, frameMatrix(b.s, b.sg * (W + 4), 2.5, 0.4, 5, 0.4)); lamps.setMatrixAt(i, frameMatrix(b.s, b.sg * (W + 4), 5.2, 0.9, 0.5, 0.9)); });
-  world.add(poles, lamps);
+  for (let s = 0; s < TRACK.L; s += 50) for (const sg of [-1, 1]) bea.push({ s: s + (sg > 0 ? 25 : 0), sg });
+  const iron = new THREE.MeshStandardMaterial({ color: 0x1a1210, roughness: 0.8, metalness: 0.5 });
+  const poles = new THREE.InstancedMesh(boxC, iron, bea.length);
+  const bowl = new THREE.InstancedMesh(new THREE.CylinderGeometry(1.1, 0.55, 0.8, 8), iron, bea.length);
+  const coal = new THREE.InstancedMesh(new THREE.CircleGeometry(1, 8).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: hdr(0xff5a10, 3) }), bea.length);
+  const pg = new THREE.PlaneGeometry(1, 1); pg.rotateX(-Math.PI / 2);
+  const pool = new THREE.InstancedMesh(pg, new THREE.MeshBasicMaterial({ map: glowTex, color: hdr(0xff6a1a, 0.6), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }), bea.length);
+  const tpos = [];
+  bea.forEach((b, i) => {
+    poles.setMatrixAt(i, frameMatrix(b.s, b.sg * (W + 3.2), 2.6, 0.4, 5.2, 0.4));
+    bowl.setMatrixAt(i, frameMatrix(b.s, b.sg * (W + 3.2), 5.4, 1, 1, 1));
+    coal.setMatrixAt(i, frameMatrix(b.s, b.sg * (W + 3.2), 5.81, 1, 1, 1));
+    pool.setMatrixAt(i, frameMatrix(b.s, b.sg * (W - 3), 0.05, 16, 1, 18));
+    const f = frameAt(b.s); _v.copy(f.p).addScaledVector(f.r, b.sg * (W + 3.2)).addScaledVector(f.u, 5.7);
+    fireList.push({ x: _v.x, y: _v.y, z: _v.z, s: rand(2.2, 2.9) }); tpos.push(_v.x, _v.y + 1.8, _v.z);
+  });
+  world.add(poles, bowl, coal, pool);
+  // Fuegos sueltos en las dunas, cerca de la pista
+  const patches = scatter(70, 3000, () => {
+    const f = frameAt(rand(0, TRACK.L)), sg = Math.random() < 0.5 ? -1 : 1, off = W + rand(22, 220);
+    const x = f.p.x + f.r.x * sg * off, z = f.p.z + f.r.z * sg * off;
+    return nearTrack(x, z, 8).d > W + 16 ? { x, z } : null;
+  });
+  for (const p of patches) {
+    const y = height(p.x, p.z), n = 2 + Math.floor(Math.random() * 3);
+    for (let k = 0; k < n; k++) fireList.push({ x: p.x + rand(-5, 5), y: y - 0.5, z: p.z + rand(-5, 5), s: rand(3.5, 8) });
+    halo.push(p.x, y + 5, p.z);
+  }
+  const fm = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), flameMaterial(), fireList.length);
+  fireList.forEach((f, i) => fm.setMatrixAt(i, _m.compose(_v.set(f.x, f.y, f.z), _q.identity(), _sc.setScalar(f.s))));
+  fm.frustumCulled = false; world.add(fm);
+  // Halos de luz (puntos grandes y suaves) para que el fuego "ilumine" el aire alrededor
+  const mkHalo = (arr, size, k) => {
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(arr, 3));
+    const p = new THREE.Points(g, new THREE.PointsMaterial({ size, map: glowTex, color: hdr(0xff4a10, k), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    world.add(p);
+  };
+  mkHalo(halo, 70, 0.45); mkHalo(tpos, 12, 0.5);
 }
 
 // Material holográfico: separación RGB, scanlines que corren, banda de barrido y parpadeo.
@@ -972,8 +1287,9 @@ let boards = [];
 function buildBoards(th) {
   boards = [];
   const list = th.words, night = th.night;
-  list.forEach(([w, sub], i) => {
-    const hue = th === THEMES.desert ? [8, 20][i % 2] : night ? [315, 190, 270, 35][i % 4] : [8, 190, 40, 210][i % 4];
+  list.forEach(([wEs, subEs, subEn, wEn], i) => {
+    const w = pxs(lang === 'en' && wEn ? wEn : wEs), sub = lang === 'en' ? subEn : subEs;
+    const hue = th.hues ? th.hues[i % th.hues.length] : th === THEMES.desert ? [8, 20][i % 2] : night ? [315, 190, 270, 35][i % 4] : [8, 190, 40, 210][i % 4];
     const tex = canvasTex(512, 256, (g, cw, ch) => {
       const gr = g.createLinearGradient(0, 0, cw, ch);
       if (night) { gr.addColorStop(0, `hsla(${hue},100%,14%,.92)`); gr.addColorStop(1, `hsla(${hue + 40},100%,5%,.92)`); }
@@ -981,10 +1297,11 @@ function buildBoards(th) {
       g.fillStyle = gr; g.fillRect(0, 0, cw, ch);
       g.strokeStyle = night ? `hsl(${hue},100%,62%)` : '#fff'; g.lineWidth = 6; g.strokeRect(8, 8, cw - 16, ch - 16);
       g.textAlign = 'center'; g.textBaseline = 'middle';
-      let fs = 86; g.font = `900 ${fs}px Orbitron, "Arial Black", sans-serif`;
-      while (g.measureText(w).width > cw - 60 && fs > 30) { fs -= 4; g.font = `900 ${fs}px Orbitron, "Arial Black", sans-serif`; }
-      g.fillStyle = night ? `hsl(${hue},100%,72%)` : '#fff'; g.shadowColor = g.fillStyle; g.shadowBlur = night ? 22 : 0; g.fillText(w, cw / 2, 108);
-      g.shadowBlur = night ? 6 : 0; g.fillStyle = '#fff'; g.font = '600 30px "Chakra Petch", sans-serif'; g.fillText(sub.toUpperCase(), cw / 2, 192);
+      let fs = 58; g.font = `${fs}px "Press Start 2P", monospace`;
+      while (g.measureText(w).width > cw - 64 && fs > 16) { fs -= 2; g.font = `${fs}px "Press Start 2P", monospace`; }
+      g.fillStyle = 'rgba(0,0,0,.5)'; g.fillText(w, cw / 2 + 5, 113);
+      g.fillStyle = night ? `hsl(${hue},100%,72%)` : '#fff'; g.shadowColor = g.fillStyle; g.shadowBlur = night ? 18 : 0; g.fillText(w, cw / 2, 108);
+      g.shadowBlur = night ? 6 : 0; g.fillStyle = '#fff'; g.font = '38px VT323, monospace'; g.fillText(sub.toUpperCase(), cw / 2, 190);
       if (night) { g.globalAlpha = 0.2; g.fillStyle = '#000'; for (let y = 0; y < ch; y += 4) g.fillRect(0, y, cw, 2); }
     });
     const mat = th.holo ? holoMaterial(tex, th.css[i % 2], i * 0.37) : new THREE.MeshBasicMaterial({ map: tex, side: THREE.DoubleSide, color: hdr(0xffffff, 0.95) });
@@ -1006,11 +1323,16 @@ const PART = 3600, partP = new Float32Array(PART * 3), partSeed = new Float32Arr
 const parts = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial({ size: 0.6, map: glowTex, transparent: true, depthWrite: false, color: 0xffffff, opacity: 0.9 }));
 parts.geometry.setAttribute('position', new THREE.BufferAttribute(partP, 3)); parts.frustumCulled = false; scene.add(parts);
 for (let i = 0; i < PART; i++) partSeed[i] = Math.random() * 100;
+const EMB = 700, embP = new Float32Array(EMB * 3), embSeed = new Float32Array(EMB);
+const embers = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial({ size: 0.32, map: glowTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, color: hdr(0xff7a2a, 2.4) }));
+embers.geometry.setAttribute('position', new THREE.BufferAttribute(embP, 3)); embers.frustumCulled = false; embers.visible = false; scene.add(embers);
+for (let i = 0; i < EMB; i++) embSeed[i] = Math.random() * 100;
 let weather = 'none', stormK = 0;
 function seedWeather() {
   const c = camera.position;
   for (let i = 0; i < RAIN; i++) rainP.set([c.x + rand(-90, 90), c.y + rand(-60, 60), c.z + rand(-90, 90)], i * 3);
   for (let i = 0; i < PART; i++) partP.set([c.x + rand(-90, 90), c.y + rand(-60, 60), c.z + rand(-90, 90)], i * 3);
+  for (let i = 0; i < EMB; i++) embP.set([c.x + rand(-90, 90), c.y + rand(-60, 60), c.z + rand(-90, 90)], i * 3);
 }
 function wrapAround(arr, i, c) {
   for (let a = 0; a < 3; a++) {
@@ -1023,6 +1345,17 @@ function wrapAround(arr, i, c) {
 function updateWeather(dt) {
   rain.visible = weather === 'rain'; parts.visible = weather === 'snow' || weather === 'sand';
   const c = camera.position;
+  embers.visible = !!theme.fire;
+  if (embers.visible) {
+    for (let i = 0; i < EMB; i++) {
+      const s = embSeed[i];
+      embP[i * 3] += (-6 - stormK * 30 + Math.sin(clock * 1.3 + s) * 3) * dt;
+      embP[i * 3 + 1] += (2.5 + (s % 1) * 4) * dt;
+      embP[i * 3 + 2] += Math.cos(clock * 1.1 + s) * 3 * dt;
+      wrapAround(embP, i, c);
+    }
+    embers.geometry.attributes.position.needsUpdate = true;
+  }
   if (weather === 'rain') {
     for (let i = 0; i < RAIN; i++) {
       rainP[i * 3 + 1] -= 95 * dt; wrapAround(rainP, i, c);
@@ -1177,8 +1510,9 @@ function refFor(i) { if (!refGhosts[i]) { const prev = TRACK; useTrack(built[i])
 function pbFor(id) { const raw = store.get('nv2-pb-' + id); if (!raw) return null; try { return JSON.parse(raw); } catch { return null; } }
 
 let cur = 0, mode = 'race', ghostMode = 'ref';
-try { const s = JSON.parse(store.get('nv2-opts') || '{}'); if (s.cur != null) cur = s.cur; if (s.mode) mode = s.mode; if (s.ghost) ghostMode = s.ghost; } catch {}
-const saveOpts = () => store.set('nv2-opts', JSON.stringify({ cur, mode, ghost: ghostMode }));
+try { const s = JSON.parse(store.get('nv2-opts') || '{}'); if (s.cur != null) cur = s.cur; if (s.mode) mode = s.mode; if (s.ghost) ghostMode = s.ghost; if (s.lang) lang = s.lang; } catch {}
+const saveOpts = () => store.set('nv2-opts', JSON.stringify({ cur, mode, ghost: ghostMode, lang }));
+applyLang();
 
 let state = 'menu', raceT = 0, countT = 0, lastCount = 0, shake = 0, attractS = 0, bestLap = null, stepIdx = 0, rec = null, activeGhost = null, zoneIn = -1;
 let zones = [], theme = THEMES.city, fogTarget = { c: new THREE.Color(), d: 0.002 };
@@ -1206,7 +1540,7 @@ function applyTheme(th) {
   parts.material.color.set(th.weather === 'sand' ? 0xd08850 : 0xffffff);
   speedLines.material.color.copy(th.night ? hdr(0xbff6ff, 1.6) : hdr(0xffffff, 1.1));
   const root = document.documentElement.style;
-  root.setProperty('--accent', th.css[0]); root.setProperty('--accent2', th.css[1]); root.setProperty('--panel', th.css[2]);
+  root.setProperty('--accent', th.css[0]); root.setProperty('--hot', th.css[1]); root.setProperty('--accent2', th.css[1]); root.setProperty('--panel', th.css[2]);
   document.body.className = 't-' + TRACK.def.id;
 }
 
@@ -1219,7 +1553,7 @@ function captureEnv() {
   const cc = new THREE.CubeCamera(1, 2600, rt);
   const f = frameAt(TRACK.L * 0.02);
   cc.position.copy(f.p).addScaledVector(f.u, 7);
-  const hide = [rain, parts, trafficPts, trafficLines, speedLines, ghostShip.g, ghostTrail.mesh, ...racers.map(r => r.ship.g), ...racers.map(r => r.trail.mesh)];
+  const hide = [rain, parts, embers, trafficPts, trafficLines, speedLines, ghostShip.g, ghostTrail.mesh, ...racers.map(r => r.ship.g), ...racers.map(r => r.trail.mesh)];
   const vis = hide.map(o => o.visible); hide.forEach(o => { o.visible = false; });
   sky.position.copy(cc.position);
   scene.add(cc); cc.update(renderer, scene); scene.remove(cc);
@@ -1241,9 +1575,9 @@ function loadCircuit(i) {
   buildBoards(th);
   applyTheme(th);
   zones = [];
-  if (TRACK.TUN) zones.push({ name: def.tunnelName, a: TRACK.sAtU(TRACK.TUN.from) - 30, b: TRACK.sAtU(TRACK.TUN.to), fog: th.fogTunnel, d: th.fogD * 1.2 });
-  if (TRACK.BAR) zones.push({ name: def.barrelName, a: TRACK.sAtU(TRACK.BAR.from) - 60, b: TRACK.sAtU(TRACK.BAR.to) });
-  if (def.storm) zones.push({ name: 'TORMENTA DE ARENA', a: TRACK.sAtCP(def.storm[0]), b: TRACK.sAtCP(def.storm[1]), fog: 0x6a3a1c, d: th.fogD * 2.6, storm: true });
+  if (TRACK.TUN) zones.push({ name: tx(def, 'tunnelName'), a: TRACK.sAtU(TRACK.TUN.from) - 30, b: TRACK.sAtU(TRACK.TUN.to), fog: th.fogTunnel, d: th.fogD * 1.2 });
+  if (TRACK.BAR) zones.push({ name: tx(def, 'barrelName'), a: TRACK.sAtU(TRACK.BAR.from) - 60, b: TRACK.sAtU(TRACK.BAR.to) });
+  if (def.storm) zones.push({ name: say('storm'), a: TRACK.sAtCP(def.storm[0]), b: TRACK.sAtCP(def.storm[1]), fog: 0x6a3a1c, d: th.fogD * 2.6, storm: true });
   mapPath = null; attractS = 0; camInit = false; gridUp(); seedWeather();
   captureEnv();
 }
@@ -1268,8 +1602,8 @@ function pickGhost() {
 }
 function ghostLabel() {
   const g = activeGhost;
-  if (!g) return ghostMode === 'pb' ? 'FANTASMA: SIN RÉCORD TODAVÍA' : 'FANTASMA: APAGADO';
-  return `FANTASMA: ${ghostMode === 'pb' ? 'TU MEJOR' : 'LIGA'} ${fmt(g.time)}`;
+  if (!g) return ghostMode === 'pb' ? say('gNone') : say('gOff');
+  return `${say('gTag')}: ${ghostMode === 'pb' ? say('gPb') : say('gRef')} ${fmt(g.time)}`;
 }
 
 // ---------- Menú ----------
@@ -1291,12 +1625,17 @@ function drawPreview(cv, t) {
 }
 function renderMenu() {
   const cards = $('#cards'); cards.innerHTML = '';
+  const bc = $('#specBc'); if (bc && !bc.firstChild) bc.innerHTML = barcode(99, 120, 26);
   built.forEach((t, i) => {
     const def = t.def, pb = pbFor(def.id), ref = refGhosts[i];
-    const el = document.createElement('button'); el.className = 'tcard cut' + (i === cur ? ' on' : '');
-    el.innerHTML = `<canvas></canvas><div class="nm">${def.name.toUpperCase()}</div><div class="pl">${def.place}</div>
-      <div class="chips">${def.tags.map(x => `<span class="chip">${x}</span>`).join('')}</div>
-      <div class="times"><span>Tu récord</span><b>${pb ? fmt(pb.time) : '--'}</b><span>Liga</span><b>${ref ? fmt(ref.time) : '…'}</b><span>Largo</span><b>${(t.L / 1000).toFixed(2)} km</b></div>`;
+    const el = document.createElement('button'); el.className = 'tcard' + (i === cur ? ' on' : '');
+    const row = (k, v) => `<div><span>${k}</span><em>&gt;</em><b>${v}</b></div>`;
+    el.innerHTML = `<div class="hd"><span class="no">0${i + 1}</span><span class="nm">${pxs(tx(def, 'name').toUpperCase())}</span>${barcode(i * 13 + 5, 38, 18)}</div>
+      <div class="slab"><canvas></canvas><i class="cr a"></i><i class="cr b"></i><i class="cr c"></i><i class="cr d"></i><span class="sx">+</span></div>
+      <div class="pl">${tx(def, 'place')}</div>
+      <div class="chips">${tx(def, 'tags').map(x => `<span class="chip">${x}</span>`).join('')}</div>
+      <div class="rows">${row(say('yourRec'), pb ? fmt(pb.time) : '--:--.---')}${row(say('league'), ref ? fmt(ref.time) : '…')}${row(say('length'), (t.L / 1000).toFixed(2) + ' KM')}</div>
+      <div class="ft"><span>${def.id.toUpperCase()}-0${i + 1} // ${def.cp.length} CP</span><span>${i === cur ? '▶ ' + say('selected') : '//:00' + (i + 1)}</span></div>`;
     el.onclick = () => { if (i !== cur) { loadCircuit(i); saveOpts(); renderMenu(); } };
     cards.appendChild(el);
     requestAnimationFrame(() => drawPreview(el.querySelector('canvas'), t));
@@ -1308,6 +1647,8 @@ function renderMenu() {
 }
 document.querySelectorAll('#segMode button').forEach(b => b.onclick = () => { mode = b.dataset.v; saveOpts(); gridUp(); renderMenu(); });
 document.querySelectorAll('#segGhost button').forEach(b => b.onclick = () => { ghostMode = b.dataset.v; saveOpts(); renderMenu(); });
+// Cambiar de idioma reconstruye el circuito para rehacer carteles y pórtico con los textos nuevos.
+document.querySelectorAll('#segLang button').forEach(b => b.onclick = () => { if (lang === b.dataset.v) return; lang = b.dataset.v; saveOpts(); applyLang(); loadCircuit(cur); renderMenu(); });
 
 // ================== Audio (sintetizado) ==================
 const sfx = {
@@ -1338,6 +1679,8 @@ const sfx = {
     this.hum = C.createGain(); this.hum.gain.value = 0; const hl = C.createBiquadFilter(); hl.type = 'lowpass'; hl.frequency.value = 170;
     mk('sawtooth', 55).connect(hl); mk('sawtooth', 55.4).connect(hl); hl.connect(this.hum); this.hum.connect(this.master);
     setInterval(() => { if (TRACK && TRACK.def.theme === 'city' && Math.random() < 0.5) this.siren(); }, 9000);
+    // Crepitar del fuego en Erg: chasquidos cortos de ruido agudo, al azar.
+    setInterval(() => { if (theme.fire && state !== 'paused' && Math.random() < 0.35) this.burst(0.012 + Math.random() * 0.03, 2500 + Math.random() * 2500, 0.03 + Math.random() * 0.04); }, 110);
     this.setAmbience();
   },
   setAmbience() {
@@ -1443,10 +1786,9 @@ function startRace() {
   state = 'countdown';
   for (const id of ['#menu', '#res', '#pause']) $(id).classList.add('hidden');
   $('#hud').classList.remove('hidden'); if (isTouch) $('#touch').classList.remove('hidden');
-  $('#posLbl').textContent = mode === 'tt' ? 'Contrarreloj' : 'Posición';
+  $('#posLbl').textContent = mode === 'tt' ? say('tt') : say('position');
   $('#ghostTag').textContent = ghostLabel(); $('#delta').textContent = '';
-  bootLines = ['VEKTOR//OS 9.2 · arrancando', 'enlace neural ......... OK', 'antigravedad ......... estable',
-    `circuito ............. ${TRACK.def.name.toUpperCase()}`, `${ghostLabel().toLowerCase()}`, 'listo.'];
+  bootLines = [...say('boot'), `${say('circuit')} ${tx(TRACK.def, 'name').toUpperCase()}`, `${ghostLabel().toLowerCase()}`, say('ready')];
 }
 let bootLines = [];
 function toMenu() {
@@ -1464,7 +1806,7 @@ function cycleGhost() {
   const opts = ['off', 'ref'].concat(pbFor(TRACK.def.id) ? ['pb'] : []);
   ghostMode = opts[(opts.indexOf(ghostMode) + 1) % opts.length];
   activeGhost = pickGhost(); saveOpts();
-  $('#ghostTag').textContent = ghostLabel(); toast(ghostMode === 'off' ? 'FANTASMA APAGADO' : ghostMode === 'pb' ? 'FANTASMA: TU MEJOR' : 'FANTASMA: LIGA', 900);
+  $('#ghostTag').textContent = ghostLabel(); toast(ghostMode === 'off' ? say('tGhostOff') : `${say('gTag')}: ${ghostMode === 'pb' ? say('gPb') : say('gRef')}`, 900);
   ghostTrail.reset();
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden && (state === 'race' || state === 'countdown')) togglePause(); });
@@ -1473,7 +1815,7 @@ $('#bResume').onclick = togglePause; $('#bRestart').onclick = startRace; $('#bPa
 $('#bMusic').onclick = () => sfx.toggleMusic(); $('#bGhost').onclick = cycleGhost;
 
 let toastTimer;
-function toast(text, ms = 1400) { const el = $('#toast'); el.textContent = text; el.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), ms); }
+function toast(text, ms = 1400) { const el = $('#toast'); el.textContent = pxs(text); el.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), ms); }
 
 function onLap(r) {
   if (r.lap >= 2) { r.laps.push(raceT - r.lapStart); r.lapStart = raceT; }
@@ -1481,7 +1823,7 @@ function onLap(r) {
   if (r === player && r.lap >= 2) {
     const lt = r.laps.at(-1); if (bestLap == null || lt < bestLap) bestLap = lt;
     const gt = activeGhost ? ghostTimeAt(activeGhost, rawProgress(player)) : null;
-    toast((r.lap === LAPS ? 'ÚLTIMA VUELTA' : `VUELTA ${r.lap}/${LAPS}`) + (gt != null ? `  ${fmtD(raceT - gt)}` : '')); sfx.beep(990, 0.25); glitchK = Math.max(glitchK, 0.35);
+    toast((r.lap === LAPS ? say('lastLap') : `${say('lapN')} ${r.lap}/${LAPS}`) + (gt != null ? `  ${fmtD(raceT - gt)}` : '')); sfx.beep(990, 0.25); glitchK = Math.max(glitchK, 0.35);
   }
 }
 function rank() { return racers.filter(r => r.active).sort((a, b) => progress(b) - progress(a)); }
@@ -1492,16 +1834,16 @@ function finish() {
   const isPb = !prev || t < prev.time;
   let saved = false; if (isPb) saved = store.set('nv2-pb-' + id, JSON.stringify(rec));
   const ref = refFor(cur);
-  $('#rKick').textContent = `${TRACK.def.name} · ${mode === 'tt' ? 'Contrarreloj' : 'Carrera'}`;
-  $('#rPlace').textContent = mode === 'tt' ? fmt(t) : `${place}º`;
-  $('#rTime').textContent = mode === 'tt' ? (isPb ? '¡Nuevo récord!' : `Récord ${fmt(prev.time)}`) : `${fmt(t)}${isPb ? ' · ¡récord!' : ` · récord ${fmt(prev.time)}`}`;
-  const rows = player.laps.map((x, i) => `<tr><td>Vuelta ${i + 1}</td><td>${fmt(x)}</td></tr>`);
-  rows.push(`<tr><td>Contra la liga (${fmt(ref.time)})</td><td style="color:${t <= ref.time ? 'var(--good)' : 'var(--bad)'}">${fmtD(t - ref.time)}</td></tr>`);
-  if (prev) rows.push(`<tr><td>Contra tu récord anterior</td><td style="color:${t <= prev.time ? 'var(--good)' : 'var(--bad)'}">${fmtD(t - prev.time)}</td></tr>`);
-  if (isPb) rows.push(`<tr><td colspan="2" style="color:var(--quiet)">${saved ? 'Fantasma guardado: elegí "Tu mejor" para correr contra él.' : 'No se pudo guardar el fantasma en este navegador.'}</td></tr>`);
+  $('#rKick').textContent = `${tx(TRACK.def, 'name')} · ${mode === 'tt' ? say('tt') : say('race')}`;
+  $('#rPlace').textContent = mode === 'tt' ? fmt(t) : pxs(ordinal(place));
+  $('#rTime').textContent = pxs(mode === 'tt' ? (isPb ? say('newRec') : `${say('rec')} ${fmt(prev.time)}`) : `${fmt(t)}${isPb ? ' · ' + say('recShort') : ` · ${say('recLower')} ${fmt(prev.time)}`}`);
+  const rows = player.laps.map((x, i) => `<tr><td>${say('lap')} ${i + 1}</td><td>${fmt(x)}</td></tr>`);
+  rows.push(`<tr><td>${say('vsLeague')} (${fmt(ref.time)})</td><td style="color:${t <= ref.time ? 'var(--good)' : 'var(--bad)'}">${fmtD(t - ref.time)}</td></tr>`);
+  if (prev) rows.push(`<tr><td>${say('vsPrev')}</td><td style="color:${t <= prev.time ? 'var(--good)' : 'var(--bad)'}">${fmtD(t - prev.time)}</td></tr>`);
+  if (isPb) rows.push(`<tr><td colspan="2" style="color:var(--quiet)">${saved ? say('saved') : say('notSaved')}</td></tr>`);
   $('#rTable').innerHTML = rows.join('');
   setTimeout(() => { if (state === 'finished') { $('#res').classList.remove('hidden'); $('#touch').classList.add('hidden'); } }, 1200);
-  toast(mode === 'tt' ? 'META' : place === 1 ? '¡GANASTE!' : 'META', 1600);
+  toast(mode === 'tt' ? (isPb ? say('highScore') : say('finish')) : place === 1 ? say('win') : say('finish'), 1600);
   sfx.beep(660, 0.2); setTimeout(() => sfx.beep(990, 0.35), 200);
 }
 
@@ -1522,7 +1864,7 @@ function fixedStep() {
   for (let i = 0; i < act.length; i++) for (let j = i + 1; j < act.length; j++) collide(act[i], act[j]);
   if (state === 'race' && player.finishTime == null) { stepIdx++; if ((stepIdx - 1) % GHOST_EVERY === 0) ghostPush(rec, player); }
   if (player.hit > 4 && state !== 'menu') { glitchK = Math.min(0.7, glitchK + player.hit / 160); shake = Math.min(1, shake + player.hit / 140); sfx.burst(Math.min(0.6, player.hit / 120), 500, 0.25); }
-  if (player.padHit && state === 'race') { sfx.burst(0.25, 2600, 0.4); toast('IMPULSO', 600); }
+  if (player.padHit && state === 'race') { sfx.burst(0.25, 2600, 0.4); toast(say('pad'), 600); }
   for (const r of racers) r.padHit = false;
 }
 
@@ -1660,7 +2002,7 @@ function updateHud(dt) {
     const n = Math.ceil(countT - 0.2);
     if (n !== lastCount && n >= 1 && n <= 3) { lastCount = n; sfx.beep(520, 0.15); }
     $('#count').textContent = countT > 0.2 ? Math.min(3, n) : '';
-    if (countT <= 0.2) { state = 'race'; $('#count').textContent = ''; $('#boot').textContent = ''; toast('¡YA!', 700); sfx.beep(1040, 0.35); glitchK = 0.6; }
+    if (countT <= 0.2) { state = 'race'; $('#count').textContent = ''; $('#boot').textContent = ''; toast(say('go'), 700); sfx.beep(1040, 0.35); glitchK = 0.6; }
     else { const n = Math.min(bootLines.length, Math.floor((3.2 - countT) / 0.42) + 1); $('#boot').textContent = bootLines.slice(0, n).join('\n'); }
   }
   hudT -= dt; if (hudT > 0) return; hudT = 1 / 20;
@@ -1668,7 +2010,7 @@ function updateHud(dt) {
   $('#pos').textContent = mode === 'tt' ? '1' : ranks.indexOf(player) + 1; $('#posOf').textContent = mode === 'tt' ? '/1' : `/${ranks.length}`;
   $('#lap').textContent = `${Math.max(1, Math.min(LAPS, player.lap))}/${LAPS}`;
   $('#time').textContent = fmt(state === 'finished' ? player.finishTime : raceT);
-  $('#split').textContent = `Mejor vuelta: ${fmt(bestLap)}`;
+  $('#split').textContent = `${say('bestLap')}: ${fmt(bestLap)}`;
   $('#spd').textContent = Math.max(0, Math.round(player.v * 3.6));
   $('#boost').style.width = `${Math.round(player.energy * 100)}%`;
   const del = $('#delta');
@@ -1698,7 +2040,7 @@ function frame(dt, draw) {
   glitchK *= Math.exp(-fdt * 5);
   cyberPass.uniforms.time.value = clock; cyberPass.uniforms.glitch.value = Math.min(1, glitchK);
   cyberPass.uniforms.ca.value = theme.fx[0] + (player.boosting && state === 'race' ? 0.006 : 0);
-  ghostMat.uniforms.time.value = clock;
+  ghostMat.uniforms.time.value = clock; sceneTime.value = clock;
   for (const m of holoMats) if (m.uniforms.time) m.uniforms.time.value = clock;
   for (const f of animated) f(fdt);
   if (state !== 'menu') { updateHud(dt); drawMap(poses); }
@@ -1713,12 +2055,18 @@ addEventListener('resize', () => {
 });
 
 // Arranque: la tipografía (con tope de 1,5 s) antes de dibujar carteles; los fantasmas de liga se calculan de a uno.
-Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), new Promise(r => setTimeout(r, 1500))]).then(() => {
-  loadCircuit(Math.min(cur, CIRCUITS.length - 1)); renderMenu();
-  let i = 0; const next = () => { if (i < CIRCUITS.length) { refFor(i++); renderMenu(); setTimeout(next, 30); } }; next();
+const fontsReady = document.fonts ? Promise.all(['20px "Press Start 2P"', '20px VT323', '20px Silkscreen'].map(f => document.fonts.load(f))) : Promise.resolve();
+const setLoad = k => { $('#loadBar').style.width = `${Math.round(k * 100)}%`; };
+setLoad(0.08);
+Promise.race([fontsReady, new Promise(r => setTimeout(r, 2500))]).then(() => {
+  loadCircuit(Math.min(cur, CIRCUITS.length - 1)); renderMenu(); setLoad(0.25);
+  let i = 0; const next = () => {
+    if (i < CIRCUITS.length) { refFor(i++); setLoad(0.25 + 0.75 * i / CIRCUITS.length); renderMenu(); setTimeout(next, 30); }
+    else setTimeout(() => $('#load').classList.add('hidden'), 300);
+  }; next();
 });
 requestAnimationFrame(loop);
-window.__nv = { get world() { return world; }, racers, get TRACK() { return TRACK; }, get state() { return state; }, startRace, frame, loadCircuit, setMode: m => { mode = m; gridUp(); }, setGhost: g => { ghostMode = g; } };
+window.__nv = window.__pr = { setLang: l => { lang = l; applyLang(); loadCircuit(cur); renderMenu(); }, get world() { return world; }, racers, get TRACK() { return TRACK; }, get state() { return state; }, startRace, frame, loadCircuit, setMode: m => { mode = m; gridUp(); }, setGhost: g => { ghostMode = g; } };
 </script>
 </body>
 </html>
