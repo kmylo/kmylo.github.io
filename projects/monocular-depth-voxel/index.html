@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        outline: none !important;
+        box-sizing: border-box;
+      }
+      html,
+      body,
+      #root {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #000;
+      }
+      canvas {
+        display: block;
+        outline: none !important;
+      }
+      #canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+    </style>
+
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.183.2/build/three.module.js",
+          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.183.2/build/three.webgpu.js",
+          "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.183.2/build/three.tsl.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.183.2/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module">
+      import * as THREE from 'three';
+      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+      import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+      import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+      import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+      import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+      import { FXAAShader } from 'three/addons/shaders/FXAAShader.js';
+
+      /* ══ UI COMPONENTS ══════════════════════════════════════
+   Build all HUD / overlay elements programmatically.
+   No innerHTML blobs — every element is a proper node.
+══════════════════════════════════════════════════════════ */
+
+      function el(tag, cls, styles, attrs) {
+        const e = document.createElement(tag);
+        if (cls) cls.split(' ').forEach((c) => c && e.classList.add(c));
+        if (styles) Object.assign(e.style, styles);
+        if (attrs)
+          Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+        return e;
+      }
+      function text(str) {
+        return document.createTextNode(str);
+      }
+
+      /* ── Inject shared stylesheet ── */
+      const sheet = el('style');
+      sheet.textContent = `
+  #hud { position:fixed; inset:0; pointer-events:none; z-index:10;
+         font-family:'Share Tech Mono',monospace; color:#0ff; }
+  .corner { position:absolute; width:28px; height:28px;
+            border-color:rgba(0,255,255,.4); border-style:solid; }
+  .corner.tl { top:18px;    left:18px;  border-width:1px 0 0 1px; }
+  .corner.tr { top:18px;    right:18px; border-width:1px 1px 0 0; }
+  .corner.bl { bottom:18px; left:18px;  border-width:0 0 1px 1px; }
+  .corner.br { bottom:18px; right:18px; border-width:0 1px 1px 0; }
+  #scanline { position:absolute; left:0; right:0; height:1px;
+              background:linear-gradient(90deg,transparent,rgba(0,255,255,.3),transparent);
+              animation:scan 5s linear infinite; }
+  @keyframes scan { 0%{top:0} 100%{top:100%} }
+  #title { position:absolute; top:22px; left:50%; transform:translateX(-50%);
+           font-family:'Bebas Neue',sans-serif; font-size:12px; letter-spacing:10px;
+           color:rgba(0,255,255,.5); white-space:nowrap; }
+  #status { position:absolute; bottom:22px; left:50%; transform:translateX(-50%);
+            font-size:9px; letter-spacing:3px; color:rgba(0,255,255,.4);
+            white-space:nowrap; display:flex; gap:28px; align-items:center; }
+  .sdot { width:5px; height:5px; border-radius:50%; background:rgba(0,255,255,.2);
+          display:inline-block; transition:background .5s; }
+  .sdot.live { background:#0ff; box-shadow:0 0 6px #0ff; }
+  #fps-el { font-variant-numeric:tabular-nums; }
+  #viz { position:absolute; bottom:50px; left:50%; transform:translateX(-50%);
+         display:flex; align-items:flex-end; gap:2px; height:30px; pointer-events:none; }
+  .vbar { width:3px; height:2px; background:rgba(0,255,255,.5); border-radius:1px 1px 0 0; }
+  #controls { position:absolute; bottom:22px; right:22px;
+              display:flex; flex-direction:column; align-items:flex-end; gap:7px; pointer-events:all; }
+  .ctrl-btn { background:rgba(0,0,0,.7); border:1px solid rgba(0,255,255,.3);
+              color:rgba(0,255,255,.7); font-family:'Share Tech Mono',monospace;
+              font-size:9px; letter-spacing:2px; padding:5px 12px;
+              cursor:pointer; transition:all .2s; text-transform:uppercase; }
+  .ctrl-btn:hover, .ctrl-btn.active { background:rgba(0,255,255,.08); color:#0ff; border-color:rgba(0,255,255,.6); }
+  .ctrl-row { display:flex; align-items:center; gap:8px;
+              font-size:8px; color:rgba(0,255,255,.45); letter-spacing:1px; }
+  .ctrl-row input[type=range] { -webkit-appearance:none; width:80px; height:2px;
+                                 background:rgba(0,255,255,.2); border-radius:1px;
+                                 outline:none; cursor:pointer; }
+  .ctrl-row input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:10px;
+    height:10px; border-radius:50%; background:#0ff; cursor:pointer; }
+  .ctrl-val { min-width:28px; text-align:right; color:rgba(0,255,255,.6); }
+  #overlay { position:fixed; inset:0; background:rgba(0,0,0,.92);
+             display:flex; flex-direction:column; align-items:center; justify-content:center;
+             gap:20px; z-index:80; transition:opacity .6s;
+             font-family:'Share Tech Mono',monospace; color:#0ff; }
+  #overlay.hidden { opacity:0; pointer-events:none; }
+  #overlay h2 { font-family:'Bebas Neue',sans-serif; font-size:24px;
+                letter-spacing:12px; color:rgba(0,255,255,.9); }
+  #overlay p  { font-size:9px; letter-spacing:3px; color:rgba(0,255,255,.4);
+                max-width:340px; text-align:center; line-height:2.2; }
+  .ov-btn { background:rgba(0,255,255,.06); border:1px solid rgba(0,255,255,.5);
+            color:rgba(0,255,255,.9); font-family:'Share Tech Mono',monospace;
+            font-size:10px; letter-spacing:3px; padding:10px 28px; cursor:pointer; transition:all .2s; }
+  .ov-btn:hover { background:rgba(0,255,255,.15); border-color:#0ff; color:#0ff; }
+  #cam-status { font-size:9px; letter-spacing:2px; color:rgba(255,100,100,.85);
+                min-height:18px; max-width:380px; text-align:center; line-height:1.8; }
+  .pulse-ring { width:56px; height:56px; border:1px solid rgba(0,255,255,.4);
+                border-radius:50%; animation:pr 2s ease-out infinite; }
+  @keyframes pr { 0%{transform:scale(.85);opacity:1} 100%{transform:scale(1.45);opacity:0} }
+  canvas { cursor: grab; }
+  canvas:active { cursor: grabbing; }
+
+  /* ── Audio transport ── */
+  #audio-controls { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+  #audio-source-label { font-size:8px; letter-spacing:2px; color:rgba(0,255,255,.35);
+                        max-width:160px; text-align:right; overflow:hidden;
+                        text-overflow:ellipsis; white-space:nowrap; }
+  .audio-row { display:flex; gap:5px; align-items:center; }
+  .audio-btn { background:rgba(0,0,0,.7); border:1px solid rgba(0,255,255,.3);
+               color:rgba(0,255,255,.7); font-family:'Share Tech Mono',monospace;
+               font-size:9px; letter-spacing:2px; padding:5px 10px;
+               cursor:pointer; transition:all .2s; text-transform:uppercase; }
+  .audio-btn:hover { background:rgba(0,255,255,.08); color:#0ff; border-color:rgba(0,255,255,.6); }
+  .audio-btn.playing { border-color:rgba(0,255,255,.7); color:#0ff; }
+  #btn-upload-audio { display:none; }
+`;
+      document.head.appendChild(sheet);
+
+      /* ── Overlay ── */
+      function makeOverlay() {
+        const overlay = el('div', '', { id: 'overlay' });
+        overlay.id = 'overlay';
+
+        const ring = el('div', 'pulse-ring');
+
+        const title = el('h2');
+        title.textContent = 'DEPTH - LIDAR';
+
+        const desc = el('p');
+        [
+          'AUDIO-REACTIVE VOXEL DEPTH RENDERER',
+          'WEBCAM + DEPTH ANYTHING V2',
+          'CLICK TO GRANT CAMERA ACCESS',
+        ].forEach((line, i, arr) => {
+          desc.appendChild(text(line));
+          if (i < arr.length - 1) desc.appendChild(el('br'));
+        });
+
+        const btn = el('button', 'ov-btn');
+        btn.id = 'btn-start';
+        btn.textContent = 'ACTIVATE WEBCAM + AUDIO';
+
+        const status = el('div');
+        status.id = 'cam-status';
+
+        overlay.append(ring, title, desc, btn, status);
+        return overlay;
+      }
+
+      /* ── HUD ── */
+      function makeHUD() {
+        const hud = el('div');
+        hud.id = 'hud';
+
+        // Corner brackets
+        ['tl', 'tr', 'bl', 'br'].forEach((pos) =>
+          hud.appendChild(el('div', `corner ${pos}`))
+        );
+
+        // Scanline
+        const scanline = el('div');
+        scanline.id = 'scanline';
+        hud.appendChild(scanline);
+
+        // Title
+        const title = el('div');
+        title.id = 'title';
+        title.textContent = 'MONOCULAR DEPTH - VOXEL RECONSTRUCTION';
+        hud.appendChild(title);
+
+        // Status bar
+        const status = el('div');
+        status.id = 'status';
+        function makeStatusItem(dotId, label) {
+          const span = el('span');
+          const dot = el('span', 'sdot');
+          dot.id = dotId;
+          span.append(dot, text(' ' + label));
+          return span;
+        }
+        const fpsEl = el('span');
+        fpsEl.id = 'fps-el';
+        fpsEl.textContent = '-- FPS';
+        status.append(
+          makeStatusItem('dot-cam', 'CAM'),
+          makeStatusItem('dot-ai', 'AI DEPTH'),
+          fpsEl
+        );
+        hud.appendChild(status);
+
+        // Viz bars
+        const viz = el('div');
+        viz.id = 'viz';
+        hud.appendChild(viz);
+
+        // Controls
+        const controls = el('div');
+        controls.id = 'controls';
+
+        function makeSlider(label, id, min, max, step, value) {
+          const row = el('div', 'ctrl-row');
+          const lbl = el('span');
+          lbl.textContent = label;
+          const input = el(
+            'input',
+            '',
+            {},
+            { type: 'range', id, min, max, step, value }
+          );
+          const val = el('span', 'ctrl-val');
+          val.id = 'v-' + id.slice(2);
+          val.textContent = value;
+          row.append(lbl, input, val);
+          return row;
+        }
+
+        controls.appendChild(makeSlider('VIBRATION', 's-vib', 0, 4, 0.05, 1.2));
+        controls.appendChild(makeSlider('EXTRUDE', 's-ext', 2, 60, 0.5, 8.5));
+        controls.appendChild(makeSlider('CONTRAST', 's-con', 0.5, 8, 0.1, 1.8));
+        controls.appendChild(
+          makeSlider('VOXEL SZ', 's-pts', 0.1, 2, 0.05, 0.45)
+        );
+
+        const colorBtn = el('button', 'ctrl-btn active');
+        colorBtn.id = 'btn-color';
+        colorBtn.textContent = 'COLOR: THERMAL';
+        controls.appendChild(colorBtn);
+
+        const depthBtn = el('button', 'ctrl-btn active');
+        depthBtn.id = 'btn-depth';
+        depthBtn.textContent = 'DEPTH: ON';
+        controls.appendChild(depthBtn);
+
+        const depthModeBtn = el('button', 'ctrl-btn active');
+        depthModeBtn.id = 'btn-depth-mode';
+        depthModeBtn.textContent = 'SRC: CONTRAST';
+        controls.appendChild(depthModeBtn);
+
+        // ── Audio transport ──────────────────────────────────────
+        const audioControls = el('div');
+        audioControls.id = 'audio-controls';
+
+        const sourceLabel = el('div');
+        sourceLabel.id = 'audio-source-label';
+        sourceLabel.textContent = 'SOURCE: SYNTH';
+
+        const audioRow = el('div', 'audio-row');
+
+        const playBtn = el('button', 'audio-btn');
+        playBtn.id = 'btn-play-pause';
+        playBtn.textContent = '⏸ PAUSE';
+
+        const uploadLabel = el('label', 'audio-btn');
+        uploadLabel.textContent = '⬆ UPLOAD';
+        uploadLabel.setAttribute('for', 'btn-upload-audio');
+        uploadLabel.setAttribute('title', 'Upload audio file (mp3, wav, ogg…)');
+
+        const uploadInput = el('input');
+        uploadInput.id = 'btn-upload-audio';
+        uploadInput.setAttribute('type', 'file');
+        uploadInput.setAttribute('accept', 'audio/*');
+
+        audioRow.append(playBtn, uploadLabel, uploadInput);
+        audioControls.append(sourceLabel, audioRow);
+        controls.appendChild(audioControls);
+
+        hud.appendChild(controls);
+        return hud;
+      }
+
+      const root = document.getElementById('root');
+      root.appendChild(makeOverlay());
+      root.appendChild(makeHUD());
+
+      /* ══ SETTINGS ═══════════════════════════════════════════ */
+      const S = {
+        vibration: 0,
+        extrude: 26.5,
+        contrast: 0.8,
+        voxelSize: 0.45,
+        colorMode: 1,
+        useLum: true,
+      };
+      const GRID_W = 192,
+        GRID_H = 128;
+
+      /* ══ RENDERER ════════════════════════════════════════════ */
+      const renderer = new THREE.WebGLRenderer({
+        antialias: false,
+        powerPreference: 'high-performance',
+      });
+      renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+      renderer.setSize(innerWidth, innerHeight);
+      renderer.setClearColor(0x000000, 1);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.6;
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.domElement.id = 'canvas';
+      root.appendChild(renderer.domElement);
+
+      /* ══ SCENE ═══════════════════════════════════════════════ */
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x000000);
+      scene.fog = new THREE.FogExp2(0x000000, 0.005);
+      const camera = new THREE.PerspectiveCamera(
+        50,
+        innerWidth / innerHeight,
+        0.1,
+        5000
+      );
+      camera.position.set(0, 8, 52);
+      camera.lookAt(0, 0, 0);
+
+      scene.add(new THREE.AmbientLight(0x001111, 1)); // minimal ambient keeps fog color consistent
+
+      /* ══ ORBIT CONTROLS ══════════════════════════════════════ */
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+      controls.minDistance = 10;
+      controls.maxDistance = 120;
+      controls.target.set(0, 0, 0);
+
+      /* ══ DEPTH TEXTURE ═══════════════════════════════════════ */
+      const depthArr = new Uint8Array(GRID_W * GRID_H * 4);
+      depthArr.fill(0);
+      const depthTex = new THREE.DataTexture(
+        depthArr,
+        GRID_W,
+        GRID_H,
+        THREE.RGBAFormat
+      );
+      depthTex.minFilter = THREE.LinearFilter;
+      depthTex.magFilter = THREE.LinearFilter;
+      depthTex.needsUpdate = true;
+
+      /* ══ SPRITE TEXTURE — soft radial glow ══════════════════ */
+      function makeSpriteTex() {
+        const c = document.createElement('canvas');
+        c.width = c.height = 64;
+        const ctx = c.getContext('2d');
+        const g = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+        g.addColorStop(0, 'rgba(255,255,255,1)');
+        g.addColorStop(0.3, 'rgba(255,255,255,0.6)');
+        g.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, 64, 64);
+        const t = new THREE.Texture(c);
+        t.needsUpdate = true;
+        return t;
+      }
+
+      /* ══ SHADER ══════════════════════════════════════════════ */
+      const uniforms = {
+        uDepthMap: { value: depthTex },
+        uExtrudeAmount: { value: S.extrude },
+        uDepthContrast: { value: S.contrast },
+        uTime: { value: 0 },
+        uColorMode: { value: 1 }, // 1 = thermal default
+        uBass: { value: 0 },
+        uMid: { value: 0 },
+        uHigh: { value: 0 },
+        uAmplitude: { value: 0 },
+        uVibration: { value: S.vibration },
+        uPointSize: { value: S.voxelSize * 18.0 },
+        uFlatMode: { value: 0 }, // 1 = ignore depth, show all particles flat
+      };
+
+      const vertShader = /* glsl */ `
+  attribute vec2 aGridUV;
+
+  uniform sampler2D uDepthMap;
+  uniform float uExtrudeAmount, uDepthContrast, uTime;
+  uniform int   uColorMode;
+  uniform float uBass, uMid, uHigh, uAmplitude, uVibration, uPointSize;
+  uniform int   uFlatMode;
+
+  varying vec3  vColor;
+  varying float vAlpha;
+
+  float hash(float n){ return fract(sin(n * 91.3458) * 47453.5453); }
+
+  vec3 lidarColor(float d){
+    vec3 c0 = vec3(0., .02, .15), c1 = vec3(0., .55, .85), c2 = vec3(.5, 1., 1.);
+    return mix(mix(c0, c1, smoothstep(0., .5, d)), c2, smoothstep(.45, 1., d));
+  }
+  vec3 thermalColor(float d){
+    if(d < .33) return mix(vec3(0.,0.,.1), vec3(.7,0.,.4), d/.33);
+    if(d < .66) return mix(vec3(.7,0.,.4), vec3(1.,.55,0.), (d-.33)/.33);
+    return mix(vec3(1.,.55,0.), vec3(1.,1.,.6), (d-.66)/.34);
+  }
+  vec3 oceanColor(float d){
+    vec3 lo = vec3(.04,.1,.23), mi = vec3(.09,.28,.63), hi = vec3(.22,.66,.91);
+    return d < .5 ? mix(lo, mi, d*2.) : mix(mi, hi, (d-.5)*2.);
+  }
+
+  void main(){
+    vec2  sUV = vec2(1. - aGridUV.x, aGridUV.y);
+    float raw = texture2D(uDepthMap, sUV).r;
+
+    // In flat mode use a constant mid depth so all particles render
+    float d = uFlatMode == 1 ? 0.5 : pow(clamp(raw, 0., 1.), uDepthContrast);
+
+    float seed = aGridUV.x * 137.4 + aGridUV.y * 289.1;
+    float rnd  = hash(seed);
+
+    // Audio displacement
+    float bassWave = sin(uTime*3.2 + aGridUV.x*10. + rnd*6.28) * uBass * 2.2 * uVibration;
+    float midWave  = sin(uTime*6.1 + aGridUV.y*16. + rnd*6.28) * uMid  * 1.0 * uVibration;
+    float hiJitter = (hash(seed + floor(uTime*18.)) - 0.5)      * uHigh * 0.6 * uVibration;
+
+    // Z extrusion — near (d=1) comes toward camera (+Z), far (d=0) recedes (-Z)
+    // This creates a relief map readable from the front with slight angle
+    float extZ = uFlatMode == 1 ? 0.0 : (d - 0.5) * uExtrudeAmount * 2.0;
+    extZ *= (1. + uAmplitude * uVibration * 0.22);
+
+    vec3 pos = position;
+    pos.z   += extZ;
+    pos.y   += bassWave;
+    pos.x   += midWave * .5;
+    pos.z   += hiJitter * abs(extZ) * .15;
+
+    // Color
+    vec3 baseColor;
+    if      (uColorMode == 0) baseColor = lidarColor(d);
+    else if (uColorMode == 1) baseColor = thermalColor(d);
+    else                      baseColor = oceanColor(d);
+    baseColor = min(baseColor + uAmplitude * uVibration * .4 * d, 1.);
+    vColor = baseColor;
+
+    // Alpha — ALL particles visible, only edge fade
+    // No depthMask so low-depth areas don't disappear
+    float edgeX = smoothstep(0., .04, aGridUV.x) * smoothstep(1., .96, aGridUV.x);
+    float edgeY = smoothstep(0., .04, aGridUV.y) * smoothstep(1., .96, aGridUV.y);
+    float depthBright = uFlatMode == 1 ? 0.7 : (0.3 + d * 0.7); // depth particles brighter when closer
+    vAlpha = edgeX * edgeY * depthBright * (0.8 + uAmplitude * .2 * uVibration);
+
+    // Point size
+    float sz = uPointSize * (0.7 + d * 0.6) * (1. + uBass * 0.5 * uVibration);
+    gl_PointSize = clamp(sz, 0.5, 5.);
+
+    gl_Position = projectionMatrix * viewMatrix * vec4(pos, 1.);
+  }
+`;
+
+      const fragShader = /* glsl */ `
+  uniform sampler2D uSprite;
+  varying vec3  vColor;
+  varying float vAlpha;
+
+  void main(){
+    // Circular soft glow from sprite texture
+    vec2  uv   = gl_PointCoord - 0.5;
+    float dist = dot(uv, uv);
+    if (dist > 0.25) discard;                    // hard clip to circle
+    float glow = 1. - smoothstep(0.05, 0.25, dist);
+    vec3  col  = vColor + vColor * pow(glow, 3.) * 0.5; // brighter core
+    gl_FragColor = vec4(col, vAlpha * glow);
+  }
+`;
+
+      const mat = new THREE.ShaderMaterial({
+        uniforms,
+        vertexShader: vertShader,
+        fragmentShader: fragShader,
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+      });
+
+      // Keep a reference so the s-pts slider can update it
+      uniforms.uSprite = { value: makeSpriteTex() };
+
+      let mesh = null;
+
+      function buildGrid() {
+        if (mesh) {
+          scene.remove(mesh);
+          mesh.geometry.dispose();
+        }
+
+        const gw = GRID_W,
+          gh = GRID_H,
+          N = gw * gh,
+          c = S.voxelSize;
+        const hw = gw * c * 0.5,
+          hh = gh * c * 0.5;
+
+        // One vertex per grid cell — position is the rest XY, z = 0
+        const pos = new Float32Array(N * 3);
+        const uvs = new Float32Array(N * 2);
+
+        for (let y = 0; y < gh; y++) {
+          for (let x = 0; x < gw; x++) {
+            const i = y * gw + x;
+            pos[i * 3] = (gw - 1 - x) * c - hw + c * 0.5; // gridX
+            pos[i * 3 + 1] = (gh - 1 - y) * c - hh + c * 0.5; // gridY
+            pos[i * 3 + 2] = 0;
+            uvs[i * 2] = (x + 0.5) / gw;
+            uvs[i * 2 + 1] = (y + 0.5) / gh;
+          }
+        }
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        geo.setAttribute('aGridUV', new THREE.BufferAttribute(uvs, 2));
+
+        mesh = new THREE.Points(geo, mat);
+        mesh.frustumCulled = false;
+        scene.add(mesh);
+      }
+      buildGrid();
+
+      /* ══ POST PROCESSING ═════════════════════════════════════ */
+      const composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
+      const fxaa = new ShaderPass(FXAAShader);
+      fxaa.material.uniforms['resolution'].value.set(
+        1 / innerWidth,
+        1 / innerHeight
+      );
+      composer.addPass(fxaa);
+      composer.addPass(new OutputPass());
+
+      /* ══ WEBCAM ══════════════════════════════════════════════ */
+      const video = document.createElement('video');
+      video.setAttribute('playsinline', '');
+      video.setAttribute('autoplay', '');
+      video.muted = true;
+      video.style.display = 'none';
+      document.body.appendChild(video);
+      let videoReady = false;
+
+      async function initWebcam() {
+        const st = document.getElementById('cam-status');
+        try {
+          st.textContent = 'REQUESTING CAMERA PERMISSION...';
+          const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: 'user',
+              width: { ideal: 640 },
+              height: { ideal: 480 },
+            },
+          });
+          video.srcObject = stream;
+          await video.play();
+          videoReady = true;
+          document.getElementById('dot-cam').classList.add('live');
+          st.textContent = '';
+          return true;
+        } catch (e) {
+          st.textContent =
+            e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError'
+              ? 'PERMISSION DENIED - ALLOW CAMERA IN BROWSER SETTINGS AND RELOAD'
+              : 'CAMERA ERROR: ' + e.message;
+          return false;
+        }
+      }
+
+      /* ══ AI DEPTH ════════════════════════════════════════════ */
+      let aiReady = false,
+        depthModel = null,
+        transformersLib = null;
+      let aiDepthMap = null,
+        aiDepthW = 0,
+        aiDepthH = 0,
+        aiNewFlag = false;
+      let capCv = null,
+        capCtx = null,
+        capW = 0,
+        capH = 0,
+        lastVT = -1;
+
+      async function initDepthModel() {
+        try {
+          transformersLib = await import(
+            'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.5.1'
+          );
+          const { AutoModelForDepthEstimation, env, Tensor } = transformersLib;
+          env.allowLocalModels = false;
+          try {
+            depthModel = await AutoModelForDepthEstimation.from_pretrained(
+              'onnx-community/depth-anything-v2-small',
+              { device: 'webgpu', dtype: 'fp16' }
+            );
+          } catch (e) {
+            depthModel = await AutoModelForDepthEstimation.from_pretrained(
+              'onnx-community/depth-anything-v2-small',
+              { device: 'wasm', dtype: 'fp32' }
+            );
+          }
+          const ws = 64,
+            wt = new Tensor('float32', new Float32Array(1 * 3 * ws * ws), [
+              1,
+              3,
+              ws,
+              ws,
+            ]);
+          const wo = await depthModel({ pixel_values: wt });
+          wo.predicted_depth?.dispose?.();
+          wt.dispose?.();
+          aiReady = true;
+          document.getElementById('dot-ai').classList.add('live');
+        } catch (e) {
+          console.warn('Depth model:', e);
+        }
+      }
+
+      function setupCap() {
+        const vw = video.videoWidth || 384,
+          vh = video.videoHeight || 256;
+        let sw = 192,
+          sh = Math.round(192 / (vw / vh));
+        sw = sw & ~1 || 2;
+        sh = sh & ~1 || 2;
+        if (sw !== capW || sh !== capH) {
+          capCv = document.createElement('canvas');
+          capCv.width = sw;
+          capCv.height = sh;
+          capCtx = capCv.getContext('2d', { willReadFrequently: true });
+          capW = sw;
+          capH = sh;
+        }
+      }
+
+      async function runAILoop() {
+        while (true) {
+          if (!aiReady || !videoReady || video.readyState < 2) {
+            await new Promise((r) => setTimeout(r, 50));
+            continue;
+          }
+          if (video.currentTime === lastVT) {
+            await new Promise((r) => setTimeout(r, 4));
+            continue;
+          }
+          lastVT = video.currentTime;
+          try {
+            setupCap();
+            capCtx.drawImage(video, 0, 0, capW, capH);
+            const px = capCtx.getImageData(0, 0, capW, capH).data;
+            const mean = [0.485, 0.456, 0.406],
+              std = [0.229, 0.224, 0.225],
+              pc = capW * capH;
+            const fd = new Float32Array(3 * pc);
+            for (let i = 0; i < pc; i++) {
+              const o = i << 2;
+              fd[i] = (px[o] / 255 - mean[0]) / std[0];
+              fd[pc + i] = (px[o + 1] / 255 - mean[1]) / std[1];
+              fd[2 * pc + i] = (px[o + 2] / 255 - mean[2]) / std[2];
+            }
+            const { Tensor } = transformersLib;
+            const inp = new Tensor('float32', fd, [1, 3, capH, capW]);
+            const out = await depthModel({ pixel_values: inp });
+            const dep = out.predicted_depth,
+              data = dep.data,
+              dims = dep.dims;
+            const h = dims[1],
+              w = dims[2],
+              tot = w * h;
+            const map = new Float32Array(tot);
+
+            // ── Percentile normalization (2%–98%) ──────────────────
+            const sorted = Float32Array.from(data).sort((a, b) => a - b);
+            const lo = sorted[Math.floor(tot * 0.02)];
+            const hi = sorted[Math.floor(tot * 0.98)];
+            const range = hi - lo;
+            if (range > 1e-4) {
+              const inv = 1 / range;
+              for (let i = 0; i < tot; i++)
+                map[i] = Math.max(0, Math.min(1, (data[i] - lo) * inv));
+            }
+            // else: keep map as zeros — no depth signal this frame
+
+            aiDepthMap = map;
+            aiDepthW = w;
+            aiDepthH = h;
+            aiNewFlag = true;
+            dep.dispose?.();
+            inp.dispose?.();
+          } catch (e) {
+            console.error('Inference:', e);
+            await new Promise((r) => setTimeout(r, 80));
+          }
+        }
+      }
+
+      const fbCv = document.createElement('canvas');
+      fbCv.width = GRID_W;
+      fbCv.height = GRID_H;
+      const fbCtx = fbCv.getContext('2d', { willReadFrequently: true });
+
+      function updateDepthLum() {
+        // Draw mirrored webcam frame
+        fbCtx.save();
+        fbCtx.translate(GRID_W, 0);
+        fbCtx.scale(-1, 1);
+        fbCtx.drawImage(video, 0, 0, GRID_W, GRID_H);
+        fbCtx.restore();
+
+        const px = fbCtx.getImageData(0, 0, GRID_W, GRID_H).data;
+        const N = GRID_W * GRID_H;
+
+        // Pass 1: raw luminance
+        const lum = new Float32Array(N);
+        for (let i = 0; i < N; i++) {
+          const o = i * 4;
+          lum[i] =
+            (0.299 * px[o] + 0.587 * px[o + 1] + 0.114 * px[o + 2]) / 255;
+        }
+
+        // Pass 2: small box-blur (radius 2) for local mean
+        const blur = new Float32Array(N);
+        const R = 2;
+        for (let y = 0; y < GRID_H; y++) {
+          for (let x = 0; x < GRID_W; x++) {
+            let sum = 0,
+              cnt = 0;
+            for (let dy = -R; dy <= R; dy++) {
+              const ny = y + dy;
+              if (ny < 0 || ny >= GRID_H) continue;
+              for (let dx = -R; dx <= R; dx++) {
+                const nx = x + dx;
+                if (nx < 0 || nx >= GRID_W) continue;
+                sum += lum[ny * GRID_W + nx];
+                cnt++;
+              }
+            }
+            blur[y * GRID_W + x] = sum / cnt;
+          }
+        }
+
+        // Pass 3: unsharp mask — boost local contrast, then remap 2–98 percentile
+        const enhanced = new Float32Array(N);
+        for (let i = 0; i < N; i++) {
+          enhanced[i] = Math.max(
+            0,
+            Math.min(1, lum[i] + (lum[i] - blur[i]) * 2.0)
+          );
+        }
+
+        // Percentile stretch so full range is always used
+        const sorted = Float32Array.from(enhanced).sort((a, b) => a - b);
+        const lo = sorted[Math.floor(N * 0.02)];
+        const hi = sorted[Math.floor(N * 0.98)];
+        const range = hi - lo;
+
+        for (let i = 0; i < N; i++) {
+          const v =
+            range > 1e-4
+              ? Math.max(0, Math.min(1, (enhanced[i] - lo) / range))
+              : enhanced[i];
+          const byte = (v * 255) | 0;
+          const o = i * 4;
+          depthArr[o] = byte;
+          depthArr[o + 1] = byte;
+          depthArr[o + 2] = byte;
+          depthArr[o + 3] = 255;
+        }
+        depthTex.needsUpdate = true;
+      }
+
+      // Persistent smoothing buffer — lerps between consecutive AI frames only
+      const smoothBuf = new Float32Array(GRID_W * GRID_H);
+      const SMOOTH_ALPHA = 0.6; // Higher = snappier, less drift toward mean gray
+
+      function updateDepthAI() {
+        if (!aiDepthMap || aiDepthW === 0) return;
+        const xr = aiDepthW / GRID_W,
+          yr = aiDepthH / GRID_H;
+        for (let y = 0; y < GRID_H; y++) {
+          const sr = Math.min((y * yr) | 0, aiDepthH - 1) * aiDepthW;
+          for (let x = 0; x < GRID_W; x++) {
+            const sx = Math.min(((GRID_W - 1 - x) * xr) | 0, aiDepthW - 1);
+            const raw = aiDepthMap[sr + sx];
+            const idx = y * GRID_W + x;
+            // Lerp toward NEW frame value — high alpha means new data wins quickly
+            smoothBuf[idx] += (raw - smoothBuf[idx]) * SMOOTH_ALPHA;
+            const v = (smoothBuf[idx] * 255) | 0;
+            const o = idx * 4;
+            depthArr[o] = v;
+            depthArr[o + 1] = v;
+            depthArr[o + 2] = v;
+            depthArr[o + 3] = 255;
+          }
+        }
+        depthTex.needsUpdate = true;
+      }
+
+      /* ══ AUDIO ═══════════════════════════════════════════════
+   Two modes:
+     'synth'  — procedural Web Audio (default / demo fallback)
+     'file'   — decoded AudioBuffer from user upload, looped
+
+   Shared state: audioCtx, analyser, master gain.
+   Pause/resume via audioCtx.suspend() / .resume() so both
+   modes freeze cleanly without losing playhead position.
+══════════════════════════════════════════════════════════ */
+      let audioCtx = null;
+      let analyser = null;
+      let freqData = null;
+      let masterGain = null;
+      let audioMode = 'synth'; // 'synth' | 'file'
+      let audioReady = false;
+      let isPlaying = true;
+
+      // File-mode nodes (kept so we can pause / resume)
+      let fileSource = null;
+      let fileBuffer = null;
+      let fileStartCtxTime = 0; // audioCtx.currentTime when we last (re)started
+      let filePauseOffset = 0; // seconds into the buffer when paused
+
+      let sAmp = 0,
+        sBass = 0,
+        sMid = 0,
+        sHigh = 0;
+
+      /* ── Shared AudioContext bootstrap (called once on user gesture) ── */
+      function bootAudioContext() {
+        if (audioCtx) return;
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+        masterGain = audioCtx.createGain();
+        masterGain.gain.value = 0.5;
+        masterGain.connect(analyser);
+        analyser.connect(audioCtx.destination);
+      }
+
+      /* ── Synth (default demo) ─────────────────────────────── */
+      function startSynth() {
+        const now = audioCtx.currentTime;
+
+        function thump(t) {
+          const o = audioCtx.createOscillator(),
+            g = audioCtx.createGain();
+          o.type = 'sine';
+          o.frequency.setValueAtTime(44, t);
+          o.frequency.exponentialRampToValueAtTime(28, t + 0.4);
+          g.gain.setValueAtTime(0.001, t);
+          g.gain.exponentialRampToValueAtTime(0.7, t + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+          o.connect(g);
+          g.connect(masterGain);
+          o.start(t);
+          o.stop(t + 0.7);
+        }
+        for (let i = 0; i < 120; i++) thump(now + i * 1.62);
+        setInterval(() => {
+          const t = audioCtx.currentTime;
+          for (let i = 0; i < 120; i++) thump(t + i * 1.62);
+        }, 120 * 1.62 * 1000);
+
+        function pad(f, d = 0, v = 0.05) {
+          const o = audioCtx.createOscillator(),
+            g = audioCtx.createGain(),
+            fi = audioCtx.createBiquadFilter();
+          o.type = 'sawtooth';
+          o.frequency.value = f;
+          o.detune.value = d;
+          fi.type = 'lowpass';
+          fi.frequency.value = 500;
+          g.gain.value = v;
+          o.connect(fi);
+          fi.connect(g);
+          g.connect(masterGain);
+          o.start();
+        }
+        pad(69.3);
+        pad(69.3, 4, 0.03);
+        pad(138.6, 0, 0.03);
+
+        const scale = [
+          138.59, 155.56, 185, 207.65, 246.94, 277.18, 311.13, 370,
+        ];
+        const seq = [0, 2, 4, 3, 1, 5, 4, 6, 2, 7, 5, 3, 0, 4, 6, 2];
+        const beat = 60 / 72;
+
+        function note(f, t, dur, v = 0.11) {
+          const o = audioCtx.createOscillator(),
+            g = audioCtx.createGain(),
+            fi = audioCtx.createBiquadFilter();
+          o.type = 'triangle';
+          o.frequency.value = f;
+          fi.type = 'lowpass';
+          fi.frequency.value = 3000;
+          g.gain.setValueAtTime(0.001, t);
+          g.gain.exponentialRampToValueAtTime(v, t + 0.03);
+          g.gain.exponentialRampToValueAtTime(v * 0.4, t + dur * 0.7);
+          g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+          o.connect(fi);
+          fi.connect(g);
+          g.connect(masterGain);
+          o.start(t);
+          o.stop(t + dur + 0.05);
+        }
+        const ll = seq.length * beat * 0.5;
+        function arp(t0) {
+          seq.forEach((s, i) => {
+            note(scale[s], t0 + i * beat * 0.5, beat * 0.4);
+            if (i % 4 === 0)
+              note(scale[s] * 0.5, t0 + i * beat * 0.5, beat * 0.7, 0.05);
+          });
+        }
+        for (let r = 0; r < 30; r++) arp(now + r * ll);
+        setInterval(() => {
+          const t = audioCtx.currentTime;
+          for (let r = 0; r < 30; r++) arp(t + r * ll);
+        }, 30 * ll * 1000);
+      }
+
+      /* ── File-mode helpers ────────────────────────────────── */
+      function playFileFrom(offset) {
+        if (fileSource) {
+          try {
+            fileSource.stop();
+          } catch (_) {}
+          fileSource.disconnect();
+        }
+        fileSource = audioCtx.createBufferSource();
+        fileSource.buffer = fileBuffer;
+        fileSource.loop = true;
+        fileSource.connect(masterGain);
+        fileSource.start(0, offset % fileBuffer.duration);
+        fileStartCtxTime = audioCtx.currentTime;
+        filePauseOffset = offset;
+      }
+
+      async function loadAudioFile(file) {
+        const arrayBuf = await file.arrayBuffer();
+        fileBuffer = await audioCtx.decodeAudioData(arrayBuf);
+
+        // Stop synth by disconnecting master temporarily, then reconnect
+        // (synth oscillators keep running but output nothing via masterGain)
+        audioMode = 'file';
+        filePauseOffset = 0;
+        isPlaying = true;
+        playFileFrom(0);
+
+        // Update label
+        const lbl = document.getElementById('audio-source-label');
+        const name =
+          file.name.length > 22 ? file.name.slice(0, 20) + '…' : file.name;
+        lbl.textContent = 'FILE: ' + name.toUpperCase();
+        updatePlayBtn();
+      }
+
+      /* ── Global initialiser (called on first user gesture) ── */
+      function startAudio() {
+        bootAudioContext();
+        if (audioReady) return;
+        audioReady = true;
+        audioMode = 'synth';
+        isPlaying = false;
+        startSynth();
+
+        // 2. Immediately suspend the context so the synth stays quiet and frozen
+        audioCtx.suspend();
+        updatePlayBtn();
+      }
+
+      /* ── Pause / Resume ──────────────────────────────────── */
+      function togglePlayPause() {
+        if (!audioCtx) return;
+        if (isPlaying) {
+          // Pause
+          if (audioMode === 'file') {
+            filePauseOffset += audioCtx.currentTime - fileStartCtxTime;
+            try {
+              fileSource.stop();
+            } catch (_) {}
+          }
+          audioCtx.suspend();
+          isPlaying = false;
+        } else {
+          // Resume
+          if (audioMode === 'file') {
+            audioCtx.resume().then(() => playFileFrom(filePauseOffset));
+          } else {
+            audioCtx.resume();
+          }
+          isPlaying = true;
+        }
+        updatePlayBtn();
+      }
+
+      function updatePlayBtn() {
+        const btn = document.getElementById('btn-play-pause');
+        if (!btn) return;
+        btn.textContent = isPlaying ? '⏸ PAUSE' : '▶ PLAY';
+        btn.classList.toggle('playing', isPlaying);
+      }
+
+      /* ── Frequency analysis (same for both modes) ─────────── */
+      function updateAudio() {
+        if (!analyser) return;
+        analyser.getByteFrequencyData(freqData);
+        const len = freqData.length;
+        let sum = 0;
+        for (let i = 0; i < len; i++) sum += freqData[i];
+        let b = 0;
+        for (let i = 0; i < 8; i++) b += freqData[i];
+        b /= 8 * 255;
+        let m = 0;
+        for (let i = 8; i < 40; i++) m += freqData[i];
+        m /= 32 * 255;
+        let h = 0;
+        for (let i = 40; i < len; i++) h += freqData[i];
+        h /= (len - 40) * 255;
+        sAmp += (sum / (len * 255) - sAmp) * 0.3;
+        sBass += (b - sBass) * 0.25;
+        sMid += (m - sMid) * 0.35;
+        sHigh += (h - sHigh) * 0.4;
+        uniforms.uAmplitude.value = sAmp;
+        uniforms.uBass.value = sBass;
+        uniforms.uMid.value = sMid;
+        uniforms.uHigh.value = sHigh;
+      }
+
+      /* ══ VIZ BARS ════════════════════════════════════════════ */
+      const vizEl = document.getElementById('viz');
+      for (let i = 0; i < 28; i++) {
+        const b = document.createElement('div');
+        b.className = 'vbar';
+        vizEl.appendChild(b);
+      }
+      const vbars = vizEl.querySelectorAll('.vbar');
+      function updateViz() {
+        if (!analyser) {
+          vbars.forEach((b) => (b.style.height = '2px'));
+          return;
+        }
+        const step = Math.floor(freqData.length / 28);
+        vbars.forEach((b, i) => {
+          let a = 0;
+          for (let j = 0; j < step; j++) a += freqData[i * step + j];
+          a /= step * 255;
+          b.style.height = Math.max(2, a * 28) + 'px';
+          b.style.background = `hsl(${185 - i * 2},100%,${50 + a * 45}%)`;
+          b.style.opacity = 0.3 + a * 0.7;
+        });
+      }
+
+      /* ══ CONTROLS ════════════════════════════════════════════ */
+      function bindSlider(id, prop, uid, vid, dec) {
+        document.getElementById(id).addEventListener('input', function () {
+          S[prop] = parseFloat(this.value);
+          document.getElementById(vid).textContent = S[prop].toFixed(dec || 1);
+          if (uid) uniforms[uid].value = S[prop];
+        });
+      }
+      bindSlider('s-vib', 'vibration', 'uVibration', 'v-vib');
+      bindSlider('s-ext', 'extrude', 'uExtrudeAmount', 'v-ext');
+      bindSlider('s-con', 'contrast', 'uDepthContrast', 'v-con');
+      document.getElementById('s-pts').addEventListener('input', function () {
+        S.voxelSize = parseFloat(this.value);
+        document.getElementById('v-pts').textContent = S.voxelSize.toFixed(2);
+        uniforms.uPointSize.value = S.voxelSize * 18.0;
+      });
+      const CLABELS = ['LIDAR', 'THERMAL', 'OCEAN'];
+      let cIdx = 1; // start at THERMAL
+      document.getElementById('btn-color').addEventListener('click', () => {
+        cIdx = (cIdx + 1) % 3;
+        uniforms.uColorMode.value = cIdx;
+        document.getElementById('btn-color').textContent =
+          'COLOR: ' + CLABELS[cIdx];
+      });
+
+      document.getElementById('btn-depth').addEventListener('click', () => {
+        const flat = uniforms.uFlatMode.value === 0;
+        uniforms.uFlatMode.value = flat ? 1 : 0;
+        document.getElementById('btn-depth').textContent = flat
+          ? 'DEPTH: OFF'
+          : 'DEPTH: ON';
+        document.getElementById('btn-depth').classList.toggle('active', !flat);
+      });
+
+      document
+        .getElementById('btn-depth-mode')
+        .addEventListener('click', () => {
+          S.useLum = !S.useLum;
+          const btn = document.getElementById('btn-depth-mode');
+          btn.textContent = S.useLum ? 'SRC: CONTRAST' : 'SRC: AI DEPTH';
+          btn.classList.toggle('active', S.useLum);
+        });
+
+      // Play / Pause
+      document
+        .getElementById('btn-play-pause')
+        .addEventListener('click', togglePlayPause);
+
+      // File upload
+      document
+        .getElementById('btn-upload-audio')
+        .addEventListener('change', async function () {
+          const file = this.files[0];
+          if (!file) return;
+          // Make sure AudioContext exists (may not if user skipped the overlay somehow)
+          bootAudioContext();
+          await loadAudioFile(file);
+          // Reset file input so the same file can be re-selected
+          this.value = '';
+        });
+
+      /* ══ CAMERA MOUSE DRIFT ══════════════════════════════════ */
+      // Handled by OrbitControls — drag to orbit, scroll to zoom, right-drag to pan
+
+      /* ══ RESIZE ══════════════════════════════════════════════ */
+      window.addEventListener('resize', () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+        composer.setSize(innerWidth, innerHeight);
+        fxaa.material.uniforms['resolution'].value.set(
+          1 / innerWidth,
+          1 / innerHeight
+        );
+      });
+
+      /* ══ RENDER LOOP ═════════════════════════════════════════ */
+      let last = 0,
+        fc = 0,
+        fpsLast = performance.now();
+      function animate(t) {
+        const dt = Math.min((t - last) / 1000, 0.08) || 0.016;
+        last = t;
+        updateAudio();
+        updateViz();
+        if (videoReady) {
+          if (S.useLum) {
+            // Luminance mode — direct pixel contrast, no AI, always fresh
+            updateDepthLum();
+          } else if (aiReady && aiNewFlag) {
+            updateDepthAI();
+            aiNewFlag = false;
+          } else if (!aiReady) {
+            updateDepthLum();
+          }
+        }
+        controls.update();
+        uniforms.uTime.value = t * 0.001;
+        uniforms.uVibration.value = S.vibration;
+        if (mesh) mesh.rotation.y = Math.sin(t * 0.00009) * 0.08 + sBass * 0.04;
+        composer.render();
+        fc++;
+        const now = performance.now();
+        if (now - fpsLast >= 800) {
+          document.getElementById('fps-el').textContent =
+            Math.round(fc / ((now - fpsLast) / 1000)) + ' FPS';
+          fc = 0;
+          fpsLast = now;
+        }
+        requestAnimationFrame(animate);
+      }
+
+      /* ══ INIT ════════════════════════════════════════════════ */
+      document
+        .getElementById('btn-start')
+        .addEventListener('click', async () => {
+          startAudio();
+          const ok = await initWebcam();
+          if (ok) {
+            document.getElementById('overlay').classList.add('hidden');
+            initDepthModel().then(() => runAILoop());
+          }
+        });
+
+      requestAnimationFrame(animate);
+    </script>
+  </body>
+</html>
