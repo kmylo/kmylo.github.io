@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fractal Sound Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f7f5f0;
+        --bg2: #efecea;
+        --bg3: #e8e4e0;
+        --bg4: #ddd9d4;
+        --border: rgba(0, 0, 0, 0.08);
+        --border2: rgba(0, 0, 0, 0.15);
+        --text: #1a1714;
+        --text2: #6b6560;
+        --text3: #9e9890;
+        --accent: #8b5e2a;
+        --accent2: #b07840;
+        --red: #b03030;
+        --green: #2a7a48;
+        --blue: #2a5a8b;
+        --purple: #5a2a8b;
+        --mono: 'DM Mono', monospace;
+        --serif: 'Instrument Serif', serif;
+        --sans: 'DM Sans', sans-serif;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 14px;
+        line-height: 1.5;
+        overflow-x: hidden;
+      }
+
+      /* ── scrollbar ── */
+      ::-webkit-scrollbar {
+        width: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--bg4);
+        border-radius: 2px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--text3);
+      }
+
+      /* ── layout ── */
+      .shell {
+        min-height: 100vh;
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      header {
+        padding: 20px 28px 16px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: baseline;
+        gap: 14px;
+      }
+
+      .logo {
+        font-family: var(--serif);
+        font-size: 22px;
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
+      .logo em {
+        font-style: italic;
+        color: var(--accent);
+      }
+      .logo-sub {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text3);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .main {
+        display: grid;
+        grid-template-columns: 260px 1fr;
+        min-height: 0;
+      }
+
+      .sidebar {
+        border-right: 1px solid var(--border);
+        padding: 20px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        overflow-y: auto;
+      }
+
+      .content {
+        padding: 20px 24px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      /* ── tabs ── */
+      .tabs {
+        display: flex;
+        gap: 2px;
+        background: var(--bg2);
+        border-radius: 8px;
+        padding: 3px;
+        margin-bottom: 4px;
+      }
+      .tab {
+        flex: 1;
+        padding: 7px 0;
+        font-size: 12px;
+        font-family: var(--mono);
+        text-align: center;
+        cursor: pointer;
+        border-radius: 5px;
+        border: none;
+        background: transparent;
+        color: var(--text2);
+        transition: all 0.15s;
+        letter-spacing: 0.04em;
+      }
+      .tab:hover {
+        color: var(--text);
+      }
+      .tab.active {
+        background: var(--bg4);
+        color: var(--accent);
+        font-weight: 500;
+      }
+
+      .panel {
+        display: none;
+      }
+      .panel.active {
+        display: contents;
+      }
+
+      /* ── section label ── */
+      .sect-label {
+        font-family: var(--mono);
+        font-size: 10px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin-bottom: 8px;
+      }
+
+      /* ── base buttons ── */
+      .base-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px;
+      }
+      .base-btn {
+        padding: 7px 8px;
+        font-family: var(--mono);
+        font-size: 11px;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        background: var(--bg3);
+        color: var(--text2);
+        cursor: pointer;
+        text-align: left;
+        transition: all 0.12s;
+        line-height: 1.3;
+      }
+      .base-btn .ratio {
+        display: block;
+        font-size: 13px;
+        color: var(--text);
+        font-weight: 500;
+      }
+      .base-btn:hover {
+        border-color: var(--border2);
+        color: var(--text);
+      }
+      .base-btn.active {
+        border-color: var(--accent2);
+        background: rgba(139, 94, 42, 0.08);
+        color: var(--accent);
+      }
+      .base-btn.active .ratio {
+        color: var(--accent);
+      }
+
+      /* ── stats ── */
+      .stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .stat {
+        background: var(--bg3);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 10px;
+      }
+      .stat-label {
+        font-size: 10px;
+        color: var(--text3);
+        font-family: var(--mono);
+        letter-spacing: 0.06em;
+      }
+      .stat-value {
+        font-size: 17px;
+        font-weight: 500;
+        color: var(--text);
+        margin-top: 1px;
+        font-family: var(--mono);
+      }
+
+      /* ── sliders ── */
+      .slider-row {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        margin-bottom: 10px;
+      }
+      .slider-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+      }
+      .slider-name {
+        font-size: 11px;
+        color: var(--text2);
+        font-family: var(--mono);
+      }
+      .slider-val {
+        font-size: 12px;
+        font-family: var(--mono);
+        font-weight: 500;
+        color: var(--accent);
+      }
+      input[type='range'] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 2px;
+        background: var(--bg4);
+        border-radius: 1px;
+        outline: none;
+        cursor: pointer;
+      }
+      input[type='range']::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--accent);
+        border: none;
+        cursor: pointer;
+        transition: transform 0.1s;
+      }
+      input[type='range']:hover::-webkit-slider-thumb {
+        transform: scale(1.2);
+      }
+      input[type='range']::-webkit-slider-runnable-track {
+        height: 2px;
+        background: linear-gradient(
+          to right,
+          var(--accent2) 0%,
+          var(--accent2) var(--pct, 50%),
+          var(--bg4) var(--pct, 50%)
+        );
+        border-radius: 1px;
+      }
+
+      /* ── divider ── */
+      .divider {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 2px 0;
+      }
+
+      /* ── dimensions display ── */
+      .dims {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+      }
+      .dim-box {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 7px 8px;
+      }
+      .dim-title {
+        font-size: 10px;
+        color: var(--text3);
+        font-family: var(--mono);
+        margin-bottom: 3px;
+      }
+      .dim-formula {
+        font-size: 11px;
+        color: var(--text2);
+        font-family: var(--mono);
+      }
+
+      /* ── play controls ── */
+      .play-controls {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .btn-play {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 20px;
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.06em;
+        border: 1px solid var(--accent2);
+        border-radius: 6px;
+        background: rgba(139, 94, 42, 0.08);
+        color: var(--accent);
+        cursor: pointer;
+        transition: all 0.12s;
+      }
+      .btn-play:hover {
+        background: rgba(139, 94, 42, 0.15);
+      }
+      .btn-play.playing {
+        border-color: var(--green);
+        background: rgba(42, 122, 72, 0.1);
+        color: var(--green);
+      }
+      .btn-stop {
+        padding: 9px 16px;
+        font-family: var(--mono);
+        font-size: 12px;
+        border: 1px solid var(--border2);
+        border-radius: 6px;
+        background: transparent;
+        color: var(--text2);
+        cursor: pointer;
+        transition: all 0.12s;
+      }
+      .btn-stop:hover {
+        border-color: var(--red);
+        color: var(--red);
+      }
+
+      /* ── spectrum canvas ── */
+      .canvas-wrap {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+      }
+      .canvas-label {
+        position: absolute;
+        top: 8px;
+        left: 10px;
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text3);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        pointer-events: none;
+      }
+      canvas {
+        width: 100%;
+        display: block;
+      }
+
+      /* ── sequencer grid ── */
+      .seq-grid {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 5px;
+      }
+      .step {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 8px 4px 6px;
+        cursor: pointer;
+        text-align: center;
+        background: var(--bg3);
+        min-height: 68px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        justify-content: center;
+        align-items: center;
+        transition: border-color 0.1s, background 0.1s;
+      }
+      .step:hover {
+        border-color: var(--border2);
+      }
+      .step.sel {
+        border-color: var(--accent2);
+        background: rgba(139, 94, 42, 0.05);
+      }
+      .step.now {
+        border-color: var(--green);
+        background: rgba(42, 122, 72, 0.07);
+      }
+      .step .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .step .dot.on {
+        background: var(--green);
+        box-shadow: 0 0 4px rgba(42, 122, 72, 0.4);
+      }
+      .step .dot.off {
+        border: 1px solid var(--border2);
+      }
+      .step .btag {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 500;
+        padding: 2px 5px;
+        border-radius: 3px;
+      }
+      .step .ftag {
+        font-size: 10px;
+        color: var(--text3);
+        font-family: var(--mono);
+      }
+
+      /* ── step editor ── */
+      .editor-box {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+      }
+      .editor-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .editor-title {
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .toggle-label {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        color: var(--text2);
+        cursor: pointer;
+        font-family: var(--mono);
+      }
+      input[type='checkbox'] {
+        width: 14px;
+        height: 14px;
+        cursor: pointer;
+        accent-color: var(--accent);
+      }
+      .base-select-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        margin-bottom: 12px;
+      }
+      .base-sel-btn {
+        padding: 5px 6px;
+        font-family: var(--mono);
+        font-size: 11px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: transparent;
+        color: var(--text2);
+        cursor: pointer;
+        transition: all 0.1s;
+        text-align: center;
+      }
+      .base-sel-btn:hover {
+        border-color: var(--border2);
+        color: var(--text);
+      }
+      .base-sel-btn.active {
+        border-color: var(--accent2);
+        background: rgba(139, 94, 42, 0.08);
+        color: var(--accent);
+      }
+
+      /* ── playback bar ── */
+      .playback-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 10px 14px;
+      }
+      .metric {
+        background: var(--bg4);
+        border-radius: 5px;
+        padding: 5px 10px;
+        font-size: 10px;
+        color: var(--text3);
+        font-family: var(--mono);
+        text-align: center;
+      }
+      .metric span {
+        display: block;
+        font-size: 16px;
+        font-weight: 500;
+        color: var(--text);
+        margin-top: 1px;
+      }
+
+      /* ── mode buttons ── */
+      .mode-grid {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+      }
+      .mode-btn {
+        padding: 5px 11px;
+        font-family: var(--mono);
+        font-size: 11px;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: transparent;
+        color: var(--text2);
+        cursor: pointer;
+        transition: all 0.1s;
+        letter-spacing: 0.03em;
+      }
+      .mode-btn:hover {
+        border-color: var(--border2);
+        color: var(--text);
+      }
+      .mode-btn.active {
+        border-color: var(--accent2);
+        background: rgba(139, 94, 42, 0.08);
+        color: var(--accent);
+      }
+
+      /* ── order vis ── */
+      .order-vis {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+        min-height: 24px;
+      }
+      .op {
+        font-size: 11px;
+        padding: 2px 7px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        color: var(--text3);
+        font-family: var(--mono);
+        transition: all 0.1s;
+      }
+      .op.cur {
+        background: rgba(139, 94, 42, 0.12);
+        border-color: var(--accent2);
+        color: var(--accent);
+        font-weight: 500;
+      }
+
+      /* ── bpm ── */
+      .bpm-row {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        flex: 1;
+        min-width: 140px;
+      }
+      .bpm-label {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text3);
+        flex-shrink: 0;
+      }
+      .bpm-val {
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        min-width: 32px;
+      }
+
+      /* ── loop row ── */
+      .loop-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .loop-label {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text2);
+      }
+
+      /* ── footer ── */
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 10px 28px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .footer-note {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text3);
+        letter-spacing: 0.06em;
+      }
+      .footer-link {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text3);
+        text-decoration: none;
+        letter-spacing: 0.04em;
+      }
+      .footer-link:hover {
+        color: var(--accent);
+      }
+
+      /* ── oscilloscope ── */
+      #osc-canvas {
+        width: 100%;
+        height: 60px;
+        display: block;
+      }
+
+      /* ── pulse animation ── */
+      @keyframes pulse-dot {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+      .dot.on.pulsing {
+        animation: pulse-dot 0.4s ease-in-out infinite;
+      }
+
+      /* ── responsive ── */
+      @media (max-width: 700px) {
+        .main {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+        }
+        .seq-grid {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <!-- HEADER -->
+      <header>
+        <div class="logo">Fractal <em>Sound</em> Lab</div>
+        <div class="logo-sub">φ · π · e · √2</div>
+      </header>
+
+      <!-- MAIN -->
+      <div class="main">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="tab active" id="tab-gen" onclick="switchTab('gen')">
+              Generador
+            </button>
+            <button class="tab" id="tab-seq" onclick="switchTab('seq')">
+              Secuenciador
+            </button>
+          </div>
+
+          <!-- ══ GENERATOR SIDEBAR ══ -->
+          <div id="gen-sidebar" class="panel active">
+            <div>
+              <div class="sect-label">Proporción base</div>
+              <div class="base-grid" id="base-btns">
+                <button class="base-btn active" onclick="setBase('phi',this)">
+                  <span class="ratio">φ = 1.618</span>
+                  áurea
+                </button>
+                <button class="base-btn" onclick="setBase('pi',this)">
+                  <span class="ratio">π = 3.142</span>
+                  pi
+                </button>
+                <button class="base-btn" onclick="setBase('e',this)">
+                  <span class="ratio">e = 2.718</span>
+                  euler
+                </button>
+                <button class="base-btn" onclick="setBase('fib',this)">
+                  <span class="ratio">1,1,2,3…</span>
+                  fibonacci
+                </button>
+                <button class="base-btn" onclick="setBase('sqrt2',this)">
+                  <span class="ratio">√2 = 1.414</span>
+                  raíz 2
+                </button>
+                <button class="base-btn" onclick="setBase('harm',this)">
+                  <span class="ratio">n+1</span>
+                  armónica
+                </button>
+              </div>
+            </div>
+
+            <div class="stats">
+              <div class="stat">
+                <div class="stat-label">proporción</div>
+                <div class="stat-value" id="base-display">1.618</div>
+              </div>
+              <div class="stat">
+                <div class="stat-label">parciales</div>
+                <div class="stat-value" id="partial-count">8</div>
+              </div>
+            </div>
+
+            <hr class="divider" />
+
+            <div>
+              <div class="sect-label">Parámetros</div>
+              <div class="slider-row">
+                <div class="slider-header">
+                  <span class="slider-name">frec. base</span>
+                  <span class="slider-val" id="freq-v">110 Hz</span>
+                </div>
+                <input
+                  type="range"
+                  id="freq"
+                  min="40"
+                  max="400"
+                  step="1"
+                  value="110"
+                />
+              </div>
+              <div class="slider-row">
+                <div class="slider-header">
+                  <span class="slider-name">parciales</span>
+                  <span class="slider-val" id="partials-v">8</span>
+                </div>
+                <input
+                  type="range"
+                  id="partials"
+                  min="2"
+                  max="16"
+                  step="1"
+                  value="8"
+                />
+              </div>
+              <div class="slider-row">
+                <div class="slider-header">
+                  <span class="slider-name">decaimiento</span>
+                  <span class="slider-val" id="decay-v">0.62</span>
+                </div>
+                <input
+                  type="range"
+                  id="decay"
+                  min="0.2"
+                  max="0.98"
+                  step="0.01"
+                  value="0.618"
+                />
+              </div>
+              <div class="slider-row">
+                <div class="slider-header">
+                  <span class="slider-name">duración</span>
+                  <span class="slider-val" id="duration-v">3.0 s</span>
+                </div>
+                <input
+                  type="range"
+                  id="duration"
+                  min="0.5"
+                  max="6"
+                  step="0.1"
+                  value="3"
+                />
+              </div>
+              <div class="slider-row">
+                <div class="slider-header">
+                  <span class="slider-name">onset fractal</span>
+                  <span class="slider-val" id="onset-v">0.50</span>
+                </div>
+                <input
+                  type="range"
+                  id="onset"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value="0.5"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- ══ SEQUENCER SIDEBAR ══ -->
+          <div id="seq-sidebar" class="panel">
+            <div>
+              <div class="sect-label">Modo de orden</div>
+              <div class="mode-grid">
+                <button
+                  class="mode-btn active"
+                  id="m-linear"
+                  onclick="setMode('linear',this)"
+                >
+                  lineal
+                </button>
+                <button
+                  class="mode-btn"
+                  id="m-reverse"
+                  onclick="setMode('reverse',this)"
+                >
+                  reversa
+                </button>
+                <button
+                  class="mode-btn"
+                  id="m-pingpong"
+                  onclick="setMode('pingpong',this)"
+                >
+                  ping-pong
+                </button>
+                <button
+                  class="mode-btn"
+                  id="m-fibonacci"
+                  onclick="setMode('fibonacci',this)"
+                >
+                  fibonacci
+                </button>
+                <button
+                  class="mode-btn"
+                  id="m-golden"
+                  onclick="setMode('golden',this)"
+                >
+                  áureo
+                </button>
+                <button
+                  class="mode-btn"
+                  id="m-random"
+                  onclick="setMode('random',this)"
+                >
+                  aleatorio
+                </button>
+                <button
+                  class="mode-btn"
+                  id="m-fractal"
+                  onclick="setMode('fractal',this)"
+                >
+                  fractal
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <div class="sect-label">Orden de visita</div>
+              <div class="order-vis" id="order-vis"></div>
+            </div>
+
+            <hr class="divider" />
+
+            <div>
+              <div class="sect-label">Tempo</div>
+              <div class="bpm-row">
+                <span class="bpm-label">BPM</span>
+                <input
+                  type="range"
+                  min="40"
+                  max="240"
+                  step="1"
+                  value="90"
+                  id="bpm"
+                  oninput="document.getElementById('bpm-v').textContent=this.value;updateSliderPct(this);updateBpm()"
+                />
+                <span class="bpm-val" id="bpm-v">90</span>
+              </div>
+            </div>
+
+            <div>
+              <div class="sect-label">Opciones</div>
+              <div class="slider-row">
+                <div class="slider-header">
+                  <span class="slider-name">repeticiones</span>
+                  <span class="slider-val" id="reps-v">1×</span>
+                </div>
+                <input
+                  type="range"
+                  min="1"
+                  max="16"
+                  step="1"
+                  value="1"
+                  id="reps"
+                  oninput="document.getElementById('reps-v').textContent=this.value+'×';updateSliderPct(this)"
+                />
+              </div>
+              <div class="loop-row">
+                <label class="toggle-label">
+                  <input type="checkbox" id="loop-chk" /> loop
+                </label>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- CONTENT -->
+        <main class="content">
+          <!-- ══ GENERATOR CONTENT ══ -->
+          <div id="gen-content" class="panel active">
+            <!-- Dimensions -->
+            <div>
+              <div class="sect-label">Dimensiones activas f · a · t</div>
+              <div class="dims">
+                <div class="dim-box">
+                  <div class="dim-title">Frecuencia</div>
+                  <div class="dim-formula" id="f-formula">fₙ = f₀ · φⁿ</div>
+                </div>
+                <div class="dim-box">
+                  <div class="dim-title">Amplitud</div>
+                  <div class="dim-formula" id="a-formula">aₙ = a₀ · φ⁻ⁿ</div>
+                </div>
+                <div class="dim-box">
+                  <div class="dim-title">Onset</div>
+                  <div class="dim-formula" id="t-formula">tₙ = t₀ · φⁿ</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="play-controls">
+              <button class="btn-play" id="play-btn" onclick="playSynth()">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <polygon points="3,1 13,7 3,13" fill="currentColor" />
+                </svg>
+                Reproducir
+              </button>
+              <button class="btn-stop" onclick="stopSynth()">Detener</button>
+            </div>
+
+            <!-- Spectrum -->
+            <div class="canvas-wrap" style="height: 160px">
+              <div class="canvas-label">espectro</div>
+              <canvas id="cv-gen" height="160"></canvas>
+            </div>
+
+            <!-- Oscilloscope -->
+            <div class="canvas-wrap" style="height: 80px">
+              <div class="canvas-label">osciloscopio</div>
+              <canvas id="osc-canvas" height="80"></canvas>
+            </div>
+          </div>
+
+          <!-- ══ SEQUENCER CONTENT ══ -->
+          <div id="seq-content" class="panel">
+            <!-- Playback -->
+            <div class="playback-bar">
+              <button class="btn-play" id="btn-play-seq" onclick="togglePlay()">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <polygon
+                    points="3,1 13,7 3,13"
+                    fill="currentColor"
+                    id="play-icon"
+                  />
+                </svg>
+                Play
+              </button>
+              <button class="btn-stop" onclick="stopSeq()">Stop</button>
+              <div class="metric">orden<span id="step-num">—</span></div>
+              <div class="metric">paso<span id="cur-step-lbl">—</span></div>
+            </div>
+
+            <!-- Step grid -->
+            <div>
+              <div class="sect-label">Secuencia — 8 pasos</div>
+              <div class="seq-grid" id="seq-grid"></div>
+            </div>
+
+            <!-- Step editor -->
+            <div>
+              <div class="sect-label">Editor de paso</div>
+              <div class="editor-box" id="step-editor">
+                <div
+                  style="
+                    font-size: 12px;
+                    color: var(--text3);
+                    font-family: var(--mono);
+                  "
+                >
+                  Selecciona un paso arriba
+                </div>
+              </div>
+            </div>
+
+            <!-- Seq spectrum -->
+            <div class="canvas-wrap" style="height: 120px">
+              <div class="canvas-label">espectro de secuencia</div>
+              <canvas id="cv-seq" height="120"></canvas>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <!-- FOOTER -->
+      <footer>
+        <span class="footer-note">Fractal Sound Lab · φ π e √2 Fibonacci</span>
+        <span class="footer-note">Web Audio API · Canvas</span>
+      </footer>
+    </div>
+
+    <script>
+      /* ════════════════════════════════════════════════════════
+   DATA
+════════════════════════════════════════════════════════ */
+      const BASES = {
+        phi: {
+          label: 'φ',
+          ratio: '1.618',
+          fn: (n) => Math.pow(1.6180339887, n),
+          af: 'fₙ = f₀ · φⁿ',
+          aa: 'aₙ = a₀ · φ⁻ⁿ',
+          at: 'tₙ = t₀ · φⁿ',
+        },
+        pi: {
+          label: 'π',
+          ratio: '3.142',
+          fn: (n) => Math.pow(Math.PI, n),
+          af: 'fₙ = f₀ · πⁿ',
+          aa: 'aₙ = a₀ · π⁻ⁿ',
+          at: 'tₙ = t₀ · πⁿ',
+        },
+        e: {
+          label: 'e',
+          ratio: '2.718',
+          fn: (n) => Math.pow(Math.E, n),
+          af: 'fₙ = f₀ · eⁿ',
+          aa: 'aₙ = a₀ · e⁻ⁿ',
+          at: 'tₙ = t₀ · eⁿ',
+        },
+        fib: {
+          label: 'Fib',
+          ratio: '1,2,3,5',
+          fn: (n) => {
+            const f = [
+              1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987,
+            ];
+            return f[n] || f[f.length - 1];
+          },
+          af: 'fₙ = f₀ · Fib(n)',
+          aa: 'aₙ = a₀ / Fib(n)',
+          at: 'tₙ = t₀ · Fib(n)',
+        },
+        sqrt2: {
+          label: '√2',
+          ratio: '1.414',
+          fn: (n) => Math.pow(Math.SQRT2, n),
+          af: 'fₙ = f₀ · √2ⁿ',
+          aa: 'aₙ = a₀ · √2⁻ⁿ',
+          at: 'tₙ = t₀ · √2ⁿ',
+        },
+        harm: {
+          label: 'arm',
+          ratio: 'n+1',
+          fn: (n) => n + 1,
+          af: 'fₙ = f₀ · (n+1)',
+          aa: 'aₙ = a₀ / (n+1)',
+          at: 'tₙ = uniforme',
+        },
+      };
+
+      const BCOLORS = {
+        phi: '#8b5e2a',
+        sqrt2: '#2a7a48',
+        e: '#b03030',
+        pi: '#5a2a8b',
+        fib: '#2a5a8b',
+        harm: '#5a5048',
+      };
+
+      const FIB = [
+        1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233, 377, 610, 987,
+      ];
+
+      function hexToRgba(hex, alpha) {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return `rgba(${r},${g},${b},${alpha})`;
+      }
+
+      /* ════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════ */
+      let currentBase = 'phi';
+      let audioCtx = null;
+      let analyser = null;
+      let activeNodes = [];
+      let genPlaying = false;
+      let oscRAF = null;
+
+      let steps = Array.from({ length: 8 }, (_, i) => ({
+        on: i < 4,
+        base: ['phi', 'sqrt2', 'e', 'pi', 'fib', 'harm', 'phi', 'sqrt2'][i],
+        freq: [110, 138, 165, 220, 110, 165, 138, 220][i],
+        partials: 6,
+        decay: 0.62,
+        duration: 0.4,
+        onset: 0.3,
+      }));
+      let selectedStep = 0;
+      let playMode = 'linear';
+      let seqInterval = null;
+      let orderIdx = 0;
+      let seqPlaying = false;
+
+      /* ════════════════════════════════════════════════════════
+   TABS
+════════════════════════════════════════════════════════ */
+      function switchTab(id) {
+        ['gen', 'seq'].forEach((t) => {
+          document
+            .getElementById('tab-' + t)
+            .classList.toggle('active', t === id);
+          document
+            .getElementById(t + '-sidebar')
+            .classList.toggle('active', t === id);
+          document
+            .getElementById(t + '-content')
+            .classList.toggle('active', t === id);
+        });
+        if (id === 'gen') {
+          drawGenSpectrum();
+        }
+        if (id === 'seq') {
+          drawSeqCanvas();
+        }
+      }
+
+      /* ════════════════════════════════════════════════════════
+   SLIDER FILL TRACK
+════════════════════════════════════════════════════════ */
+      function updateSliderPct(el) {
+        const min = parseFloat(el.min) || 0;
+        const max = parseFloat(el.max) || 1;
+        const val = parseFloat(el.value);
+        const pct = (((val - min) / (max - min)) * 100).toFixed(1) + '%';
+        el.style.setProperty('--pct', pct);
+      }
+
+      function initSliders() {
+        document.querySelectorAll('input[type=range]').forEach((el) => {
+          updateSliderPct(el);
+          el.addEventListener('input', () => updateSliderPct(el));
+        });
+      }
+
+      /* ════════════════════════════════════════════════════════
+   GENERATOR — BASE
+════════════════════════════════════════════════════════ */
+      function setBase(key, btn) {
+        currentBase = key;
+        document
+          .querySelectorAll('#base-btns .base-btn')
+          .forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const b = BASES[key];
+        document.getElementById('base-display').textContent = b.ratio;
+        document.getElementById('f-formula').textContent = b.af;
+        document.getElementById('a-formula').textContent = b.aa;
+        document.getElementById('t-formula').textContent = b.at;
+        drawGenSpectrum();
+      }
+
+      /* ════════════════════════════════════════════════════════
+   GENERATOR — SLIDERS
+════════════════════════════════════════════════════════ */
+      function bindSlider(id, suf, fx) {
+        const el = document.getElementById(id);
+        const out = document.getElementById(id + '-v');
+        if (!el || !out) return;
+        el.addEventListener('input', () => {
+          const v = parseFloat(el.value);
+          out.textContent = v.toFixed(fx) + suf;
+          if (id === 'partials')
+            document.getElementById('partial-count').textContent = el.value;
+          drawGenSpectrum();
+        });
+      }
+      bindSlider('freq', ' Hz', 0);
+      bindSlider('partials', '', 0);
+      bindSlider('decay', '', 2);
+      bindSlider('duration', ' s', 1);
+      bindSlider('onset', '', 2);
+
+      function getGenParams() {
+        return {
+          freq: parseFloat(document.getElementById('freq').value),
+          partials: parseInt(document.getElementById('partials').value),
+          decay: parseFloat(document.getElementById('decay').value),
+          duration: parseFloat(document.getElementById('duration').value),
+          onset: parseFloat(document.getElementById('onset').value),
+        };
+      }
+
+      function buildGenPartials() {
+        const p = getGenParams(),
+          b = BASES[currentBase],
+          parts = [];
+        for (let n = 0; n < p.partials; n++) {
+          const fm = b.fn(n);
+          const freq = p.freq * fm;
+          if (freq > 20000) break;
+          const amp = Math.pow(p.decay, n);
+          const onset =
+            currentBase === 'harm'
+              ? 0
+              : Math.min(p.onset * (b.fn(n) - 1) * 0.05, p.duration * 0.8);
+          parts.push({ freq, amp, onset });
+        }
+        return parts;
+      }
+
+      /* ════════════════════════════════════════════════════════
+   GENERATOR — DRAW SPECTRUM
+════════════════════════════════════════════════════════ */
+      function drawGenSpectrum() {
+        const cv = document.getElementById('cv-gen');
+        if (!cv) return;
+        const rect = cv.getBoundingClientRect();
+        const W = rect.width || 600,
+          H = 160;
+        cv.width = W;
+        cv.height = H;
+        const c = cv.getContext('2d');
+        c.clearRect(0, 0, W, H);
+
+        const parts = buildGenPartials();
+        if (!parts.length) return;
+        const maxF = Math.max(...parts.map((p) => p.freq)) * 1.12;
+        const maxA = Math.max(...parts.map((p) => p.amp));
+
+        // grid lines
+        c.strokeStyle = 'rgba(0,0,0,0.06)';
+        c.lineWidth = 1;
+        for (let i = 1; i < 4; i++) {
+          const y = H - (i / 4) * (H - 24) - 14;
+          c.beginPath();
+          c.moveTo(0, y);
+          c.lineTo(W, y);
+          c.stroke();
+        }
+
+        parts.forEach((p, i) => {
+          const x = (Math.log(p.freq) / Math.log(maxF)) * (W - 50) + 25;
+          const bH = (p.amp / maxA) * (H - 36);
+          const hue = (i * 43 + 30) % 360;
+          const sat = 55,
+            lit = 40;
+
+          // bar gradient — use hsla() for transparent stop
+          const grad = c.createLinearGradient(0, H - bH - 12, 0, H - 12);
+          grad.addColorStop(0, `hsla(${hue},${sat}%,${lit}%,1)`);
+          grad.addColorStop(1, `hsla(${hue},${sat}%,${lit}%,0.15)`);
+          c.fillStyle = grad;
+          c.fillRect(x - 5, H - bH - 12, 10, bH);
+
+          // top cap
+          c.fillStyle = `hsl(${hue},${sat}%,${lit}%)`;
+          c.fillRect(x - 5, H - bH - 14, 10, 3);
+
+          if (p.freq < 6000) {
+            c.fillStyle = 'rgba(60,50,40,0.55)';
+            c.font = '9px "DM Mono",monospace';
+            c.textAlign = 'center';
+            c.fillText(Math.round(p.freq) + 'Hz', x, H - 2);
+          }
+        });
+      }
+
+      /* ════════════════════════════════════════════════════════
+   GENERATOR — OSCILLOSCOPE
+════════════════════════════════════════════════════════ */
+      function drawOscilloscope() {
+        const cv = document.getElementById('osc-canvas');
+        if (!cv) return;
+        const rect = cv.getBoundingClientRect();
+        const W = rect.width || 600,
+          H = 80;
+        cv.width = W;
+        cv.height = H;
+        const c = cv.getContext('2d');
+        c.clearRect(0, 0, W, H);
+
+        if (!analyser) {
+          // draw flat line when idle
+          c.strokeStyle = 'rgba(139,94,42,0.25)';
+          c.lineWidth = 1;
+          c.beginPath();
+          c.moveTo(0, H / 2);
+          c.lineTo(W, H / 2);
+          c.stroke();
+          return;
+        }
+
+        const buf = new Uint8Array(analyser.fftSize);
+        analyser.getByteTimeDomainData(buf);
+
+        c.strokeStyle = '#8b5e2a';
+        c.lineWidth = 1.5;
+        c.beginPath();
+        const step = W / buf.length;
+        for (let i = 0; i < buf.length; i++) {
+          const y = (buf[i] / 128.0 - 1.0) * (H / 2) + H / 2;
+          if (i === 0) c.moveTo(0, y);
+          else c.lineTo(i * step, y);
+        }
+        c.stroke();
+
+        if (genPlaying) oscRAF = requestAnimationFrame(drawOscilloscope);
+      }
+
+      /* ════════════════════════════════════════════════════════
+   GENERATOR — AUDIO
+════════════════════════════════════════════════════════ */
+      async function ensureAudio() {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 2048;
+          analyser.connect(audioCtx.destination);
+        }
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
+      }
+
+      async function playSynth() {
+        stopSynth();
+        await ensureAudio();
+        genPlaying = true;
+
+        const btn = document.getElementById('play-btn');
+        btn.classList.add('playing');
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14"><rect x="2" y="2" width="4" height="10" fill="currentColor"/><rect x="8" y="2" width="4" height="10" fill="currentColor"/></svg> Sonando…`;
+
+        const parts = buildGenPartials(),
+          p = getGenParams();
+        const master = audioCtx.createGain();
+        master.gain.value = 0.5 / Math.max(parts.length, 1);
+        master.connect(analyser);
+        const now = audioCtx.currentTime;
+        activeNodes = [master];
+
+        parts.forEach((part) => {
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = part.freq;
+          g.gain.setValueAtTime(0, now + part.onset);
+          g.gain.linearRampToValueAtTime(part.amp, now + part.onset + 0.05);
+          g.gain.exponentialRampToValueAtTime(0.001, now + p.duration);
+          osc.connect(g);
+          g.connect(master);
+          osc.start(now + part.onset);
+          osc.stop(now + p.duration + 0.1);
+          activeNodes.push(osc, g);
+          osc.onended = () => {
+            if (genPlaying && part === parts[parts.length - 1]) resetPlayBtn();
+          };
+        });
+
+        oscRAF = requestAnimationFrame(drawOscilloscope);
+      }
+
+      function stopSynth() {
+        genPlaying = false;
+        cancelAnimationFrame(oscRAF);
+        activeNodes.forEach((n) => {
+          try {
+            n.disconnect();
+            if (n.stop) n.stop();
+          } catch (e) {}
+        });
+        activeNodes = [];
+        resetPlayBtn();
+        drawOscilloscope();
+      }
+
+      function resetPlayBtn() {
+        genPlaying = false;
+        const btn = document.getElementById('play-btn');
+        if (!btn) return;
+        btn.classList.remove('playing');
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polygon points="3,1 13,7 3,13" fill="currentColor"/></svg> Reproducir`;
+      }
+
+      /* ════════════════════════════════════════════════════════
+   SEQUENCER — HELPERS
+════════════════════════════════════════════════════════ */
+      function getSeqFreqs(bk, f0, n) {
+        const out = [];
+        for (let i = 0; i < n; i++) {
+          const f = f0 * BASES[bk].fn(i);
+          if (f > 18000) break;
+          out.push({ freq: f, amp: Math.pow(0.65, i) });
+        }
+        return out;
+      }
+
+      function buildOrder(mode) {
+        const active = steps
+          .map((s, i) => (s.on ? i : -1))
+          .filter((i) => i >= 0);
+        if (!active.length) return [0];
+        switch (mode) {
+          case 'linear':
+            return [...active];
+          case 'reverse':
+            return [...active].reverse();
+          case 'pingpong': {
+            const f = [...active],
+              b = [...active].slice(1, -1).reverse();
+            return [...f, ...b];
+          }
+          case 'fibonacci': {
+            const o = [];
+            for (let i = 0; i < active.length * 2; i++)
+              o.push(active[FIB[i] % active.length]);
+            return o.slice(0, Math.max(active.length, 8));
+          }
+          case 'golden': {
+            const phi = 0.6180339887,
+              o = [];
+            let pos = 0;
+            for (let i = 0; i < active.length * 3; i++) {
+              o.push(active[Math.floor(pos * active.length) % active.length]);
+              pos = (pos + phi) % 1;
+            }
+            return o.slice(0, active.length * 2);
+          }
+          case 'random':
+            return [...active].sort(() => Math.random() - 0.5);
+          case 'fractal': {
+            function fo(a) {
+              if (a.length <= 1) return a;
+              const m = Math.floor(a.length / 2);
+              return [a[m], ...fo(a.slice(0, m)), ...fo(a.slice(m + 1))];
+            }
+            return fo(active);
+          }
+          default:
+            return [...active];
+        }
+      }
+
+      /* ════════════════════════════════════════════════════════
+   SEQUENCER — RENDER
+════════════════════════════════════════════════════════ */
+      function updateOrderVis() {
+        const order = buildOrder(playMode);
+        document.getElementById('order-vis').innerHTML = order
+          .map(
+            (s, i) =>
+              `<span class="op${
+                i === orderIdx % order.length && seqPlaying ? ' cur' : ''
+              }">${s + 1}</span>`
+          )
+          .join('');
+      }
+
+      function renderGrid() {
+        const order = buildOrder(playMode);
+        const curIdx = seqPlaying ? order[orderIdx % order.length] : -1;
+        document.getElementById('seq-grid').innerHTML = steps
+          .map((s, i) => {
+            const col = BCOLORS[s.base] || '#888';
+            const isCur = seqPlaying && curIdx === i;
+            const isOn = s.on;
+            return `<div class="step${i === selectedStep ? ' sel' : ''}${
+              isCur ? ' now' : ''
+            }" onclick="selectStep(${i})">
+      <div class="dot ${isOn ? (isCur ? 'on pulsing' : 'on') : 'off'}"></div>
+      <div class="btag" style="background:${
+        isOn ? hexToRgba(col, 0.12) : 'rgba(0,0,0,0.04)'
+      };color:${isOn ? col : 'var(--text3)'}">${BASES[s.base].label}</div>
+      <div class="ftag">${s.freq}Hz</div>
+    </div>`;
+          })
+          .join('');
+      }
+
+      function selectStep(i) {
+        selectedStep = i;
+        renderGrid();
+        renderEditor();
+      }
+
+      function renderEditor() {
+        const s = steps[selectedStep];
+        const el = document.getElementById('step-editor');
+        el.innerHTML = `
+    <div class="editor-head">
+      <span class="editor-title">Paso ${selectedStep + 1}</span>
+      <label class="toggle-label">
+        <input type="checkbox" ${
+          s.on ? 'checked' : ''
+        } onchange="steps[${selectedStep}].on=this.checked;renderGrid();updateOrderVis();drawSeqCanvas()"> activo
+      </label>
+    </div>
+    <div class="base-select-grid">
+      ${Object.keys(BASES)
+        .map(
+          (k) =>
+            `<button class="base-sel-btn${
+              s.base === k ? ' active' : ''
+            }" onclick="steps[${selectedStep}].base='${k}';renderGrid();renderEditor();drawSeqCanvas()">${
+              BASES[k].label
+            } <span style="color:var(--text3);font-size:10px">${k}</span></button>`
+        )
+        .join('')}
+    </div>
+    <div class="slider-row">
+      <div class="slider-header"><span class="slider-name">frec. base</span><span class="slider-val">${
+        s.freq
+      }Hz</span></div>
+      <input type="range" min="40" max="600" step="1" value="${
+        s.freq
+      }" oninput="steps[${selectedStep}].freq=+this.value;this.previousElementSibling.lastElementChild.textContent=this.value+'Hz';updateSliderPct(this);renderGrid();drawSeqCanvas()">
+    </div>
+    <div class="slider-row">
+      <div class="slider-header"><span class="slider-name">parciales</span><span class="slider-val">${
+        s.partials
+      }</span></div>
+      <input type="range" min="2" max="12" step="1" value="${
+        s.partials
+      }" oninput="steps[${selectedStep}].partials=+this.value;this.previousElementSibling.lastElementChild.textContent=this.value;updateSliderPct(this);drawSeqCanvas()">
+    </div>
+    <div class="slider-row">
+      <div class="slider-header"><span class="slider-name">decaimiento</span><span class="slider-val">${s.decay.toFixed(
+        2
+      )}</span></div>
+      <input type="range" min="0.2" max="0.98" step="0.01" value="${
+        s.decay
+      }" oninput="steps[${selectedStep}].decay=+this.value;this.previousElementSibling.lastElementChild.textContent=(+this.value).toFixed(2);updateSliderPct(this)">
+    </div>
+    <div class="slider-row">
+      <div class="slider-header"><span class="slider-name">duración (s)</span><span class="slider-val">${s.duration.toFixed(
+        2
+      )}s</span></div>
+      <input type="range" min="0.05" max="2" step="0.05" value="${
+        s.duration
+      }" oninput="steps[${selectedStep}].duration=+this.value;this.previousElementSibling.lastElementChild.textContent=(+this.value).toFixed(2)+'s';updateSliderPct(this)">
+    </div>
+    <div class="slider-row">
+      <div class="slider-header"><span class="slider-name">onset fractal</span><span class="slider-val">${s.onset.toFixed(
+        2
+      )}</span></div>
+      <input type="range" min="0" max="1" step="0.01" value="${
+        s.onset
+      }" oninput="steps[${selectedStep}].onset=+this.value;this.previousElementSibling.lastElementChild.textContent=(+this.value).toFixed(2);updateSliderPct(this)">
+    </div>
+  `;
+        el.querySelectorAll('input[type=range]').forEach(updateSliderPct);
+      }
+
+      /* ════════════════════════════════════════════════════════
+   SEQUENCER — CANVAS
+════════════════════════════════════════════════════════ */
+      function drawSeqCanvas() {
+        const cv = document.getElementById('cv-seq');
+        if (!cv) return;
+        const rect = cv.getBoundingClientRect();
+        const W = rect.width || 600,
+          H = 120;
+        cv.width = W;
+        cv.height = H;
+        const c = cv.getContext('2d');
+        c.clearRect(0, 0, W, H);
+        const order = buildOrder(playMode);
+        if (!order.length) return;
+        const sw = W / order.length;
+        order.forEach((si, i) => {
+          const s = steps[si];
+          if (!s.on) return;
+          const freqs = getSeqFreqs(s.base, s.freq, Math.min(s.partials, 6));
+          const col = BCOLORS[s.base] || '#888';
+          // parse hex color to rgb for rgba() usage
+          const r = parseInt(col.slice(1, 3), 16);
+          const g = parseInt(col.slice(3, 5), 16);
+          const b = parseInt(col.slice(5, 7), 16);
+          freqs.forEach((p, fi) => {
+            const bH = p.amp * (H - 18) * 0.85;
+            const x = i * sw + fi * (sw / freqs.length);
+            const bw = sw / freqs.length - 1;
+            const alpha = Math.max(0.15, 1 - fi * 0.15);
+            c.fillStyle = `rgba(${r},${g},${b},${alpha.toFixed(2)})`;
+            c.fillRect(x, H - bH - 10, bw, bH);
+          });
+          c.fillStyle = col;
+          c.font = '10px "DM Mono",monospace';
+          c.textAlign = 'center';
+          c.fillText(BASES[s.base].label, i * sw + sw / 2, H - 1);
+        });
+      }
+
+      /* ════════════════════════════════════════════════════════
+   SEQUENCER — MODE
+════════════════════════════════════════════════════════ */
+      function setMode(m, btn) {
+        playMode = m;
+        document
+          .querySelectorAll('.mode-btn')
+          .forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        orderIdx = 0;
+        updateOrderVis();
+        drawSeqCanvas();
+      }
+
+      /* ════════════════════════════════════════════════════════
+   SEQUENCER — AUDIO
+════════════════════════════════════════════════════════ */
+      async function playSeqStep(si) {
+        const s = steps[si];
+        if (!s.on) return;
+        await ensureAudio();
+        const freqs = getSeqFreqs(s.base, s.freq, s.partials);
+        const master = audioCtx.createGain();
+        master.gain.value = 0.4 / Math.max(freqs.length, 1);
+        master.connect(analyser || audioCtx.destination);
+        const now = audioCtx.currentTime;
+        freqs.forEach((p, i) => {
+          const osc = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = p.freq;
+          const ons = Math.min(
+            s.onset * (Math.pow(1.618, i) - 1) * 0.04,
+            s.duration * 0.8
+          );
+          g.gain.setValueAtTime(0, now + ons);
+          g.gain.linearRampToValueAtTime(p.amp, now + ons + 0.03);
+          g.gain.exponentialRampToValueAtTime(0.001, now + s.duration);
+          osc.connect(g);
+          g.connect(master);
+          osc.start(now + ons);
+          osc.stop(now + s.duration + 0.1);
+        });
+      }
+
+      function togglePlay() {
+        if (seqPlaying) {
+          stopSeq();
+          return;
+        }
+        seqPlaying = true;
+        orderIdx = 0;
+        const btn = document.getElementById('btn-play-seq');
+        btn.classList.add('playing');
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14"><rect x="2" y="2" width="4" height="10" fill="currentColor"/><rect x="8" y="2" width="4" height="10" fill="currentColor"/></svg> Pausa`;
+        tick();
+      }
+
+      function tick() {
+        if (!seqPlaying) return;
+        const order = buildOrder(playMode);
+        if (!order.length) {
+          stopSeq();
+          return;
+        }
+        const reps = parseInt(document.getElementById('reps').value);
+        const loop = document.getElementById('loop-chk').checked;
+        const total = order.length * reps;
+        if (orderIdx >= total) {
+          if (loop) orderIdx = 0;
+          else {
+            stopSeq();
+            return;
+          }
+        }
+        const si = order[orderIdx % order.length];
+        playSeqStep(si);
+        document.getElementById('step-num').textContent = orderIdx + 1;
+        document.getElementById('cur-step-lbl').textContent = si + 1;
+        orderIdx++;
+        renderGrid();
+        updateOrderVis();
+        const bpm = parseInt(document.getElementById('bpm').value);
+        seqInterval = setTimeout(tick, 60000 / bpm);
+      }
+
+      function stopSeq() {
+        seqPlaying = false;
+        clearTimeout(seqInterval);
+        orderIdx = 0;
+        const btn = document.getElementById('btn-play-seq');
+        btn.classList.remove('playing');
+        btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><polygon points="3,1 13,7 3,13" fill="currentColor"/></svg> Play`;
+        document.getElementById('step-num').textContent = '—';
+        document.getElementById('cur-step-lbl').textContent = '—';
+        renderGrid();
+        updateOrderVis();
+      }
+
+      function updateBpm() {
+        if (seqPlaying) {
+          stopSeq();
+          togglePlay();
+        }
+      }
+
+      /* ════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════ */
+      window.addEventListener('load', () => {
+        initSliders();
+        drawGenSpectrum();
+        drawOscilloscope();
+        renderGrid();
+        renderEditor();
+        updateOrderVis();
+      });
+
+      window.addEventListener('resize', () => {
+        drawGenSpectrum();
+        drawSeqCanvas();
+        drawOscilloscope();
+      });
+    </script>
+  </body>
+</html>
