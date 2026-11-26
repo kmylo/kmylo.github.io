@@ -1,0 +1,1697 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Color Matcher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tektur:wght@400..900&family=Major+Mono+Display&family=Barlow+Condensed:wght@300;400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#121312;--card:#0b0c0b;--card-2:#161716;--card-3:#1f201f;--line:#2c2e2b;--grid:#202220;--hair:rgba(233,235,230,.08);
+  --ink:#E9EBE6;--ink-2:#A9ADA5;--ink-3:#6B6D68;
+  --green:#C6F432;--yellow:#A99BFF;--pink:#ff2e63;--orange:#ff5a1f;
+  --r:#ff5a52;--g:#C6F432;--b:#7f8cff;
+  --rad:28px;--cut:9px;
+  --display:'Barlow Condensed','Arial Narrow',sans-serif;
+  --mono:'Space Mono',ui-monospace,Menlo,monospace;
+  --tek:'Tektur','Barlow Condensed',sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background-color:var(--bg);background-image:linear-gradient(rgba(198,244,50,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(198,244,50,.045) 1px,transparent 1px);background-size:44px 44px;color:var(--ink);font:13px/1.55 var(--mono);padding:0 16px 48px;min-height:100vh}
+.wrap{max-width:1320px;margin:0 auto}
+.bar{display:flex;align-items:stretch;justify-content:space-between;border-bottom:1px solid var(--hair);margin:0 -16px 0;padding:0 16px;background:rgba(18,19,18,.85);backdrop-filter:blur(6px);position:sticky;top:0;z-index:40;min-height:64px;gap:12px}
+.brand{display:flex;align-items:center;gap:14px}
+.brand .logo{font-family:var(--tek);font-weight:800;font-size:26px;letter-spacing:-.02em;color:var(--ink)}
+.brand .logo i{font-style:normal;color:var(--green)}
+.brand b{display:block;font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:.02em;text-transform:uppercase;line-height:1}
+.brand small{display:block;font-size:10.5px;letter-spacing:.18em;color:var(--ink-3);text-transform:uppercase;margin-top:3px}
+.topbar{display:flex;gap:10px;align-items:center}
+.lang{display:inline-flex;border:1px solid var(--hair)}
+.lang button{clip-path:none;border:0;background:transparent;color:var(--ink-3);padding:8px 12px;letter-spacing:.16em}
+.lang button.on{background:var(--ink);color:#0b0b0b}
+#status{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-2);border:1px solid var(--hair);padding:8px 12px;max-width:520px;text-transform:uppercase}
+#status::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:8px;box-shadow:0 0 8px var(--green);vertical-align:1px}
+.hero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin:26px 0 30px}
+h1{font-family:var(--tek);font-weight:900;font-size:clamp(46px,8.2vw,124px);line-height:.86;margin:0;letter-spacing:-.01em;color:var(--green);text-transform:uppercase;text-shadow:0 0 28px rgba(198,244,50,.35)}
+.hero .meta{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);text-align:right;line-height:1.9}
+.hero .meta b{color:var(--ink-2);font-weight:400}
+.hero .tm{font-family:var(--tek);font-weight:800;font-size:24px;color:var(--ink);letter-spacing:.02em}
+.hero .tm::before{content:'';display:inline-block;width:18px;height:18px;background:var(--ink);margin-right:10px;vertical-align:-2px}
+.sub{color:var(--ink-2);font-size:12px;margin-top:10px;max-width:640px;letter-spacing:.02em}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:26px;align-items:start}
+@media (max-width:960px){.grid{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:26px;min-width:0}
+
+.card{position:relative;--accent:var(--green);filter:drop-shadow(0 22px 28px rgba(0,0,0,.28));min-width:0}
+.card.yellow{--accent:var(--yellow)}.card.pink{--accent:var(--pink)}.card.orange{--accent:var(--orange)}
+.card-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.card-tab{position:relative;display:inline-flex;align-items:center;gap:10px;background:var(--card);border-radius:var(--rad) var(--rad) 0 0;padding:14px 22px 6px 18px}
+.card-tab::after{content:'';position:absolute;right:-28px;bottom:0;width:28px;height:28px;background:radial-gradient(circle at 100% 0,transparent 27.5px,var(--card) 28px)}
+.card-tab .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent);flex:none}
+.card-tab h2{margin:0;font-family:var(--tek);font-weight:700;font-size:18px;letter-spacing:.04em;text-transform:uppercase;line-height:1}
+.card-tab small{display:block;color:var(--ink-2);font-size:11px;font-family:var(--mono);min-height:13px}
+.card-side{display:flex;gap:6px;align-items:center;padding-bottom:8px;flex-wrap:wrap;justify-content:flex-end}
+.card-menu{clip-path:none;width:34px;height:34px;border-radius:50%;background:var(--card);border:0;display:inline-flex;gap:3px;align-items:center;justify-content:center;cursor:pointer;padding:0;flex:none}
+.card-menu i{width:4px;height:4px;border-radius:50%;background:var(--ink-2)}
+.card-menu:hover i{background:var(--accent)}
+.card-body{background:var(--card);border-radius:0 var(--rad) var(--rad) var(--rad);padding:18px}
+.card.collapsed .card-body{display:none}
+.card.collapsed .card-tab{border-radius:var(--rad)}.card.collapsed .card-tab::after{display:none}
+
+.drop{border:1.5px dashed var(--line);border-radius:18px;background:var(--card-2);min-height:190px;display:grid;place-items:center;position:relative;overflow:hidden}
+.drop.empty{cursor:pointer}
+.drop.over{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.drop .hint{color:var(--ink-2);text-align:center;padding:22px;font-size:13px}
+.drop .hint kbd{font-family:var(--mono);background:var(--card-3);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:11px}
+.imgwrap,.stack{position:relative;display:grid;justify-content:center;align-content:center;width:100%;padding:8px}
+.imgwrap canvas,.stack canvas{grid-area:1/1;display:block;width:auto;height:auto;max-width:100%;max-height:58vh}
+canvas.ov{cursor:crosshair;touch-action:none;position:relative;z-index:2}
+.pins{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.pinchip{display:inline-flex;align-items:center;gap:6px;background:var(--card-3);border:1px solid var(--line);border-radius:0;padding:3px 4px 3px 4px;font-family:var(--mono);font-size:11.5px;color:var(--ink-2);cursor:pointer}
+.pinchip i{width:20px;height:20px;border-radius:50%;border:1.5px solid #fff;display:inline-block}
+.pinchip b{color:var(--ink);font-weight:600}
+.pinchip.sel{border-color:var(--accent);box-shadow:0 0 10px color-mix(in srgb,var(--accent) 35%,transparent)}
+.pinchip button{width:20px;height:20px;padding:0;border:0;background:transparent;color:var(--ink-2);font-size:12px;clip-path:none}
+.pinchip button:hover{color:var(--pink)}
+#cvOut{clip-path:inset(0 0 0 50%)}
+#mag{position:fixed;width:128px;height:128px;border-radius:50%;border:2px solid #f4f4f5;box-shadow:0 10px 26px rgba(0,0,0,.55);pointer-events:none;display:none;z-index:50;overflow:hidden;background:#000}
+#mag canvas{width:100%;height:100%;display:block}
+
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+button{font:inherit;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:var(--card-3);color:var(--ink);border:1px solid var(--line);border-radius:0;padding:9px 14px;cursor:pointer;transition:border-color .15s,background .15s,color .15s;clip-path:polygon(var(--cut) 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%,0 var(--cut))}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#0b0b0b;border-color:var(--accent)}
+button:disabled{opacity:.4;cursor:not-allowed;box-shadow:none}
+.seg{display:inline-flex;background:var(--card-2);border:1px solid var(--line);padding:3px;gap:2px;flex-wrap:wrap}
+.seg label{padding:6px 11px;font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;color:var(--ink-2)}
+.seg input{display:none}
+.seg label:has(input:checked){background:var(--accent);color:#0a0a0b;font-weight:600}
+.ctrl{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px 14px;align-items:center}
+.ctrl>.lbl{color:var(--ink-2);font-size:11px;text-transform:uppercase;letter-spacing:.07em}
+.slider{display:flex;gap:12px;align-items:center}
+.slider input{flex:1;accent-color:var(--accent);min-width:0}
+.slider output{width:60px;text-align:right;font-family:var(--display);font-weight:300;font-size:24px;line-height:1;flex:none}
+.checks{display:flex;gap:14px;flex-wrap:wrap}
+.checks label{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+.checks input{accent-color:var(--accent)}
+.tabs{display:inline-flex;background:var(--card);border:1px solid var(--line);padding:3px;gap:2px;flex-wrap:wrap}
+.tabs button{padding:6px 11px;border:0;background:transparent;clip-path:none;font-size:10.5px}
+.tabs button.on{background:var(--accent);color:#0a0a0b}
+.tabs.sub{background:var(--card-3)}
+.tabs button.cr:not(.on){color:var(--r)}.tabs button.cg:not(.on){color:var(--g)}.tabs button.cb:not(.on){color:var(--b)}
+.tabs .sep{width:1px;background:var(--line);margin:4px 3px}
+
+.edcv{width:100%;display:block;border-radius:16px;background:var(--card-2);touch-action:none;outline:none}
+#cvCurves,#cvAB,#cvVol{aspect-ratio:1/1;cursor:crosshair}
+#cvVol{cursor:grab}
+.cvCL{aspect-ratio:2/1;cursor:crosshair}
+#cvHist{width:100%;height:100px;display:block;border-radius:14px;background:var(--card-2);margin-top:12px}
+.readout{font-family:var(--mono);font-size:12px;color:var(--ink-2);margin-top:10px;min-height:18px}
+.readout b{font-weight:600;color:var(--ink)}
+b.cr,.cr{color:var(--r)}b.cg,.cg{color:var(--g)}b.cb,.cb{color:var(--b)}
+.panel[hidden]{display:none}
+.cl-h{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.07em;margin:4px 0 6px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-top:16px}
+.stat{background:var(--card-2);border-radius:16px;padding:10px 12px;min-width:0}
+.stat .k{font-size:10px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.06em}
+.stat .v{font-family:var(--display);font-weight:300;font-size:24px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note{font-size:12px;color:var(--ink-2);margin:12px 0 0}
+.cmp{display:flex;gap:10px;align-items:center;font-size:11px;color:var(--ink-2);margin-top:12px;text-transform:uppercase;letter-spacing:.06em}
+.cmp input{flex:1;accent-color:var(--accent)}
+.probe{display:flex;gap:10px;align-items:center;margin-top:12px;background:var(--card-2);border-radius:16px;padding:10px 12px;font-family:var(--mono);font-size:11.5px;color:var(--ink-2);min-height:56px}
+.probe b{color:var(--ink);font-weight:600}
+.sw{width:36px;height:36px;border-radius:10px;border:1px solid var(--line);flex:none;background:var(--card-3)}
+.pal{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pal button{width:34px;height:34px;padding:0;clip-path:none;border-radius:0;border:1px solid rgba(255,255,255,.12)}
+.pairs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pair{display:inline-flex;gap:2px;align-items:center;background:var(--card-3);border-radius:0;padding:4px 8px;font-size:12px;color:var(--ink-2)}
+.pair i{width:16px;height:16px;border-radius:5px;display:inline-block}
+.toolhint{font-size:12px;color:var(--ink-2);margin-top:8px;min-height:17px}
+.nodes{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.node{display:inline-flex;align-items:center;gap:4px;background:var(--card-3);border:1px solid var(--line);border-radius:0;padding:3px 4px 3px 10px;font-family:var(--mono);font-size:12px}
+.node.sel{border-color:var(--accent);box-shadow:0 0 10px color-mix(in srgb,var(--accent) 35%,transparent)}
+.node input{width:58px;background:transparent;border:0;color:var(--ink);font:inherit;text-align:right;outline:none;-moz-appearance:textfield}
+.node input::-webkit-inner-spin-button{display:none}
+.node span{color:var(--ink-2)}
+.node button{width:20px;height:20px;padding:0;font-size:12px;line-height:1;background:transparent;border:0;color:var(--ink-2);clip-path:none}
+.node button:hover{color:var(--pink)}
+.nodes-h{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:11px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.07em}
+.lists{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.lists h3{margin:0 0 6px;text-align:center;font-family:var(--display);font-weight:600;font-size:22px;line-height:1}
+.list{height:240px;overflow:auto;background:var(--card-2);border-radius:14px;padding:8px 10px;font-family:var(--mono);font-size:12px;line-height:1.65}
+.list div{cursor:pointer;border-radius:6px;padding:0 6px;white-space:nowrap;display:flex;justify-content:space-between;gap:8px}
+.list div:hover,.list div.hl{background:var(--card-3)}
+.list div i{font-style:normal;color:var(--ink-2)}
+.list .empty{color:var(--ink-2);display:block;cursor:default;white-space:normal}
+.exp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.exp button{text-align:left;padding:12px 15px;text-transform:none;letter-spacing:.02em}
+.exp button b{display:block;font-family:var(--tek);font-weight:700;font-size:17px;letter-spacing:.02em;text-transform:uppercase}
+.exp button small{display:block;color:var(--ink-2);font-size:11px;font-weight:400}
+input[type=text]{font:inherit;font-size:14px;background:var(--card-3);color:var(--ink);border:1px solid var(--line);border-radius:0;padding:9px 14px;width:100%;outline:none}
+input[type=text]:focus{border-color:var(--accent)}
+select{font:inherit;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;background:var(--card-3);color:var(--ink);border:1px solid var(--line);border-radius:0;padding:7px 10px}
+.lblsm{font-size:11px;color:var(--ink-2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.hue-track{height:8px;border-radius:999px;background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);margin:-4px 0 0}
+footer{margin-top:30px;color:var(--ink-3);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;text-align:center}
+input[type=file]{display:none}
+@media (max-width:560px){h1{font-size:42px}.ctrl{grid-template-columns:minmax(0,1fr)}.exp{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.card-body{padding:14px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="bar">
+  <div class="brand"><span class="logo">&lt;{<i>C</i>}&gt;</span><div><b>Color Matcher</b><small>CMTR-01 / Curvas + LUT 3D</small></div></div>
+  <div class="topbar">
+    <span class="lang" id="lang"><button data-l="en">EN</button><button data-l="es">ES</button></span>
+    <span id="status">Listo</span>
+    <button id="btnUndo" title="Ctrl+Z">Deshacer</button>
+  </div>
+</header>
+<section class="hero">
+  <div>
+    <h1>Color<br>Matcher</h1>
+    <div class="sub">Curvas, rejillas A/B y C/L, Color Match y máscaras sobre una LUT 3D. Exporta a Photoshop, Lightroom, Affinity y GIMP.</div>
+  </div>
+  <div class="meta"><div class="tm">_CM.2K26&trade;</div><div>Motor <b>OKLab · LUT 33³</b></div><div>Salida <b>.cube · .acv · .xmp · gimp</b></div><div>Estado <b>local, sin servidor</b></div></div>
+</section>
+
+<div class="grid">
+  <div class="col">
+    <section class="card" id="cardRef">
+      <header class="card-head">
+        <div class="card-tab"><span class="dot"></span><div><h2>Referencia</h2><small id="refInfo">opcional</small></div></div>
+        <div class="card-side"><button class="card-menu" title="Plegar"><i></i><i></i><i></i></button></div>
+      </header>
+      <div class="card-body">
+        <div class="seg" id="tools">
+          <label><input type="radio" name="tool" value="probe" checked><span>Sonda</span></label>
+          <label><input type="radio" name="tool" value="node"><span>Nodo</span></label>
+          <label><input type="radio" name="tool" value="rect"><span>Rango</span></label>
+          <label><input type="radio" name="tool" value="lasso"><span>Lazo</span></label>
+          <label><input type="radio" name="tool" value="pair"><span>Par</span></label>
+        </div>
+        <div class="toolhint" id="toolHint"></div>
+        <div class="drop empty" id="dropRef" style="margin-top:8px">
+          <div class="hint" id="hintRef">Arrastra la foto cuyo look quieres capturar, haz clic para elegirla o pégala con <kbd>Ctrl</kbd>+<kbd>V</kbd></div>
+          <div class="imgwrap" id="wrapRef" hidden><canvas id="cvRef"></canvas><canvas id="ovRef" class="ov"></canvas></div>
+        </div>
+        <div class="row">
+          <button id="btnLoadRef" class="primary">Cargar</button>
+          <button id="btnPasteRef">Pegar</button>
+          <button id="btnClearRect" disabled>Quitar selección</button>
+        </div>
+        <div class="cl-h" style="margin-top:14px"><span>Paleta k-means (OKLab)</span><span><select id="kSel"><option>4</option><option>6</option><option selected>8</option><option>12</option></select></span></div>
+        <div class="pal" id="pal"></div>
+        <div class="cl-h" style="margin-top:16px"><span>Muestras · <span id="pinCount">0</span></span>
+          <span style="display:flex;gap:6px;align-items:center"><select id="autoStrat"><option value="lum">Por luminancia</option><option value="kmeans">K-means color</option><option value="hue">Por tono</option></select><select id="autoN"><option>4</option><option selected>6</option><option>8</option><option>12</option></select><button id="btnAutoPins">Auto</button><button id="btnClearPins">Borrar</button></span></div>
+        <div class="pins" id="pinList"></div>
+        <input type="file" id="fileRef" accept="image/*">
+      </div>
+    </section>
+
+    <section class="card yellow" id="cardTgt">
+      <header class="card-head">
+        <div class="card-tab"><span class="dot"></span><div><h2>Vista previa</h2><small id="tgtInfo"></small></div></div>
+        <div class="card-side"><button class="card-menu" title="Plegar"><i></i><i></i><i></i></button></div>
+      </header>
+      <div class="card-body">
+        <div class="drop empty" id="dropTgt">
+          <div class="hint" id="hintTgt">Arrastra la imagen a corregir, haz clic o pégala con <kbd>Ctrl</kbd>+<kbd>V</kbd> con el cursor sobre esta tarjeta</div>
+          <div class="stack" id="stackTgt" hidden><canvas id="cvBase"></canvas><canvas id="cvOut"></canvas><canvas id="ovTgt" class="ov"></canvas></div>
+        </div>
+        <div class="cmp"><span id="lblBase">Original</span><input type="range" id="split" min="0" max="100" value="50"><span>Resultado</span></div>
+        <div class="probe"><div class="sw" id="swIn"></div><div class="sw" id="swOut"></div><div id="probeTxt">Haz clic en una imagen con la sonda para leer un color</div></div>
+        <div class="row">
+          <button id="btnLoadTgt">Cargar</button>
+          <button id="btnPasteTgt">Pegar</button>
+          <button id="btnUseRef">Usar la referencia</button>
+          <button id="btnPng" disabled>Descargar PNG</button>
+          <span class="checks" style="margin-left:auto"><label><input type="checkbox" id="dither" checked>Tramado</label><label><input type="checkbox" id="desat">Desaturar antes</label></span>
+        </div>
+        <canvas id="cvHist"></canvas>
+        <input type="file" id="fileTgt" accept="image/*">
+      </div>
+    </section>
+
+    <section class="card" id="cardMatch">
+      <header class="card-head">
+        <div class="card-tab"><span class="dot"></span><div><h2>Color Match</h2><small>referencia → vista previa</small></div></div>
+        <div class="card-side"><button class="card-menu" title="Plegar"><i></i><i></i><i></i></button></div>
+      </header>
+      <div class="card-body">
+        <div class="ctrl">
+          <div class="lbl">Match global</div>
+          <div class="row" style="margin:0"><button id="btnMatch" class="primary" disabled>Calcular</button><button id="btnMatchOff" disabled>Quitar</button></div>
+          <div class="lbl">Intensidad</div>
+          <div class="slider"><input type="range" id="matchAmt" min="0" max="100" value="100"><output id="oMatchAmt">100%</output></div>
+          <div class="lbl">Opciones</div>
+          <div class="checks"><label><input type="checkbox" id="matchKeepL">Conservar luminancia</label><label><input type="checkbox" id="pairL" checked>Pares con luminancia</label></div>
+        </div>
+        <div class="cl-h" style="margin-top:16px"><span>Pares de color</span><span id="pairCount">0</span></div>
+        <div class="pairs" id="pairs"></div>
+        <p class="note">El match global iguala media y desviación de L, a y b en OKLab (transferencia de Reinhard en un espacio perceptual). Es una aproximación estadística de primer y segundo orden, no una inversa exacta: dos fotos con el mismo look y distinto contenido dan resultados distintos. Para afinar, usa la herramienta Par: clic en el color de la vista previa que quieres cambiar y luego en el color destino de la referencia o de la paleta. El par deforma la rejilla A/B y, si está activado, la C/L para la luminancia.</p>
+      </div>
+    </section>
+  </div>
+
+  <div class="col">
+    <section class="card pink" id="cardEd">
+      <header class="card-head">
+        <div class="card-tab"><span class="dot"></span><div><h2>Editor</h2><small id="edSub">curvas por canal</small></div></div>
+        <div class="card-side">
+          <span class="tabs" id="edTabs"><button data-t="curves" class="on">Curvas</button><button data-t="ab">A/B</button><button data-t="cl">C/L</button><button data-t="vol">Volumen</button></span>
+          <button class="card-menu" title="Plegar"><i></i><i></i><i></i></button>
+        </div>
+      </header>
+      <div class="card-body">
+        <div class="panel" id="pCurves">
+          <div class="row" style="margin:0 0 12px">
+            <span class="tabs sub" id="tabs"><button data-c="0" class="on">RGB</button><button data-c="1" class="cr">R</button><button data-c="2" class="cg">G</button><button data-c="3" class="cb">B</button><span class="sep"></span><button data-c="4" title="Saturación según luminancia">S×L</button><button data-c="5" title="Saturación según saturación">S→S</button><button data-c="6" title="Luminancia según saturación">L×S</button></span>
+          </div>
+          <canvas id="cvCurves" class="edcv" tabindex="0"></canvas>
+          <div class="readout" id="readout">Clic para añadir punto, arrastra para mover, doble clic o Supr para borrar</div>
+          <div class="row">
+            <button id="btnResetC">Reset canal</button>
+            <button id="btnResetAll">Reset curvas</button>
+            <span class="checks" style="margin-left:auto">
+              <label class="cr"><input type="checkbox" class="vis" data-c="1" checked>R</label>
+              <label class="cg"><input type="checkbox" class="vis" data-c="2" checked>G</label>
+              <label class="cb"><input type="checkbox" class="vis" data-c="3" checked>B</label>
+              <label><input type="checkbox" id="band" checked>Datos</label>
+            </span>
+          </div>
+          <div class="row"><span class="lblsm" style="margin:0">Interpolación</span>
+            <div class="seg" id="interpSeg">
+              <label><input type="radio" name="interp" value="mono" checked><span>Suave</span></label>
+              <label><input type="radio" name="interp" value="natural"><span>Natural</span></label>
+              <label><input type="radio" name="interp" value="linear"><span>Lineal</span></label>
+            </div>
+            <span class="note" style="margin:0" id="interpNote">Hermite monótono: pasa por cada nodo sin sobrepasar</span>
+          </div>
+          <div class="nodes-h"><span id="nodesTitle">Nodos RGB</span><span id="nodesAxis">entrada → salida</span></div>
+          <div class="nodes" id="nodes"></div>
+        </div>
+
+        <div class="panel" id="pAB" hidden>
+          <canvas id="cvAB" class="edcv"></canvas>
+          <div class="readout" id="abRead">Arrastra los nodos: el ángulo es el tono y la distancia al centro la croma. El nodo central mueve los neutros (balance de blancos).</div>
+          <div class="row">
+            <button id="btnABReset">Reset A/B</button>
+            <button id="btnABSmooth">Suavizar</button>
+            <span class="checks" style="margin-left:auto"><label><input type="checkbox" id="abAfter">Nube después</label></span>
+          </div>
+          <div class="ctrl" style="margin-top:12px">
+            <div class="lbl">Luminancia del fondo</div>
+            <div class="slider"><input type="range" id="abL" min="20" max="95" value="68"><output id="oAbL">68</output></div>
+          </div>
+        </div>
+
+        <div class="panel" id="pCL" hidden>
+          <div class="cl-h"><span>Rejilla 1 · eje <span id="clName0">verde ↔ magenta</span></span><button id="btnCL0Reset">Reset</button></div>
+          <canvas id="cvCL0" class="edcv cvCL"></canvas>
+          <div class="cl-h" style="margin-top:12px"><span>Rejilla 2 · eje <span id="clName1">azul ↔ amarillo</span></span><button id="btnCL1Reset">Reset</button></div>
+          <canvas id="cvCL1" class="edcv cvCL"></canvas>
+          <div class="readout" id="clRead">Eje horizontal: croma firmada sobre el eje. Eje vertical: luminancia. Arrastra nodos para mover colores en croma y en luz a la vez.</div>
+          <div class="ctrl" style="margin-top:8px">
+            <div class="lbl">Ángulo de los ejes</div>
+            <div class="slider"><input type="range" id="clAngle" min="-90" max="90" value="0"><output id="oClAngle">0°</output></div>
+          </div>
+          <div class="row"><button id="btnCLSmooth">Suavizar ambas</button></div>
+        </div>
+
+        <div class="panel" id="pVol" hidden>
+          <canvas id="cvVol" class="edcv"></canvas>
+          <div class="row">
+            <div class="seg">
+              <label><input type="radio" name="vol" value="before"><span>Antes</span></label>
+              <label><input type="radio" name="vol" value="after"><span>Después</span></label>
+              <label><input type="radio" name="vol" value="both" checked><span>Ambos</span></label>
+            </div>
+            <span class="note" style="margin:0">Arrastra para rotar. Ejes: L vertical, a y b horizontales (OKLab).</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="cardExt">
+      <header class="card-head">
+        <div class="card-tab"><span class="dot"></span><div><h2>Extracción de curvas</h2><small>luminancia → canal</small></div></div>
+        <div class="card-side"><button class="card-menu" title="Plegar"><i></i><i></i><i></i></button></div>
+      </header>
+      <div class="card-body">
+        <div class="ctrl">
+          <div class="lbl">Luminancia de entrada</div>
+          <div class="seg">
+            <label><input type="radio" name="model" value="avg"><span>(R+G+B)/3</span></label>
+            <label><input type="radio" name="model" value="601" checked><span>Rec.601</span></label>
+            <label><input type="radio" name="model" value="709"><span>Rec.709</span></label>
+          </div>
+          <div class="lbl">Estadístico por nivel</div>
+          <div class="seg">
+            <label><input type="radio" name="stat" value="median" checked><span>Mediana</span></label>
+            <label><input type="radio" name="stat" value="mean"><span>Media</span></label>
+          </div>
+          <div class="lbl">Ubicar nodos</div>
+          <div class="seg">
+            <label><input type="radio" name="place" value="error" checked><span>Por error</span></label>
+            <label><input type="radio" name="place" value="pop"><span>Por población</span></label>
+          </div>
+          <div class="lbl">Suavizado σ</div>
+          <div class="slider"><input type="range" id="sigma" min="0" max="8" step="0.1" value="1.5"><output id="oSigma">1.5</output></div>
+          <div class="lbl">Puntos por curva</div>
+          <div class="slider"><input type="range" id="npts" min="2" max="16" step="1" value="10"><output id="oNpts">10</output></div>
+          <div class="lbl">Intensidad</div>
+          <div class="slider"><input type="range" id="strength" min="0" max="150" step="1" value="100"><output id="oStrength">100%</output></div>
+          <div class="lbl">Rango de luminancia</div>
+          <div><div class="slider"><input type="range" id="rL0" min="0" max="255" value="0"><output id="oRL0">0</output></div><div class="slider"><input type="range" id="rL1" min="0" max="255" value="255"><output id="oRL1">255</output></div></div>
+          <div class="lbl">Rango de tono</div>
+          <div><label class="checks" style="margin-bottom:6px"><label><input type="checkbox" id="rHOn">Filtrar por tono</label></label>
+            <div class="slider"><input type="range" id="rH0" min="0" max="360" value="0"><output id="oRH0">0°</output></div><div class="hue-track"></div>
+            <div class="slider"><input type="range" id="rH1" min="0" max="360" value="360"><output id="oRH1">360°</output></div></div>
+          <div class="lbl">Croma mínima</div>
+          <div class="slider"><input type="range" id="rC" min="0" max="80" value="0"><output id="oRC">0%</output></div>
+          <div class="lbl">Opciones</div>
+          <div class="checks"><label><input type="checkbox" id="mono" checked>Forzar monotonía</label><label><input type="checkbox" id="autoEx" checked>Extraer al cambiar</label></div>
+        </div>
+        <div class="row"><button id="btnExtract" class="primary" disabled>Extraer curvas</button><span class="note" style="margin:0">Los rangos y la selección también filtran la paleta y el Color Match</span></div>
+        <div class="stats">
+          <div class="stat"><div class="k">Píxeles usados</div><div class="v" id="sPx">-</div></div>
+          <div class="stat"><div class="k">Niveles cubiertos</div><div class="v" id="sCov">-</div></div>
+          <div class="stat"><div class="k">RMSE R/G/B</div><div class="v" id="sRmse">-</div></div>
+          <div class="stat"><div class="k">Ancho p10-p90</div><div class="v" id="sBand">-</div></div>
+        </div>
+        <p class="note">Cada curva dice qué valor de R, G o B tiene la referencia para cada nivel de luminancia. En una foto virada el ajuste es casi exacto (RMSE bajo). En una foto a color el RMSE alto refleja el color propio de la escena, y conviene usar Color Match o las rejillas.</p>
+      </div>
+    </section>
+
+    <section class="card orange collapsed" id="cardMask">
+      <header class="card-head">
+        <div class="card-tab"><span class="dot"></span><div><h2>Máscara y opacidad</h2><small id="maskSub">desactivada</small></div></div>
+        <div class="card-side"><button class="card-menu" title="Plegar"><i></i><i></i><i></i></button></div>
+      </header>
+      <div class="card-body">
+        <div class="ctrl">
+          <div class="lbl">Máscara de color</div>
+          <div class="checks"><label><input type="checkbox" id="mOn">Activar</label><label><input type="checkbox" id="mInv">Invertir</label><label><input type="checkbox" id="mShow">Ver máscara</label></div>
+          <div class="lbl">Tono central</div>
+          <div><div class="slider"><input type="range" id="mHc" min="0" max="360" value="40"><output id="oMHc">40°</output></div><div class="hue-track"></div></div>
+          <div class="lbl">Amplitud de tono</div>
+          <div class="slider"><input type="range" id="mHw" min="0" max="180" value="180"><output id="oMHw">todo</output></div>
+          <div class="lbl">Luminancia desde</div>
+          <div class="slider"><input type="range" id="mL0" min="0" max="100" value="0"><output id="oML0">0</output></div>
+          <div class="lbl">Luminancia hasta</div>
+          <div class="slider"><input type="range" id="mL1" min="0" max="100" value="100"><output id="oML1">100</output></div>
+          <div class="lbl">Croma mínima</div>
+          <div class="slider"><input type="range" id="mC" min="0" max="80" value="0"><output id="oMC">0%</output></div>
+          <div class="lbl">Suavidad</div>
+          <div class="slider"><input type="range" id="mF" min="1" max="60" value="20"><output id="oMF">20</output></div>
+          <div class="lbl">Opacidad global</div>
+          <div class="slider"><input type="range" id="opacity" min="0" max="100" value="100"><output id="oOpacity">100%</output></div>
+        </div>
+        <p class="note">La máscara se evalúa sobre el color original de cada píxel y mezcla el resultado con el original. Como todo vive en la LUT 3D, la máscara viaja con la .cube; los formatos de curvas no pueden representarla.</p>
+      </div>
+    </section>
+
+    <section class="card collapsed" id="cardData">
+      <header class="card-head">
+        <div class="card-tab"><span class="dot"></span><div><h2>Datos por nivel</h2><small>(luminancia, valor) : píxeles</small></div></div>
+        <div class="card-side"><button class="card-menu" title="Plegar"><i></i><i></i><i></i></button></div>
+      </header>
+      <div class="card-body">
+        <div class="lists">
+          <div><h3 class="cr">R</h3><div class="list" id="listR"></div></div>
+          <div><h3 class="cg">G</h3><div class="list" id="listG"></div></div>
+          <div><h3 class="cb">B</h3><div class="list" id="listB"></div></div>
+        </div>
+        <p class="note">Para cada nivel de luminancia L, el valor del canal en la referencia y cuántos píxeles tienen esa luminancia. Clic en una fila para marcarla en las curvas.</p>
+      </div>
+    </section>
+
+    <section class="card orange" id="cardExp">
+      <header class="card-head">
+        <div class="card-tab"><span class="dot"></span><div><h2>Exportar</h2><small>presets y LUT</small></div></div>
+        <div class="card-side"><button class="card-menu" title="Plegar"><i></i><i></i><i></i></button></div>
+      </header>
+      <div class="card-body">
+        <div class="lblsm">Nombre del preset</div>
+        <input type="text" id="pname" value="Color Matcher">
+        <div class="exp" style="margin-top:10px">
+          <button id="exCube"><b>LUT 3D .cube</b><small>Todo el ajuste · Affinity, Photoshop, Resolve, Premiere</small></button>
+          <button id="exAcv"><b>Photoshop .acv</b><small>Solo curvas RGB · Curvas › Cargar</small></button>
+          <button id="exXmp"><b>Lightroom / ACR .xmp</b><small>Solo curvas RGB · Ajustes › Importar</small></button>
+          <button id="exGimp"><b>GIMP curvas</b><small>Solo curvas RGB · Curvas › Importar</small></button>
+          <button id="exCsv"><b>CSV</b><small>Curvas, 256 valores por canal</small></button>
+          <button id="exJson"><b>Proyecto JSON</b><small>Todo el estado, reimportable aquí</small></button>
+        </div>
+        <div class="row">
+          <span class="lblsm" style="margin:0">Tamaño .cube</span>
+          <select id="cubeN"><option value="33" selected>33³</option><option value="65">65³</option></select>
+          <button id="btnImport" style="margin-left:auto">Importar JSON</button>
+        </div>
+        <input type="file" id="fileJson" accept=".json,application/json">
+        <p class="note">Las rejillas A/B y C/L, el Color Match, las curvas especiales y la máscara son funciones de los tres canales a la vez, así que solo una LUT 3D puede guardarlas: una curva por canal no puede representarlas. Los formatos .acv, .xmp y GIMP exportan únicamente las curvas RGB, y cada programa las interpola con su propio spline (diferencias de uno o dos niveles). Lightroom aplica la curva en su espacio interno, no en sRGB.</p>
+      </div>
+    </section>
+  </div>
+</div>
+<footer>Color Matcher · _CM.2K26 · ideas de Guillermo Luijk y 3D LUT Creator · todo se procesa localmente en tu navegador</footer>
+</div>
+<div id="mag"><canvas width="128" height="128"></canvas></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const clamp=(v,a,b)=>v<a?a:v>b?b:v;
+const TAU=Math.PI*2;
+const MODELS={avg:[1/3,1/3,1/3],'601':[.299,.587,.114],'709':[.2126,.7152,.0722]};
+const CMAX=0.32, NR=6, NS=12, UM=0.25, NX=12, NY=8;
+const CH=['RGB','R','G','B','S×L','S→S','L×S'];
+const ident=()=>[[0,0],[255,255]];
+const defPts=c=>(c===4||c===6)?[[0,128],[255,128]]:ident();
+const setStatus=t=>$('#status').textContent=t;
+
+/* ================= color ================= */
+const LIN=new Float32Array(256);
+for (let i=0;i<256;i++){ const v=i/255; LIN[i]=v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4); }
+const toLin=v=>v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);
+const toS=v=>v<=0.0031308?12.92*v:1.055*Math.pow(v,1/2.4)-0.055;
+function linToOklab(r,g,b){
+  const l=Math.cbrt(0.4122214708*r+0.5363325363*g+0.0514459929*b);
+  const m=Math.cbrt(0.2119034982*r+0.6806995451*g+0.1073969566*b);
+  const s=Math.cbrt(0.0883024619*r+0.2817188376*g+0.6299787005*b);
+  return [0.2104542553*l+0.7936177850*m-0.0040720468*s, 1.9779984951*l-2.4285922050*m+0.4505937099*s, 0.0259040371*l+0.7827717662*m-0.8086757660*s];
+}
+const oklab=(r,g,b)=>linToOklab(toLin(r),toLin(g),toLin(b));          // sRGB 0..1
+const oklabB=(r,g,b)=>linToOklab(LIN[r],LIN[g],LIN[b]);               // sRGB 0..255 entero
+function oklabToLin(L,a,b){
+  const l=(L+0.3963377774*a+0.2158037573*b)**3, m=(L-0.1055613458*a-0.0638541728*b)**3, s=(L-0.0894841775*a-1.2914855480*b)**3;
+  return [4.0767416621*l-3.3077115913*m+0.2309699292*s, -1.2684380046*l+2.6097574011*m-0.3413193965*s, -0.0041960863*l-0.7034186147*m+1.7076147010*s];
+}
+function fromOklab(L,a,b){ const v=oklabToLin(L,a,b); return [toS(clamp(v[0],0,1)),toS(clamp(v[1],0,1)),toS(clamp(v[2],0,1))]; }
+const inG=v=>v[0]>=-1e-4&&v[0]<=1.0001&&v[1]>=-1e-4&&v[1]<=1.0001&&v[2]>=-1e-4&&v[2]<=1.0001;
+// fuera de gamut: reduce la croma a L constante (busqueda binaria) en vez de recortar cada canal,
+// que aplana zonas enteras en el mismo valor y produce manchas y bandas
+function fromOklabGM(L,a,b){
+  L=clamp(L,0,1); let v=oklabToLin(L,a,b);
+  if (!inG(v)){ let lo=0,hi=1; for (let i=0;i<12;i++){ const m=(lo+hi)/2; if (inG(oklabToLin(L,a*m,b*m))) lo=m; else hi=m; } v=oklabToLin(L,a*lo,b*lo); }
+  return [toS(clamp(v[0],0,1)),toS(clamp(v[1],0,1)),toS(clamp(v[2],0,1))];
+}
+const hex=rgb=>'#'+rgb.map(v=>Math.round(clamp(v,0,255)).toString(16).padStart(2,'0')).join('');
+
+/* ================= estado ================= */
+const S={
+  ref:null, tgt:null, prev:null, rect:null, lasso:null,
+  model:'601', stat:'median', sigma:1.5, mono:true, band:true, strength:1, npts:10, place:'error', autoEx:true,
+  range:{l0:0,l1:255,hOn:false,h0:0,h1:360,cmin:0},
+  desat:false, vis:[true,true,true,true], active:0, sel:-1, tab:'curves',
+  hist:null, count:null, raw:[], p10:[], p90:[], dense:[],
+  pts:[0,1,2,3,4,5,6].map(defPts),
+  ab:new Float32Array((NR+1)*NS*2), abSel:null, abL:0.68, abAfter:false,
+  cl:[new Float32Array((NX+1)*(NY+1)*2),new Float32Array((NX+1)*(NY+1)*2)], clAngle:0, clSel:null,
+  match:{on:false,amt:1,keepL:false,mr:null,sr:null,mt:null,st:null}, pairL:true, pairs:[], pairFrom:null,
+  mask:{on:false,inv:false,show:false,hc:40,hw:180,l0:0,l1:100,cmin:0,feather:20}, opacity:1,
+  tool:'probe', dither:true, interp:'mono', probe:null, line:null, palette:[], lut:null, outHist:null, hoverX:null, undo:[], pasteTarget:'ref',
+  cloud:null, vol:{yaw:0.7,pitch:0.35,mode:'both'}, pins:[], pinSel:null, pinId:0
+};
+let P={};
+
+/* ================= curvas ================= */
+const q2=v=>Math.round(v*100)/100;
+// curva muestreada en n puntos sobre x en [0,255], en coma flotante (sin cuantizar a 8 bits)
+function evalCurve(pts,n=256,mode=S.interp){
+  const N=pts.length, out=new Float32Array(n), xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]), step=255/(n-1);
+  if (N<2){ out.fill(ys[0]??0); return out; }
+  let seg;
+  if (mode==='linear'||N===2){
+    seg=(k,x)=>ys[k]+(ys[k+1]-ys[k])*(x-xs[k])/(xs[k+1]-xs[k]);
+  } else if (mode==='natural'){
+    // spline cubica natural (segunda derivada nula en los extremos), parecida a la de Photoshop: puede sobrepasar
+    const h=[],al=[],l=[1],mu=[0],z=[0],c=new Array(N).fill(0),b=[],d=[];
+    for (let i=0;i<N-1;i++) h[i]=xs[i+1]-xs[i];
+    for (let i=1;i<N-1;i++){ al[i]=3/h[i]*(ys[i+1]-ys[i])-3/h[i-1]*(ys[i]-ys[i-1]); l[i]=2*(xs[i+1]-xs[i-1])-h[i-1]*mu[i-1]; mu[i]=h[i]/l[i]; z[i]=(al[i]-h[i-1]*z[i-1])/l[i]; }
+    for (let j=N-2;j>=1;j--) c[j]=z[j]-mu[j]*c[j+1];
+    for (let j=0;j<N-1;j++){ b[j]=(ys[j+1]-ys[j])/h[j]-h[j]*(c[j+1]+2*c[j])/3; d[j]=(c[j+1]-c[j])/(3*h[j]); }
+    seg=(k,x)=>{ const t=x-xs[k]; return ys[k]+b[k]*t+c[k]*t*t+d[k]*t*t*t; };
+  } else {
+    // Hermite monotono (Fritsch-Carlson): no sobrepasa entre nodos
+    const dd=[], m=new Array(N);
+    for (let i=0;i<N-1;i++) dd.push((ys[i+1]-ys[i])/(xs[i+1]-xs[i]));
+    m[0]=dd[0]; m[N-1]=dd[N-2];
+    for (let i=1;i<N-1;i++) m[i]=dd[i-1]*dd[i]<=0?0:(dd[i-1]+dd[i])/2;
+    for (let i=0;i<N-1;i++){ if (dd[i]===0){ m[i]=0; m[i+1]=0; continue; } const a=m[i]/dd[i], bb=m[i+1]/dd[i], q=a*a+bb*bb; if (q>9){ const t=3/Math.sqrt(q); m[i]=t*a*dd[i]; m[i+1]=t*bb*dd[i]; } }
+    seg=(k,x)=>{ const hh=xs[k+1]-xs[k], t=(x-xs[k])/hh, t2=t*t, t3=t2*t; return (2*t3-3*t2+1)*ys[k]+(t3-2*t2+t)*hh*m[k]+(-2*t3+3*t2)*ys[k+1]+(t3-t2)*hh*m[k+1]; };
+  }
+  let k=0;
+  for (let i=0;i<n;i++){
+    const x=i*step;
+    if (x<=xs[0]){ out[i]=ys[0]; continue; }
+    if (x>=xs[N-1]){ out[i]=ys[N-1]; continue; }
+    while (x>xs[k+1]) k++;
+    out[i]=clamp(seg(k,x),0,255);
+  }
+  return out;
+}
+// interpolacion lineal en una tabla de cualquier tamano, x continuo en [0,255]
+function interp(cv,L){ const n=cv.length-1, f=clamp(L,0,255)/255*n, i=Math.min(n-1,Math.floor(f)), t=f-i; return cv[i]+(cv[i+1]-cv[i])*t; }
+function luts(n=256){
+  const M=evalCurve(S.pts[0],n);
+  return [1,2,3].map(c=>{ const C=evalCurve(S.pts[c],n), o=new Float32Array(n); for (let x=0;x<n;x++) o[x]=interp(M,C[x]); return o; });
+}
+const isDef=c=>{ const a=S.pts[c], d=defPts(c); return a.length===2&&a[0][0]===d[0][0]&&a[0][1]===d[0][1]&&a[1][0]===d[1][0]&&a[1][1]===d[1][1]; };
+function reduce(cv,max){
+  const pts=[[0,q2(cv[0])],[255,q2(cv[255])]];
+  while (pts.length<max){
+    const f=evalCurve(pts,256,'mono'); let worst=-1, err=0;
+    for (let x=1;x<255;x++){ const e=Math.abs(f[x]-cv[x]); if (e>err && !pts.some(p=>Math.abs(p[0]-x)<3)){ err=e; worst=x; } }
+    if (err<0.6||worst<0) break;
+    pts.push([worst,q2(cv[worst])]); pts.sort((a,b)=>a[0]-b[0]);
+  }
+  return pts;
+}
+function reducePop(cv,max,cnt){
+  let tot=0; for (let L=0;L<256;L++) tot+=cnt[L];
+  const xs=[0]; let acc=0, q=1;
+  for (let L=0;L<256;L++){ acc+=cnt[L]; while (q<max-1 && acc>=tot*q/(max-1)){ if (L-xs[xs.length-1]>=4 && L<=251) xs.push(L); q++; } }
+  xs.push(255);
+  return xs.map(x=>[x,q2(cv[x])]);
+}
+
+/* ================= rejillas ================= */
+const abBase=(k,j)=>{ if (!k) return [0,0]; const r=k/NR*CMAX, t=j/NS*TAU; return [r*Math.cos(t),r*Math.sin(t)]; };
+const abPos=(k,j)=>{ const b=abBase(k,j), i=(k*NS+j)*2; return [b[0]+S.ab[i],b[1]+S.ab[i+1]]; };
+function abCells(a,b){
+  const C=Math.hypot(a,b); let r=C/CMAX*NR, th=Math.atan2(b,a); if (th<0) th+=TAU;
+  const sct=th/TAU*NS, j=Math.floor(sct)%NS, u=sct-Math.floor(sct), j2=(j+1)%NS;
+  let k=Math.floor(r), t=r-k; if (k>=NR){ k=NR-1; t=1; }
+  return [[k,j,(1-t)*(1-u)],[k,j2,(1-t)*u],[k+1,j,t*(1-u)],[k+1,j2,t*u]];
+}
+function abDisp(a,b){
+  let da=0, db=0;
+  for (const [k,j,w] of abCells(a,b)){ if (!w) continue; const i=(k*NS+j)*2; da+=w*S.ab[i]; db+=w*S.ab[i+1]; }
+  return [da,db];
+}
+function setAB(k,j,da,db){
+  if (k===0){ for (let jj=0;jj<NS;jj++){ S.ab[jj*2]=da; S.ab[jj*2+1]=db; } }
+  else { const i=(k*NS+j)*2; S.ab[i]=da; S.ab[i+1]=db; }
+}
+function distributeAB(a,b,da,db){
+  const cells=abCells(a,b), merged=[];
+  for (const c of cells){ const key=c[0]===0?'c':c[0]+'_'+c[1], f=merged.find(m=>m.key===key); if (f) f.w+=c[2]; else merged.push({key,k:c[0],j:c[1],w:c[2]}); }
+  const s=merged.reduce((t,m)=>t+m.w*m.w,0)||1;
+  for (const m of merged){ const i=(m.k*NS+m.j)*2; setAB(m.k,m.j,S.ab[i]+da*m.w/s,S.ab[i+1]+db*m.w/s); }
+}
+const clBase=(ix,iy)=>[-UM+ix/NX*2*UM, iy/NY];
+const clPos=(g,ix,iy)=>{ const b=clBase(ix,iy), i=(iy*(NX+1)+ix)*2; return [b[0]+S.cl[g][i],b[1]+S.cl[g][i+1]]; };
+function clCells(u,L){
+  const fx=clamp((u+UM)/(2*UM)*NX,0,NX), fy=clamp(L*NY,0,NY);
+  let ix=Math.floor(fx), iy=Math.floor(fy); if (ix>=NX) ix=NX-1; if (iy>=NY) iy=NY-1;
+  const tx=fx-ix, ty=fy-iy;
+  return [[ix,iy,(1-tx)*(1-ty)],[ix+1,iy,tx*(1-ty)],[ix,iy+1,(1-tx)*ty],[ix+1,iy+1,tx*ty]];
+}
+function clDisp(g,u,L){
+  let du=0,dl=0; const A=S.cl[g];
+  for (const [ix,iy,w] of clCells(u,L)){ if (!w) continue; const i=(iy*(NX+1)+ix)*2; du+=w*A[i]; dl+=w*A[i+1]; }
+  return [du,dl];
+}
+function distributeCL(g,u,L,du,dl){
+  const cells=clCells(u,L), s=cells.reduce((t,c)=>t+c[2]*c[2],0)||1, A=S.cl[g];
+  for (const [ix,iy,w] of cells){ const i=(iy*(NX+1)+ix)*2; A[i]+=du*w/s; A[i+1]+=dl*w/s; }
+}
+const nonZero=a=>{ for (let i=0;i<a.length;i++) if (Math.abs(a[i])>1e-6) return true; return false; };
+const clAng=g=>(S.clAngle+(g?90:0))*Math.PI/180;
+
+/* ================= pipeline ================= */
+function prep(){
+  const [wr,wg,wb]=MODELS[S.model];
+  const curvesOn=![0,1,2,3].every(isDef);
+  P={ desat:S.desat, wr, wg, wb,
+    match:S.match.on&&S.match.mr?{...S.match,k:S.match.sr.map((v,i)=>S.match.st[i]>1e-4?clamp(v/S.match.st[i],0.2,i?3:2):1)}:null,
+    curves:curvesOn, T:curvesOn?luts(1024):null,
+    sxl:!isDef(4), sxs:!isDef(5), lxs:!isDef(6),
+    SxL:evalCurve(S.pts[4],1024), SxS:evalCurve(S.pts[5],1024), LxS:evalCurve(S.pts[6],1024),
+    abOn:nonZero(S.ab), clOn:[nonZero(S.cl[0]),nonZero(S.cl[1])],
+    cs:[0,1].map(g=>[Math.cos(clAng(g)),Math.sin(clAng(g))]),
+    mask:S.mask, maskOn:S.mask.on, opacity:S.opacity };
+}
+function maskW(r,g,b){
+  const m=P.mask, f=Math.max(1,m.feather), [L,A,B]=oklab(r,g,b), C=Math.hypot(A,B);
+  let w=1;
+  if (m.hw<180){
+    let h=Math.atan2(B,A)*180/Math.PI; if (h<0) h+=360;
+    const d=Math.abs(((h-m.hc)%360+540)%360-180);
+    w*=clamp((m.hw+f-d)/f,0,1)*clamp(C/0.03,0,1);
+  }
+  const Lp=L*100, hf=f/2;
+  if (m.l0>0) w*=clamp((Lp-(m.l0-hf))/hf,0,1);
+  if (m.l1<100) w*=clamp(((m.l1+hf)-Lp)/hf,0,1);
+  if (m.cmin>0) w*=clamp((C/CMAX*100-(m.cmin-hf))/hf,0,1);
+  return m.inv?1-w:w;
+}
+// r,g,b en 0..1. ctx opcional recibe los estados intermedios.
+function proc(r,g,b,ctx){
+  if (P.desat){ const y=P.wr*r+P.wg*g+P.wb*b; r=g=b=y; }
+  const r0=r,g0=g,b0=b;
+  if (P.match){
+    const m=P.match; let [L,A,B]=oklab(r,g,b);
+    let L2=(L-m.mt[0])*m.k[0]+m.mr[0], A2=(A-m.mt[1])*m.k[1]+m.mr[1], B2=(B-m.mt[2])*m.k[2]+m.mr[2];
+    if (m.keepL) L2=L;
+    [r,g,b]=fromOklabGM(L+(L2-L)*m.amt, A+(A2-A)*m.amt, B+(B2-B)*m.amt);
+  }
+  if (P.curves){ r=interp(P.T[0],r*255)/255; g=interp(P.T[1],g*255)/255; b=interp(P.T[2],b*255)/255; }
+  let [L,A,B]=oklab(r,g,b);
+  let C=Math.hypot(A,B);
+  if (ctx) ctx.sp=[clamp(L,0,1)*255, clamp(C/CMAX,0,1)*255];
+  if (P.sxl||P.sxs||P.lxs){
+    const cx=clamp(C/CMAX,0,1)*255;
+    if (C>1e-6 && (P.sxl||P.sxs)){
+      let C2=P.sxs?interp(P.SxS,cx)/255*CMAX:C;
+      if (P.sxl) C2*=interp(P.SxL,clamp(L,0,1)*255)/128;
+      A*=C2/C; B*=C2/C;
+    }
+    if (P.lxs) L+=(interp(P.LxS,cx)-128)/256;
+  }
+  if (ctx) ctx.ab=[L,A,B];
+  if (P.abOn){ const d=abDisp(A,B); A+=d[0]; B+=d[1]; }
+  for (let gi=0;gi<2;gi++){
+    const [c,s]=P.cs[gi]; let u=A*c+B*s; const v=-A*s+B*c;
+    if (ctx) ctx['cl'+gi]=[u,L];
+    if (P.clOn[gi]){ const d=clDisp(gi,u,L); u+=d[0]; L+=d[1]; A=u*c-v*s; B=u*s+v*c; }
+  }
+  if (ctx) ctx.fin=[L,A,B];
+  [r,g,b]=fromOklabGM(L,A,B);
+  if (P.maskOn||P.opacity<1){
+    let w=P.opacity; if (P.maskOn) w*=maskW(r0,g0,b0);
+    if (P.maskOn&&P.mask.show) return [w,w,w];
+    r=r0+(r-r0)*w; g=g0+(g-g0)*w; b=b0+(b-b0)*w;
+  }
+  return [r,g,b];
+}
+function buildLUT(N){
+  const out=new Float32Array(N*N*N*3), k=1/(N-1); let o=0;
+  for (let b=0;b<N;b++) for (let g=0;g<N;g++) for (let r=0;r<N;r++){
+    const v=proc(r*k,g*k,b*k); out[o++]=v[0]; out[o++]=v[1]; out[o++]=v[2];
+  }
+  return out;
+}
+const DN=(()=>{ const n=new Float32Array(64*64*3); for (let i=0;i<n.length;i++) n[i]=(Math.random()+Math.random())/2-0.5; return n; })();
+function applyLUT(src,lut,N,hist,dither){
+  const {w,h,data}=src, out=new ImageData(w,h), o=out.data;
+  const I=new Int32Array(256), F=new Float32Array(256);
+  for (let v=0;v<256;v++){ const f=v/255*(N-1); let i=Math.floor(f); if (i>N-2) i=N-2; I[v]=i; F[v]=f-i; }
+  const sg=N*3, sb=N*N*3;
+  const hs=hist?[new Float64Array(256),new Float64Array(256),new Float64Array(256),new Float64Array(256)]:null;
+  for (let p=0;p<data.length;p+=4){
+    const R=data[p],G=data[p+1],B=data[p+2], ir=I[R],ig=I[G],ib=I[B], tr=F[R],tg=F[G],tb=F[B];
+    const base=ib*sb+ig*sg+ir*3;
+    for (let c=0;c<3;c++){
+      const i0=base+c;
+      const c00=lut[i0]+(lut[i0+3]-lut[i0])*tr, c10=lut[i0+sg]+(lut[i0+sg+3]-lut[i0+sg])*tr;
+      const c01=lut[i0+sb]+(lut[i0+sb+3]-lut[i0+sb])*tr, c11=lut[i0+sb+sg]+(lut[i0+sb+sg+3]-lut[i0+sb+sg])*tr;
+      const c0=c00+(c10-c00)*tg, c1=c01+(c11-c01)*tg;
+      o[p+c]=(c0+(c1-c0)*tb)*255+(dither?DN[(((((p>>2)/w)|0)&63)*64+(((p>>2)%w)&63))*3+c]:0);
+    }
+    o[p+3]=data[p+3];
+    if (hs){ hs[0][o[p]]++; hs[1][o[p+1]]++; hs[2][o[p+2]]++; hs[3][Math.min(255,Math.round(P.wr*o[p]+P.wg*o[p+1]+P.wb*o[p+2]))]++; }
+  }
+  if (hs) S.outHist=hs;
+  return out;
+}
+
+/* ================= imágenes ================= */
+function toData(src,w,h,max){
+  const k=Math.min(1,max/Math.max(w,h)); w=Math.round(w*k); h=Math.round(h*k);
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(src,0,0,w,h);
+  return { w, h, data:x.getImageData(0,0,w,h).data, src:c };
+}
+async function fileToData(file,max){
+  if (/hei[cf]/i.test(file.type)||/\.hei[cf]$/i.test(file.name||'')) throw new Error('HEIC');
+  try { const bmp=await createImageBitmap(file); const d=toData(bmp,bmp.width,bmp.height,max); if (bmp.close) bmp.close(); return d; }
+  catch(e1){
+    const url=await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>rej(r.error); r.readAsDataURL(file); });
+    const img=new Image(); await new Promise((res,rej)=>{ img.onload=res; img.onerror=()=>rej(new Error('decode')); img.src=url; });
+    return toData(img,img.naturalWidth,img.naturalHeight,max);
+  }
+}
+function showImg(cv,ov,data){
+  cv.width=ov.width=data.w; cv.height=ov.height=data.h;
+  cv.getContext('2d').drawImage(data.src,0,0);
+}
+function setRef(data){
+  S.ref=data; S.lasso=null; S.pins=S.pins.filter(p=>p.src!=='ref'); renderPins(); showImg($('#cvRef'),$('#ovRef'),data);
+  $('#wrapRef').hidden=false; $('#hintRef').hidden=true; $('#dropRef').classList.remove('empty');
+  $('#refInfo').textContent=data.w+'×'+data.h; $('#btnExtract').disabled=false; $('#btnClearRect').disabled=true;
+  refChanged(true);
+  if (!S.tgt) setTgt(data);
+  updateMatchBtns();
+}
+function setTgt(data){
+  S.tgt=data; S.prev=toData(data.src,data.w,data.h,1000);
+  for (const id of ['#cvBase','#cvOut','#ovTgt']){ const c=$(id); c.width=S.prev.w; c.height=S.prev.h; }
+  drawBase();
+  $('#stackTgt').hidden=false; $('#hintTgt').hidden=true; $('#dropTgt').classList.remove('empty');
+  $('#tgtInfo').textContent=data.w+'×'+data.h; $('#btnPng').disabled=false;
+  // nube de muestras para rejillas y volumen
+  const {w,h,data:d}=S.prev, n=Math.min(6000,w*h), rgb=new Uint8Array(n*3);
+  for (let i=0;i<n;i++){ const p=Math.floor(Math.random()*w*h)*4; rgb[i*3]=d[p]; rgb[i*3+1]=d[p+1]; rgb[i*3+2]=d[p+2]; }
+  S.cloud={n,rgb,ab:new Float32Array(n*3),cl0:new Float32Array(n*2),cl1:new Float32Array(n*2),fin:new Float32Array(n*3),out:new Uint8Array(n*3),orig:new Float32Array(n*3)};
+  for (let i=0;i<n;i++){ const o=oklabB(rgb[i*3],rgb[i*3+1],rgb[i*3+2]); S.cloud.orig.set(o,i*3); }
+  S.probe=null; S.line=null; S.pairFrom=null; S.pins=S.pins.filter(p=>p.src!=='tgt'); renderPins();
+  updateMatchBtns(); changed();
+}
+function drawBase(){
+  if (!S.prev) return;
+  const {w,h,data}=S.prev, id=new ImageData(w,h), o=id.data, [wr,wg,wb]=MODELS[S.model];
+  for (let i=0;i<data.length;i+=4){
+    if (S.desat){ const y=Math.round(wr*data[i]+wg*data[i+1]+wb*data[i+2]); o[i]=o[i+1]=o[i+2]=y; } else { o[i]=data[i]; o[i+1]=data[i+1]; o[i+2]=data[i+2]; }
+    o[i+3]=data[i+3];
+  }
+  $('#cvBase').getContext('2d').putImageData(id,0,0);
+  $('#lblBase').textContent=S.desat?'B/N':'Original';
+}
+
+/* ================= filtros de rango y análisis ================= */
+function passFn(){
+  const R=S.range, [wr,wg,wb]=MODELS[S.model], ls=S.lasso, needLab=R.hOn||R.cmin>0;
+  return (x,y,r,g,b)=>{
+    if (ls){ const xi=x|0, yi=y|0; if (xi<ls.x0||xi>ls.x1||yi<ls.y0||yi>ls.y1||!ls.mask[yi*ls.w+xi]) return false; }
+    const L=wr*r+wg*g+wb*b; if (L<R.l0||L>R.l1) return false;
+    if (needLab){
+      const [,A,B]=oklabB(r,g,b), C=Math.hypot(A,B);
+      if (C/CMAX*100<R.cmin) return false;
+      if (R.hOn){ let h=Math.atan2(B,A)*180/Math.PI; if (h<0) h+=360; if (R.h0<=R.h1 ? (h<R.h0||h>R.h1) : (h<R.h0&&h>R.h1)) return false; }
+    }
+    return true;
+  };
+}
+function analyze(){
+  const {w,h,data:d}=S.ref, [wr,wg,wb]=MODELS[S.model], H=new Uint32Array(3*65536), cnt=new Float64Array(256), pass=passFn();
+  for (let y=0;y<h;y++) for (let x=0;x<w;x++){
+    const i=(y*w+x)*4; if (d[i+3]<128) continue;
+    const r=d[i],g=d[i+1],b=d[i+2]; if (!pass(x,y,r,g,b)) continue;
+    let L=Math.round(wr*r+wg*g+wb*b); if (L>255) L=255;
+    cnt[L]++; const o=L<<8; H[o+r]++; H[65536+o+g]++; H[131072+o+b]++;
+  }
+  S.hist=H; S.count=cnt;
+  for (let c=0;c<3;c++){
+    const raw=new Float32Array(256).fill(NaN), p10=new Float32Array(256).fill(NaN), p90=new Float32Array(256).fill(NaN);
+    for (let L=0;L<256;L++){
+      const n=cnt[L]; if (!n) continue;
+      const o=c*65536+(L<<8); let acc=0,sum=0,a=-1,m=-1,b=-1;
+      for (let v=0;v<256;v++){ const hh=H[o+v]; if (!hh) continue; sum+=v*hh; acc+=hh;
+        if (a<0&&acc>=n*.1) a=v; if (m<0&&acc>=n*.5) m=v; if (b<0&&acc>=n*.9) b=v; }
+      raw[L]=S.stat==='mean'?sum/n:m; p10[L]=a; p90[L]=b;
+    }
+    S.raw[c]=raw; S.p10[c]=p10; S.p90[c]=p90;
+  }
+  renderLists();
+}
+function pav(y,w){
+  const vals=[],wts=[],lens=[];
+  for (let i=0;i<y.length;i++){
+    vals.push(y[i]); wts.push(w[i]); lens.push(1);
+    while (vals.length>1&&vals[vals.length-2]>vals[vals.length-1]){
+      const v2=vals.pop(),w2=wts.pop(),l2=lens.pop(),v1=vals.pop(),w1=wts.pop(),l1=lens.pop(),ww=w1+w2;
+      vals.push((v1*w1+v2*w2)/ww); wts.push(ww); lens.push(l1+l2);
+    }
+  }
+  const out=new Float32Array(y.length); let k=0;
+  for (let j=0;j<vals.length;j++) for (let t=0;t<lens[j];t++) out[k++]=vals[j];
+  return out;
+}
+function extract(){
+  if (!S.hist) return;
+  const cnt=S.count; let N=0; for (let L=0;L<256;L++) N+=cnt[L];
+  if (!N){ setStatus('El rango o la selección no contiene píxeles'); return; }
+  pushUndo();
+  for (let c=0;c<3;c++){
+    const raw=S.raw[c], f=new Float32Array(256), known=[];
+    for (let L=0;L<256;L++) if (!isNaN(raw[L])) known.push(L);
+    for (let L=0;L<=known[0];L++) f[L]=raw[known[0]];
+    for (let k=0;k<known.length-1;k++){ const a=known[k],b=known[k+1]; for (let L=a;L<=b;L++) f[L]=raw[a]+(raw[b]-raw[a])*(L-a)/(b-a); }
+    for (let L=known[known.length-1];L<256;L++) f[L]=raw[known[known.length-1]];
+    const w=new Float64Array(256); for (let L=0;L<256;L++) w[L]=cnt[L]||1e-3;
+    let s=f;
+    if (S.sigma>0.05){
+      s=new Float32Array(256); const R=Math.ceil(S.sigma*3), k2=2*S.sigma*S.sigma;
+      for (let L=0;L<256;L++){ let num=0,den=0; for (let j=Math.max(0,L-R);j<=Math.min(255,L+R);j++){ const g=Math.exp(-((j-L)**2)/k2)*w[j]; num+=g*f[j]; den+=g; } s[L]=num/den; }
+    }
+    if (S.mono) s=pav(Array.from(s),w);
+    const dense=new Float32Array(256), blend=new Float32Array(256);
+    for (let L=0;L<256;L++){ dense[L]=clamp(s[L],0,255); blend[L]=clamp(L+(dense[L]-L)*S.strength,0,255); }
+    S.dense[c]=dense; S.pts[c+1]=S.place==='pop'?reducePop(blend,S.npts,cnt):reduce(blend,S.npts);
+  }
+  S.pts[0]=ident(); S.sel=-1; S.pins.forEach(p=>{ if (p.ch<4) linkPin(p); }); renderPins();
+  stats(); changed(); setStatus('Curvas extraídas'+(S.lasso?' de la selección':''));
+}
+function stats(){
+  const H=S.hist,cnt=S.count; let N=0,cov=0,bs=0,bn=0; const rm=[];
+  for (let L=0;L<256;L++){ N+=cnt[L]; if (cnt[L]) cov++; }
+  for (let c=0;c<3;c++){ let ss=0; const cv=S.dense[c];
+    for (let L=0;L<256;L++){ if (!cnt[L]) continue; const o=c*65536+(L<<8), y=cv[L];
+      for (let v=0;v<256;v++){ const h=H[o+v]; if (h) ss+=h*(v-y)*(v-y); }
+      bs+=(S.p90[c][L]-S.p10[c][L])*cnt[L]; bn+=cnt[L]; }
+    rm.push(Math.sqrt(ss/N)); }
+  $('#sPx').textContent=N>=1e6?(N/1e6).toFixed(2)+' M':N>=1e3?Math.round(N/1e3)+' k':N;
+  $('#sCov').textContent=cov+' / 256';
+  $('#sRmse').textContent=rm.map(v=>v.toFixed(1)).join(' / ');
+  $('#sBand').textContent=(bs/bn).toFixed(1)+' niv.';
+}
+function refChanged(full){
+  if (!S.ref) return;
+  analyze();
+  if (S.autoEx||full) extract(); else changed();
+  kmeans();
+  drawOv('ref');
+}
+
+/* ================= paleta k-means ================= */
+function kmeans(){
+  if (!S.ref) return;
+  const K=+$('#kSel').value, {w,h,data:d}=S.ref, pass=passFn(), pts=[];
+  const step=Math.max(1,Math.floor(Math.sqrt(w*h/16000)));
+  for (let y=0;y<h;y+=step) for (let x=0;x<w;x+=step){ const i=(y*w+x)*4; if (pass(x,y,d[i],d[i+1],d[i+2])) pts.push(oklabB(d[i],d[i+1],d[i+2])); }
+  if (pts.length<K){ S.palette=[]; renderPalette(); return; }
+  const {cen,as}=kmeansCore(pts,K);
+  const cnt=new Array(K).fill(0); for (let i=0;i<pts.length;i++) cnt[as[i]]++;
+  S.palette=cen.map((c,k)=>({rgb:fromOklab(...c).map(v=>Math.round(v*255)),share:cnt[k]/pts.length})).filter(p=>p.share>0).sort((a,b)=>oklabB(...a.rgb)[0]-oklabB(...b.rgb)[0]);
+  renderPalette();
+}
+function kmeansCore(pts,K){
+  const cen=[pts[Math.floor(Math.random()*pts.length)].slice()], dist=new Float64Array(pts.length);
+  const d2=(p,c)=>(p[0]-c[0])**2+(p[1]-c[1])**2+(p[2]-c[2])**2;
+  while (cen.length<K){
+    let tot=0; for (let i=0;i<pts.length;i++){ let m=1e9; for (const c of cen) m=Math.min(m,d2(pts[i],c)); dist[i]=m; tot+=m; }
+    let r=Math.random()*tot, i=0; while (r>dist[i]&&i<pts.length-1){ r-=dist[i]; i++; } cen.push(pts[i].slice());
+  }
+  const as=new Int32Array(pts.length);
+  for (let it=0;it<12;it++){
+    for (let i=0;i<pts.length;i++){ let b=0,bm=1e9; for (let k=0;k<K;k++){ const m=d2(pts[i],cen[k]); if (m<bm){ bm=m; b=k; } } as[i]=b; }
+    const sum=cen.map(()=>[0,0,0,0]);
+    for (let i=0;i<pts.length;i++){ const s=sum[as[i]]; s[0]+=pts[i][0]; s[1]+=pts[i][1]; s[2]+=pts[i][2]; s[3]++; }
+    sum.forEach((s,k)=>{ if (s[3]) cen[k]=[s[0]/s[3],s[1]/s[3],s[2]/s[3]]; });
+  }
+  for (let i=0;i<pts.length;i++){ let b=0,bm=1e9; for (let k=0;k<K;k++){ const m=d2(pts[i],cen[k]); if (m<bm){ bm=m; b=k; } } as[i]=b; }
+  return {cen,as};
+}
+function renderPalette(){
+  $('#pal').innerHTML=S.palette.map((p,i)=>`<button data-i="${i}" style="background:${hex(p.rgb)}" title="${hex(p.rgb)} · ${(p.share*100).toFixed(0)}%"></button>`).join('')||'<span class="note" style="margin:0">Carga una referencia</span>';
+}
+$('#pal').addEventListener('click',e=>{
+  const b=e.target.closest('[data-i]'); if (!b) return; const rgb=S.palette[+b.dataset.i].rgb;
+  if (S.tool==='pair'&&S.pairFrom){ completePair(rgb); return; }
+  S.probe={rgb,src:'pal'}; renderProbe(); drawEditors(); drawOv('ref'); drawOv('tgt');
+});
+$('#kSel').onchange=kmeans;
+
+/* ================= Color Match ================= */
+function labStats(data,w,h,pass){
+  const step=Math.max(1,Math.floor(Math.sqrt(w*h/60000))); let n=0; const s=[0,0,0], q=[0,0,0];
+  for (let y=0;y<h;y+=step) for (let x=0;x<w;x+=step){ const i=(y*w+x)*4; if (pass&&!pass(x,y,data[i],data[i+1],data[i+2])) continue;
+    const o=oklabB(data[i],data[i+1],data[i+2]); for (let c=0;c<3;c++){ s[c]+=o[c]; q[c]+=o[c]*o[c]; } n++; }
+  if (!n) return null;
+  const m=s.map(v=>v/n); return { m, sd:q.map((v,c)=>Math.sqrt(Math.max(0,v/n-m[c]*m[c]))) };
+}
+function computeMatch(){
+  if (!S.ref||!S.prev) return;
+  const r=labStats(S.ref.data,S.ref.w,S.ref.h,passFn()), t=labStats(S.prev.data,S.prev.w,S.prev.h,null);
+  if (!r||!t){ setStatus('No hay píxeles para el match'); return; }
+  pushUndo();
+  Object.assign(S.match,{on:true,mr:r.m,sr:r.sd,mt:t.m,st:t.sd});
+  const hadCurves=![0,1,2,3].every(isDef); if (hadCurves){ for (const c of [0,1,2,3]) S.pts[c]=defPts(c); S.sel=-1; }
+  $('#btnMatchOff').disabled=false; changed();
+  setStatus('Color Match calculado'+(S.lasso?' desde la selección':'')+(hadCurves?' · curvas RGB reseteadas para no aplicar el look dos veces (Ctrl+Z las recupera)':''));
+}
+function updateMatchBtns(){ $('#btnMatch').disabled=!(S.ref&&S.prev); $('#btnMatchOff').disabled=!S.match.on; }
+function completePair(toRgb){
+  const from=S.pairFrom; if (!from) return;
+  pushUndo(); prep();
+  const ctx={}; proc(from[0]/255,from[1]/255,from[2]/255,ctx);
+  const pre=ctx.ab, want=oklabB(...toRgb), cur=abDisp(pre[1],pre[2]);
+  distributeAB(pre[1],pre[2],want[1]-(pre[1]+cur[0]),want[2]-(pre[2]+cur[1]));
+  if (S.pairL){
+    prep(); const c2={}; proc(from[0]/255,from[1]/255,from[2]/255,c2);
+    const [u,L]=c2.cl0; distributeCL(0,u,L,0,want[0]-c2.fin[0]);
+  }
+  S.pairs.push({from,to:toRgb}); S.pairFrom=null; renderPairs(); toolHint(); changed();
+  setStatus('Par aplicado');
+}
+function renderPairs(){
+  $('#pairCount').textContent=S.pairs.length;
+  $('#pairs').innerHTML=S.pairs.map(p=>`<span class="pair"><i style="background:${hex(p.from)}"></i>→<i style="background:${hex(p.to)}"></i></span>`).join('')||'<span class="note" style="margin:0">Usa la herramienta Par</span>';
+}
+
+/* ================= deshacer ================= */
+function snap(){ return JSON.stringify({pts:S.pts,ab:Array.from(S.ab),cl:S.cl.map(a=>Array.from(a)),match:S.match,pairs:S.pairs,pins:S.pins}); }
+function pushUndo(){ S.undo.push(snap()); if (S.undo.length>60) S.undo.shift(); }
+function undo(){
+  const s=S.undo.pop(); if (!s){ setStatus('Nada que deshacer'); return; }
+  const j=JSON.parse(s); S.pts=j.pts; S.ab=new Float32Array(j.ab); S.cl=j.cl.map(a=>new Float32Array(a)); S.match=j.match; S.pairs=j.pairs; S.pins=j.pins||[]; if (!S.pins.some(p=>p.id===S.pinSel)) S.pinSel=null; renderPins(); drawOv('ref'); drawOv('tgt');
+  S.sel=-1; renderPairs(); updateMatchBtns(); changed(); setStatus('Deshecho');
+}
+$('#btnUndo').onclick=undo;
+document.addEventListener('keydown',e=>{
+  if ((e.key==='Delete'||e.key==='Backspace')&&S.pinSel!=null&&document.activeElement!==$('#cvCurves')&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){ e.preventDefault(); deletePin(S.pinSel); }
+});
+document.addEventListener('keydown',e=>{ if ((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){ e.preventDefault(); undo(); } });
+
+/* ================= ciclo de render ================= */
+let rq=0;
+let hqT=0;
+function changed(){ if (rq) return; rq=requestAnimationFrame(()=>{ rq=0; prep(); S.lut=buildLUT(33); S.lutHQ=null; processCloud(); render(); drawEditors(); renderProbe(); renderNodes(); updateMaskSub();
+  clearTimeout(hqT); hqT=setTimeout(()=>{ prep(); S.lutHQ=buildLUT(65); render(); },350); }); }
+function processCloud(){
+  const c=S.cloud; if (!c) return;
+  for (let i=0;i<c.n;i++){
+    const ctx={}, o=proc(c.rgb[i*3]/255,c.rgb[i*3+1]/255,c.rgb[i*3+2]/255,ctx);
+    c.ab.set(ctx.ab,i*3); c.cl0.set(ctx.cl0,i*2); c.cl1.set(ctx.cl1,i*2); c.fin.set(ctx.fin,i*3);
+    c.out[i*3]=o[0]*255; c.out[i*3+1]=o[1]*255; c.out[i*3+2]=o[2]*255;
+  }
+}
+function render(){
+  if (!S.prev||!S.lut) return;
+  $('#cvOut').getContext('2d').putImageData(S.lutHQ?applyLUT(S.prev,S.lutHQ,65,true,S.dither):applyLUT(S.prev,S.lut,33,true,S.dither),0,0);
+  drawHist(); drawOv('tgt');
+}
+function drawEditors(){
+  if (S.tab==='curves'){ drawCurves(); readout(); }
+  else if (S.tab==='ab') drawAB();
+  else if (S.tab==='cl'){ drawCL(0); drawCL(1); }
+  else drawVol();
+}
+
+/* ================= utilidades de dibujo ================= */
+function setupCanvas(cv){
+  if (!cv.offsetParent) return null;
+  const dpr=Math.min(2,window.devicePixelRatio||1), r=cv.getBoundingClientRect();
+  const W=Math.max(10,r.width), H=Math.max(10,r.height), pw=Math.round(W*dpr), ph=Math.round(H*dpr);
+  if (cv.width!==pw||cv.height!==ph){ cv.width=pw; cv.height=ph; }
+  const ctx=cv.getContext('2d'); ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,W,H);
+  return {ctx,W,H};
+}
+const colors=()=>[css('--ink'),css('--r'),css('--g'),css('--b'),css('--pink'),css('--yellow'),css('--orange')];
+function probeCtx(){ if (!S.probe) return null; const ctx={}, [r,g,b]=S.probe.rgb; ctx.out=proc(r/255,g/255,b/255,ctx); return ctx; }
+function lineCtx(){ return null; }
+
+/* ================= editor de curvas ================= */
+const PAD={l:34,r:12,t:12,b:26};
+function geom(){
+  const r=$('#cvCurves').getBoundingClientRect(), pw=r.width-PAD.l-PAD.r, ph=r.height-PAD.t-PAD.b;
+  return { r, pw, ph, X:v=>PAD.l+v/255*pw, Y:v=>PAD.t+ph-v/255*ph, iX:px=>(px-PAD.l)/pw*255, iY:py=>(PAD.t+ph-py)/ph*255 };
+}
+function drawCurves(){
+  const st=setupCanvas($('#cvCurves')); if (!st) return;
+  const {ctx,W,H}=st, {pw,ph,X,Y}=geom(), p=PAD, cols=colors(), A=S.active, tone=A<4;
+  ctx.strokeStyle=css('--grid'); ctx.lineWidth=1;
+  for (let i=0;i<=8;i++){ const v=i*255/8; ctx.beginPath(); ctx.moveTo(X(v),p.t); ctx.lineTo(X(v),p.t+ph); ctx.moveTo(p.l,Y(v)); ctx.lineTo(p.l+pw,Y(v)); ctx.stroke(); }
+  ctx.strokeStyle=css('--line'); ctx.strokeRect(p.l,p.t,pw,ph);
+  ctx.font='10px var(--mono)'; ctx.fillStyle=css('--ink-2');
+  for (const v of [0,64,128,192,255]){ ctx.textAlign='center'; ctx.fillText(v,X(v),H-9); ctx.textAlign='right'; ctx.fillText(A===4||A===6?(v===128?'1×':v===0?(A===4?'0×':'-'):v===255?(A===4?'2×':'+'):''):v,p.l-6,Y(v)+3); }
+  ctx.setLineDash([4,4]); ctx.strokeStyle=css('--ink-2'); ctx.globalAlpha=.45; ctx.beginPath();
+  if (A===4||A===6){ ctx.moveTo(X(0),Y(128)); ctx.lineTo(X(255),Y(128)); } else { ctx.moveTo(X(0),Y(0)); ctx.lineTo(X(255),Y(255)); }
+  ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+  if (tone&&S.band&&S.hist){
+    const bw=Math.max(1,pw/256), cnt=S.count;
+    for (let c=0;c<3;c++){ if (!S.vis[c+1]) continue; ctx.fillStyle=cols[c+1];
+      ctx.globalAlpha=.13; for (let L=0;L<256;L++){ if (!cnt[L]) continue; const y1=Y(S.p90[c][L]),y2=Y(S.p10[c][L]); ctx.fillRect(X(L)-bw/2,y1,bw,Math.max(1,y2-y1)); }
+      ctx.globalAlpha=.45; for (let L=0;L<256;L++){ if (!cnt[L]) continue; ctx.beginPath(); ctx.arc(X(L),Y(S.raw[c][L]),.7+Math.log10(1+cnt[L])*.4,0,7); ctx.fill(); } }
+    ctx.globalAlpha=1;
+  }
+  const list=tone?[1,2,3,0].filter(c=>c!==A&&(c===0||S.vis[c])).concat([A]):[A];
+  ctx.lineJoin='round';
+  for (const c of list){
+    const cv=evalCurve(S.pts[c],512); ctx.strokeStyle=cols[c]; ctx.lineWidth=c===A?2.4:1.4; ctx.globalAlpha=c===A?1:.7;
+    ctx.beginPath(); for (let i=0;i<512;i++){ const x=X(i*255/511), y=Y(cv[i]); i?ctx.lineTo(x,y):ctx.moveTo(x,y); } ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  if (tone) for (const c of [0,1,2,3]){ if (c===A||(c>0&&!S.vis[c])) continue; ctx.fillStyle=cols[c]; ctx.globalAlpha=.75; S.pts[c].forEach(pt=>{ ctx.beginPath(); ctx.arc(X(pt[0]),Y(pt[1]),3,0,7); ctx.fill(); }); }
+  ctx.globalAlpha=1;
+  // nodos del canal activo
+  S.pts[A].forEach((pt,i)=>{
+    const sel=i===S.sel;
+    if (sel){ ctx.beginPath(); ctx.arc(X(pt[0]),Y(pt[1]),12,0,7); ctx.fillStyle=cols[A]; ctx.globalAlpha=.22; ctx.fill(); ctx.globalAlpha=1; }
+    ctx.beginPath(); ctx.arc(X(pt[0]),Y(pt[1]),sel?7:5.5,0,7); ctx.fillStyle=cols[A]; ctx.fill(); ctx.lineWidth=2; ctx.strokeStyle=sel?'#fff':'#0a0a0b'; ctx.stroke();
+  });
+  // números de las muestras sobre sus nodos
+  ctx.font='600 11px var(--mono)'; ctx.textAlign='center';
+  S.pins.forEach((pin,n)=>{ if (pin.ch!==A) return; const q=S.pts[A].find(p=>p[0]===pin.nx); if (!q) return;
+    ctx.lineWidth=3; ctx.strokeStyle='#000'; ctx.strokeText(n+1,X(q[0]),Y(q[1])-12); ctx.fillStyle=pin.id===S.pinSel?css('--green'):'#fff'; ctx.fillText(n+1,X(q[0]),Y(q[1])-12); });
+  // sonda
+  const pc=probeCtx();
+  if (pc){
+    const [r,g,b]=S.probe.rgb; ctx.setLineDash([3,3]); ctx.strokeStyle='#fff'; ctx.globalAlpha=.6; ctx.lineWidth=1;
+    const xs=tone?[P.wr*r+P.wg*g+P.wb*b]:[A===4?pc.sp[0]:pc.sp[1]];
+    ctx.beginPath(); ctx.moveTo(X(xs[0]),p.t); ctx.lineTo(X(xs[0]),p.t+ph); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+    if (tone){ const T=luts(); [r,g,b].forEach((v,c)=>{ ctx.beginPath(); ctx.arc(X(v),Y(T[c][v]),5,0,7); ctx.strokeStyle=cols[c+1]; ctx.lineWidth=2; ctx.stroke(); }); }
+  }
+  if (S.hoverX!=null){ ctx.strokeStyle=css('--ink'); ctx.globalAlpha=.25; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(X(S.hoverX),p.t); ctx.lineTo(X(S.hoverX),p.t+ph); ctx.stroke(); ctx.globalAlpha=1; }
+}
+function readout(){
+  const x=S.hoverX, A=S.active; if (x==null) return;
+  const a=evalCurve(S.pts[A]);
+  const sel=S.sel>=0&&S.pts[A][S.sel]?` · punto ${S.pts[A][S.sel].map(v=>+v.toFixed(2)).join(', ')}`:'';
+  if (A<4){ const T=luts(); $('#readout').innerHTML=`entrada <b>${x}</b> → canal activo <b>${a[x].toFixed(1)}</b> · final <b class="cr">${T[0][x].toFixed(0)}</b> <b class="cg">${T[1][x].toFixed(0)}</b> <b class="cb">${T[2][x].toFixed(0)}</b>${sel}`; }
+  else if (A===4) $('#readout').innerHTML=`luminancia <b>${(x/2.55).toFixed(0)}</b> → saturación <b>×${(a[x]/128).toFixed(2)}</b>${sel}`;
+  else if (A===5) $('#readout').innerHTML=`croma <b>${(x/2.55).toFixed(0)}%</b> → <b>${(a[x]/2.55).toFixed(0)}%</b>${sel}`;
+  else $('#readout').innerHTML=`croma <b>${(x/2.55).toFixed(0)}%</b> → luminancia <b>${a[x]>=128?'+':''}${((a[x]-128)/2.56).toFixed(1)}</b>${sel}`;
+}
+function renderNodes(){
+  const box=$('#nodes'), pts=S.pts[S.active];
+  $('#nodesTitle').textContent='Nodos '+CH[S.active]+' ('+pts.length+')';
+  $('#nodesAxis').textContent=S.active===4?'luminancia → factor':S.active===5?'croma → croma':S.active===6?'croma → luminancia':'entrada → salida';
+  box.innerHTML=pts.map((p,i)=>`<span class="node${i===S.sel?' sel':''}" data-i="${i}"><input type="number" min="0" max="255" step="0.1" data-k="0" value="${+p[0].toFixed(2)}"><span>→</span><input type="number" min="0" max="255" step="0.1" data-k="1" value="${+p[1].toFixed(2)}">${pts.length>2?'<button title="Borrar">×</button>':''}</span>`).join('');
+}
+$('#nodes').addEventListener('change',e=>{
+  const n=e.target.closest('.node'); if (!n||e.target.tagName!=='INPUT') return;
+  pushUndo(); const i=+n.dataset.i, k=+e.target.dataset.k, pts=S.pts[S.active], v=q2(+e.target.value||0);
+  if (k===0){ const lo=i>0?pts[i-1][0]+0.5:0, hi=i<pts.length-1?pts[i+1][0]-0.5:255; pts[i][0]=clamp(v,lo,hi); } else pts[i][1]=clamp(v,0,255);
+  S.sel=i; changed();
+});
+$('#nodes').addEventListener('focusin',e=>{ const n=e.target.closest('.node'); if (n){ S.sel=+n.dataset.i; drawCurves(); document.querySelectorAll('.node').forEach(x=>x.classList.toggle('sel',x===n)); } });
+$('#nodes').addEventListener('click',e=>{ if (e.target.tagName!=='BUTTON') return; S.sel=+e.target.closest('.node').dataset.i; delSel(); });
+
+const cvC=$('#cvCurves'); let dragging=false;
+function hitCurve(e){
+  const g=geom(), px=e.clientX-g.r.left, py=e.clientY-g.r.top; let best=-1, bd=11;
+  S.pts[S.active].forEach((p,i)=>{ const d=Math.hypot(g.X(p[0])-px,g.Y(p[1])-py); if (d<bd){ bd=d; best=i; } });
+  return {g,px,py,i:best};
+}
+cvC.addEventListener('pointerdown',e=>{
+  cvC.focus(); const {g,px,py,i}=hitCurve(e), pts=S.pts[S.active];
+  pushUndo();
+  if (i>=0){ S.sel=i; const pin=S.pins.find(q=>q.ch===S.active&&q.nx===pts[i][0]); S.pinSel=pin?pin.id:null; renderPins(); drawOv('ref'); drawOv('tgt'); }
+  else { const x=q2(g.iX(px)), y=q2(clamp(g.iY(py),0,255)); if (x<0||x>255||pts.some(p=>Math.abs(p[0]-x)<0.5)){ S.undo.pop(); return; } pts.push([x,y]); pts.sort((a,b)=>a[0]-b[0]); S.sel=pts.findIndex(p=>p[0]===x); }
+  dragging=true; cvC.setPointerCapture(e.pointerId); changed();
+});
+cvC.addEventListener('pointermove',e=>{
+  const g=geom(), px=e.clientX-g.r.left, py=e.clientY-g.r.top;
+  S.hoverX=Math.round(clamp(g.iX(px),0,255));
+  if (dragging&&S.sel>=0){ const pts=S.pts[S.active], n=pts.length, i=S.sel, lo=i>0?pts[i-1][0]+0.5:0, hi=i<n-1?pts[i+1][0]-0.5:255, ox=pts[i][0];
+    pts[i]=[q2(clamp(g.iX(px),lo,hi)),q2(clamp(g.iY(py),0,255))];
+    S.pins.forEach(q=>{ if (q.ch===S.active&&q.nx===ox) q.nx=pts[i][0]; }); changed(); }
+  else { drawCurves(); readout(); }
+});
+cvC.addEventListener('pointerup',()=>dragging=false);
+cvC.addEventListener('pointerleave',()=>{ if (!dragging){ S.hoverX=null; drawCurves(); } });
+function delSel(){
+  const pts=S.pts[S.active]; if (!(S.sel>=0&&pts.length>2)) return;
+  if (S.sel===0||S.sel===pts.length-1){ setStatus('Los extremos no se borran: muévelos o usa Reset canal'); return; }
+  pushUndo(); const x=pts[S.sel][0]; pts.splice(S.sel,1); S.sel=-1;
+  const before=S.pins.length; S.pins=S.pins.filter(p=>!(p.ch===S.active&&p.nx===x)); if (S.pins.length!==before){ if (!S.pins.some(p=>p.id===S.pinSel)) S.pinSel=null; renderPins(); drawOv('ref'); drawOv('tgt'); }
+  changed();
+}
+cvC.addEventListener('dblclick',e=>{ const {i}=hitCurve(e); if (i>=0){ S.undo.pop(); S.sel=i; delSel(); } });
+cvC.addEventListener('keydown',e=>{
+  if (e.key==='Delete'||e.key==='Backspace'){ e.preventDefault(); delSel(); }
+  if (S.sel>=0&&e.key.startsWith('Arrow')){ e.preventDefault(); const pts=S.pts[S.active], i=S.sel, n=pts.length, s=e.shiftKey?5:1;
+    const lo=i>0?pts[i-1][0]+0.5:0, hi=i<n-1?pts[i+1][0]-0.5:255; let [x,y]=pts[i]; const st=e.altKey?0.1:s;
+    if (e.key==='ArrowUp') y+=st; if (e.key==='ArrowDown') y-=st; if (e.key==='ArrowLeft') x-=st; if (e.key==='ArrowRight') x+=st; x=q2(x); y=q2(y);
+    pts[i]=[clamp(x,lo,hi),clamp(y,0,255)]; changed(); }
+});
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{
+  S.active=+b.dataset.c; S.sel=-1; document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  drawCurves(); renderNodes();
+  $('#readout').textContent=S.active===4?'Saturación según luminancia: la línea central es 1×. Sube para saturar esas luces, baja para desaturar.':S.active===5?'Saturación según saturación: la diagonal es neutra. Comprime o expande la croma.':S.active===6?'Luminancia según saturación: aclara u oscurece colores según su croma.':'Clic para añadir punto, arrastra para mover, doble clic o Supr para borrar';
+});
+
+/* ================= rejilla A/B ================= */
+let abBg=null;
+function abBackground(size){
+  const key=size+'|'+S.abL; if (abBg&&abBg.key===key) return abBg.c;
+  const c=document.createElement('canvas'); c.width=c.height=size; const x=c.getContext('2d'), id=x.createImageData(size,size), d=id.data, R=size/2;
+  for (let y=0;y<size;y++) for (let i=0;i<size;i++){
+    const a=(i-R+.5)/R*CMAX, b=-(y-R+.5)/R*CMAX, lin=oklabToLin(S.abL,a,b), og=lin.some(v=>v<-0.003||v>1.003), k=(y*size+i)*4;
+    for (let ch=0;ch<3;ch++){ let v=toS(clamp(lin[ch],0,1))*255; if (og) v=v*0.28+20*0.72; d[k+ch]=v; }
+    d[k+3]=255;
+  }
+  x.putImageData(id,0,0); abBg={key,c}; return c;
+}
+function abGeom(){ const r=$('#cvAB').getBoundingClientRect(), W=r.width, H=r.height, R=Math.min(W,H)/2-14;
+  return {r,cx:W/2,cy:H/2,R, X:a=>W/2+a/CMAX*R, Y:b=>H/2-b/CMAX*R, iA:px=>(px-W/2)/R*CMAX, iB:py=>-(py-H/2)/R*CMAX}; }
+function drawAB(){
+  const st=setupCanvas($('#cvAB')); if (!st) return;
+  const {ctx}=st, g=abGeom(), {X,Y,R,cx,cy}=g;
+  ctx.imageSmoothingEnabled=true; ctx.drawImage(abBackground(200),cx-R,cy-R,2*R,2*R);
+  // nube
+  const c=S.cloud;
+  if (c){
+    for (let i=0;i<c.n;i++){
+      if (S.abAfter){ ctx.fillStyle=`rgb(${c.out[i*3]},${c.out[i*3+1]},${c.out[i*3+2]})`; ctx.fillRect(X(c.fin[i*3+1])-1,Y(c.fin[i*3+2])-1,2.2,2.2); }
+      else { ctx.fillStyle='rgba(255,255,255,.32)'; ctx.fillRect(X(c.ab[i*3+1])-.7,Y(c.ab[i*3+2])-.7,1.5,1.5); }
+    }
+  }
+  // malla
+  ctx.strokeStyle='rgba(10,10,11,.75)'; ctx.lineWidth=1.2;
+  for (let k=1;k<=NR;k++){ ctx.beginPath(); for (let j=0;j<=NS;j++){ const q=abPos(k,j%NS); j?ctx.lineTo(X(q[0]),Y(q[1])):ctx.moveTo(X(q[0]),Y(q[1])); } ctx.stroke(); }
+  for (let j=0;j<NS;j++){ ctx.beginPath(); for (let k=0;k<=NR;k++){ const q=abPos(k,k?j:0); k?ctx.lineTo(X(q[0]),Y(q[1])):ctx.moveTo(X(q[0]),Y(q[1])); } ctx.stroke(); }
+  for (let k=0;k<=NR;k++) for (let j=0;j<(k?NS:1);j++){
+    const q=abPos(k,j), i=(k*NS+j)*2, moved=Math.abs(S.ab[i])+Math.abs(S.ab[i+1])>1e-5, sel=S.abSel&&S.abSel[0]===k&&(k===0||S.abSel[1]===j);
+    const s=sel?9:k?6:8; ctx.fillStyle=moved?css('--pink'):'#0a0a0b'; ctx.strokeStyle=sel?'#fff':'rgba(255,255,255,.85)'; ctx.lineWidth=sel?2:1.2;
+    ctx.fillRect(X(q[0])-s/2,Y(q[1])-s/2,s,s); ctx.strokeRect(X(q[0])-s/2,Y(q[1])-s/2,s,s);
+  }
+  // línea y sonda
+  const lc=lineCtx(); if (lc){ ctx.strokeStyle='#fff'; ctx.lineWidth=1.6; ctx.beginPath(); lc.forEach((q,i)=>{ i?ctx.lineTo(X(q.ab[1]),Y(q.ab[2])):ctx.moveTo(X(q.ab[1]),Y(q.ab[2])); }); ctx.stroke(); }
+  ctx.font='600 11px var(--mono)'; ctx.textAlign='center';
+  S.pins.forEach((pin,n)=>{ const c2={}; proc(pin.rgb[0]/255,pin.rgb[1]/255,pin.rgb[2]/255,c2); const x=X(c2.ab[1]), y=Y(c2.ab[2]);
+    ctx.fillStyle=hex(pin.rgb); ctx.beginPath(); ctx.arc(x,y,6,0,7); ctx.fill(); ctx.lineWidth=pin.id===S.pinSel?3:1.6; ctx.strokeStyle=pin.id===S.pinSel?css('--green'):'#fff'; ctx.stroke();
+    ctx.lineWidth=3; ctx.strokeStyle='#000'; ctx.strokeText(n+1,x,y-10); ctx.fillStyle='#fff'; ctx.fillText(n+1,x,y-10); });
+  const pc=probeCtx();
+  if (pc){ const a0=X(pc.ab[1]),b0=Y(pc.ab[2]),a1=X(pc.fin[1]),b1=Y(pc.fin[2]);
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(a0,b0); ctx.lineTo(a1,b1); ctx.stroke();
+    ctx.beginPath(); ctx.arc(a0,b0,7,0,7); ctx.stroke();
+    ctx.beginPath(); ctx.arc(a1,b1,7,0,7); ctx.fillStyle=hex(pc.out.map(v=>v*255)); ctx.fill(); ctx.stroke(); }
+}
+const cvAB=$('#cvAB'); let abDrag=null;
+function hitAB(e){
+  const g=abGeom(), px=e.clientX-g.r.left, py=e.clientY-g.r.top; let best=null, bd=12;
+  for (let k=0;k<=NR;k++) for (let j=0;j<(k?NS:1);j++){ const q=abPos(k,j), d=Math.hypot(g.X(q[0])-px,g.Y(q[1])-py); if (d<bd){ bd=d; best=[k,j]; } }
+  return {g,px,py,hit:best};
+}
+cvAB.addEventListener('pointerdown',e=>{ const {hit}=hitAB(e); if (!hit) return; pushUndo(); S.abSel=hit; abDrag=hit; cvAB.setPointerCapture(e.pointerId); drawAB(); });
+cvAB.addEventListener('pointermove',e=>{
+  const {g,px,py}=hitAB(e);
+  if (abDrag){ const [k,j]=abDrag, b=abBase(k,j); setAB(k,j,g.iA(px)-b[0],g.iB(py)-b[1]); changed(); }
+  const a=g.iA(px), b=g.iB(py), C=Math.hypot(a,b); let h=Math.atan2(b,a)*180/Math.PI; if (h<0) h+=360;
+  $('#abRead').innerHTML=`a <b>${a.toFixed(3)}</b> · b <b>${b.toFixed(3)}</b> · croma <b>${(C/CMAX*100).toFixed(0)}%</b> · tono <b>${h.toFixed(0)}°</b>`+(S.abSel?` · nodo anillo ${S.abSel[0]}${S.abSel[0]?', sector '+S.abSel[1]:' (centro)'}`:'');
+});
+cvAB.addEventListener('pointerup',()=>abDrag=null);
+cvAB.addEventListener('dblclick',e=>{ const {hit}=hitAB(e); if (!hit) return; S.undo.pop(); pushUndo(); setAB(hit[0],hit[1],0,0); changed(); });
+function smoothAB(){
+  pushUndo(); const src=Float32Array.from(S.ab), at=(k,j)=>(k*NS+((j+NS)%NS))*2;
+  for (let k=1;k<=NR;k++) for (let j=0;j<NS;j++){
+    const nb=[at(k,j-1),at(k,j+1),at(k-1,k-1?j:0)]; if (k<NR) nb.push(at(k+1,j));
+    for (let c=0;c<2;c++){ let s=0; for (const n of nb) s+=src[n+c]; S.ab[at(k,j)+c]=src[at(k,j)+c]*0.5+0.5*s/nb.length; }
+  }
+  changed();
+}
+
+/* ================= rejillas C/L ================= */
+const clBg=[null,null];
+function clBackground(g,w,h){
+  const key=w+'|'+h+'|'+S.clAngle; if (clBg[g]&&clBg[g].key===key) return clBg[g].c;
+  const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d'), id=x.createImageData(w,h), d=id.data, ang=clAng(g), ca=Math.cos(ang), sa=Math.sin(ang);
+  for (let y=0;y<h;y++) for (let i=0;i<w;i++){ const u=-UM+(i+.5)/w*2*UM, L=1-(y+.5)/h, lin=oklabToLin(L,u*ca,u*sa), og=lin.some(v=>v<-0.003||v>1.003), k=(y*w+i)*4;
+    for (let ch=0;ch<3;ch++){ let v=toS(clamp(lin[ch],0,1))*255; if (og) v=v*0.3+20*0.7; d[k+ch]=v; } d[k+3]=255; }
+  x.putImageData(id,0,0); clBg[g]={key,c}; return c;
+}
+const CLP={l:10,r:10,t:10,b:10};
+function clGeom(g){ const r=$('#cvCL'+g).getBoundingClientRect(), pw=r.width-CLP.l-CLP.r, ph=r.height-CLP.t-CLP.b;
+  return {r,pw,ph,X:u=>CLP.l+(u+UM)/(2*UM)*pw, Y:L=>CLP.t+(1-L)*ph, iU:px=>-UM+(px-CLP.l)/pw*2*UM, iL:py=>1-(py-CLP.t)/ph}; }
+function drawCL(g){
+  const st=setupCanvas($('#cvCL'+g)); if (!st) return;
+  const {ctx}=st, G=clGeom(g), {X,Y,pw,ph}=G;
+  ctx.drawImage(clBackground(g,160,80),CLP.l,CLP.t,pw,ph);
+  const c=S.cloud, key='cl'+g;
+  if (c){ ctx.fillStyle='rgba(255,255,255,.3)'; for (let i=0;i<c.n;i++) ctx.fillRect(X(c[key][i*2])-.7,Y(c[key][i*2+1])-.7,1.5,1.5); }
+  ctx.strokeStyle='rgba(10,10,11,.75)'; ctx.lineWidth=1.1;
+  for (let iy=0;iy<=NY;iy++){ ctx.beginPath(); for (let ix=0;ix<=NX;ix++){ const q=clPos(g,ix,iy); ix?ctx.lineTo(X(q[0]),Y(q[1])):ctx.moveTo(X(q[0]),Y(q[1])); } ctx.stroke(); }
+  for (let ix=0;ix<=NX;ix++){ ctx.beginPath(); for (let iy=0;iy<=NY;iy++){ const q=clPos(g,ix,iy); iy?ctx.lineTo(X(q[0]),Y(q[1])):ctx.moveTo(X(q[0]),Y(q[1])); } ctx.stroke(); }
+  for (let iy=0;iy<=NY;iy++) for (let ix=0;ix<=NX;ix++){
+    const q=clPos(g,ix,iy), i=(iy*(NX+1)+ix)*2, moved=Math.abs(S.cl[g][i])+Math.abs(S.cl[g][i+1])>1e-5, sel=S.clSel&&S.clSel[0]===g&&S.clSel[1]===ix&&S.clSel[2]===iy, s=sel?8:5;
+    ctx.fillStyle=moved?css('--pink'):'#0a0a0b'; ctx.strokeStyle=sel?'#fff':'rgba(255,255,255,.8)'; ctx.lineWidth=sel?2:1;
+    ctx.fillRect(X(q[0])-s/2,Y(q[1])-s/2,s,s); ctx.strokeRect(X(q[0])-s/2,Y(q[1])-s/2,s,s);
+  }
+  ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.setLineDash([3,3]); ctx.beginPath(); ctx.moveTo(X(0),CLP.t); ctx.lineTo(X(0),CLP.t+ph); ctx.stroke(); ctx.setLineDash([]);
+  const lc=lineCtx(); if (lc){ ctx.strokeStyle='#fff'; ctx.lineWidth=1.6; ctx.beginPath(); lc.forEach((q,i)=>{ const v=q[key]; i?ctx.lineTo(X(v[0]),Y(v[1])):ctx.moveTo(X(v[0]),Y(v[1])); }); ctx.stroke(); }
+  const pc=probeCtx(); if (pc){ const v=pc[key]; ctx.strokeStyle='#fff'; ctx.lineWidth=1.6; ctx.beginPath(); ctx.arc(X(v[0]),Y(v[1]),7,0,7); ctx.stroke(); }
+}
+let clDrag=null;
+[0,1].forEach(g=>{
+  const cv=$('#cvCL'+g);
+  const hit=e=>{ const G=clGeom(g), px=e.clientX-G.r.left, py=e.clientY-G.r.top; let best=null, bd=11;
+    for (let iy=0;iy<=NY;iy++) for (let ix=0;ix<=NX;ix++){ const q=clPos(g,ix,iy), d=Math.hypot(G.X(q[0])-px,G.Y(q[1])-py); if (d<bd){ bd=d; best=[g,ix,iy]; } }
+    return {G,px,py,best}; };
+  cv.addEventListener('pointerdown',e=>{ const {best}=hit(e); if (!best) return; pushUndo(); S.clSel=best; clDrag=best; cv.setPointerCapture(e.pointerId); drawCL(g); });
+  cv.addEventListener('pointermove',e=>{ const {G,px,py}=hit(e);
+    if (clDrag&&clDrag[0]===g){ const [,ix,iy]=clDrag, b=clBase(ix,iy), i=(iy*(NX+1)+ix)*2; S.cl[g][i]=G.iU(px)-b[0]; S.cl[g][i+1]=G.iL(py)-b[1]; changed(); }
+    $('#clRead').innerHTML=`rejilla ${g+1} · croma sobre el eje <b>${(G.iU(px)/CMAX*100).toFixed(0)}%</b> · luminancia <b>${(G.iL(py)*100).toFixed(0)}</b>`; });
+  cv.addEventListener('pointerup',()=>clDrag=null);
+  cv.addEventListener('dblclick',e=>{ const {best}=hit(e); if (!best) return; S.undo.pop(); pushUndo(); const i=(best[2]*(NX+1)+best[1])*2; S.cl[g][i]=0; S.cl[g][i+1]=0; changed(); });
+});
+function smoothCL(){
+  pushUndo();
+  for (let g=0;g<2;g++){ const src=Float32Array.from(S.cl[g]), at=(ix,iy)=>(iy*(NX+1)+ix)*2;
+    for (let iy=0;iy<=NY;iy++) for (let ix=0;ix<=NX;ix++){ const nb=[]; if (ix>0) nb.push(at(ix-1,iy)); if (ix<NX) nb.push(at(ix+1,iy)); if (iy>0) nb.push(at(ix,iy-1)); if (iy<NY) nb.push(at(ix,iy+1));
+      for (let c=0;c<2;c++){ let s=0; for (const n of nb) s+=src[n+c]; S.cl[g][at(ix,iy)+c]=src[at(ix,iy)+c]*0.5+0.5*s/nb.length; } } }
+  changed();
+}
+
+/* ================= volumen ================= */
+function drawVol(){
+  const st=setupCanvas($('#cvVol')); if (!st) return;
+  const {ctx,W,H}=st, sc=Math.min(W,H)*0.85, cx=W/2, cy=H/2, {yaw,pitch,mode}=S.vol, cyw=Math.cos(yaw), syw=Math.sin(yaw), cp=Math.cos(pitch), sp=Math.sin(pitch);
+  const pr=(L,a,b)=>{ const x=a/CMAX*0.5, y=L-0.5, z=b/CMAX*0.5, x1=x*cyw+z*syw, z1=-x*syw+z*cyw, y1=y*cp-z1*sp; return [cx+x1*sc, cy-y1*sc]; };
+  ctx.lineWidth=1; ctx.font='10px var(--mono)'; ctx.fillStyle=css('--ink-2');
+  const axis=(p0,p1,lab,col)=>{ const a=pr(...p0), b=pr(...p1); ctx.strokeStyle=col; ctx.beginPath(); ctx.moveTo(...a); ctx.lineTo(...b); ctx.stroke(); ctx.fillText(lab,b[0]+4,b[1]); };
+  axis([0,0,0],[1,0,0],'L',css('--ink-2')); axis([0.5,-CMAX,0],[0.5,CMAX,0],'+a','rgba(255,90,120,.7)'); axis([0.5,0,-CMAX],[0.5,0,CMAX],'+b','rgba(230,220,80,.7)');
+  const c=S.cloud; if (!c){ ctx.textAlign='center'; ctx.fillText(trStr('Carga una imagen'),cx,cy); return; }
+  if (mode!=='after'){ ctx.globalAlpha=mode==='both'?.35:.8; for (let i=0;i<c.n;i++){ const q=pr(c.orig[i*3],c.orig[i*3+1],c.orig[i*3+2]); ctx.fillStyle=`rgb(${c.rgb[i*3]},${c.rgb[i*3+1]},${c.rgb[i*3+2]})`; ctx.fillRect(q[0]-1,q[1]-1,2,2); } }
+  if (mode!=='before'){ ctx.globalAlpha=.9; for (let i=0;i<c.n;i++){ const o=oklabB(c.out[i*3],c.out[i*3+1],c.out[i*3+2]), q=pr(...o); ctx.fillStyle=`rgb(${c.out[i*3]},${c.out[i*3+1]},${c.out[i*3+2]})`; ctx.fillRect(q[0]-1.2,q[1]-1.2,2.4,2.4); } }
+  ctx.globalAlpha=1;
+}
+(()=>{ const cv=$('#cvVol'); let d=null;
+  cv.addEventListener('pointerdown',e=>{ d=[e.clientX,e.clientY,S.vol.yaw,S.vol.pitch]; cv.setPointerCapture(e.pointerId); cv.style.cursor='grabbing'; });
+  cv.addEventListener('pointermove',e=>{ if (!d) return; S.vol.yaw=d[2]+(e.clientX-d[0])*0.01; S.vol.pitch=clamp(d[3]+(e.clientY-d[1])*0.01,-1.5,1.5); drawVol(); });
+  cv.addEventListener('pointerup',()=>{ d=null; cv.style.cursor='grab'; });
+})();
+document.querySelectorAll('input[name=vol]').forEach(r=>r.onchange=()=>{ S.vol.mode=r.value; drawVol(); });
+
+/* ================= histograma ================= */
+function drawHist(){
+  const st=setupCanvas($('#cvHist')); if (!st||!S.outHist) return;
+  const {ctx,W,H}=st; let max=0; for (const a of S.outHist) for (let v=1;v<255;v++) max=Math.max(max,a[v]);
+  const X=v=>v/255*W, Y=x=>H-2-Math.min(1,x/max)*(H-6), cols=colors();
+  for (let c=0;c<3;c++){ if (!S.vis[c+1]) continue; const a=S.outHist[c];
+    ctx.beginPath(); ctx.moveTo(0,H); for (let v=0;v<256;v++) ctx.lineTo(X(v),Y(a[v])); ctx.lineTo(W,H); ctx.closePath();
+    ctx.fillStyle=cols[c+1]; ctx.globalAlpha=.2; ctx.fill(); ctx.globalAlpha=.9; ctx.strokeStyle=cols[c+1]; ctx.lineWidth=1.2; ctx.stroke(); }
+  ctx.globalAlpha=.7; ctx.setLineDash([3,3]); ctx.strokeStyle=css('--ink'); ctx.beginPath(); const l=S.outHist[3];
+  for (let v=0;v<256;v++){ v?ctx.lineTo(X(v),Y(l[v])):ctx.moveTo(X(v),Y(l[v])); } ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+}
+
+/* ================= sonda ================= */
+function renderProbe(){
+  if (!S.probe){ $('#swIn').style.background=''; $('#swOut').style.background=''; return; }
+  const pc=probeCtx(), [r,g,b]=S.probe.rgb, out=pc.out.map(v=>Math.round(v*255)), o=oklabB(r,g,b), C=Math.hypot(o[1],o[2]); let h=Math.atan2(o[2],o[1])*180/Math.PI; if (h<0) h+=360;
+  $('#swIn').style.background=hex([r,g,b]); $('#swOut').style.background=hex(out);
+  $('#probeTxt').innerHTML=`<b>${hex([r,g,b])}</b> → <b>${hex(out)}</b> · RGB ${r} ${g} ${b} → ${out.join(' ')}<br>L ${(o[0]*100).toFixed(1)} · C ${(C/CMAX*100).toFixed(0)}% · h ${h.toFixed(0)}° · lum ${Math.round(P.wr*r+P.wg*g+P.wb*b)}`;
+}
+
+/* ================= herramientas sobre imágenes ================= */
+const HINTS={probe:'Clic o arrastra sobre la referencia o la vista previa para leer un color y verlo en el editor.',
+  node:'Clic en una imagen: deja una muestra y crea un nodo en la curva activa. Clic sobre una muestra la selecciona y arrastrarla la mueve. Doble clic, Supr o × la borran junto con su nodo.',
+  rect:'Arrastra un rectángulo sobre la referencia: la extracción, la paleta, las muestras auto y el Color Match usan solo esa zona.',
+  lasso:'Dibuja con el lápiz una forma libre sobre la referencia: al soltar se cierra sola. La extracción, la paleta, las muestras auto y el Color Match usan solo esa zona.',
+  pair:'1) Clic en la vista previa sobre el color a cambiar. 2) Clic en la referencia o en la paleta sobre el color destino.'};
+function toolHint(){ $('#toolHint').textContent=S.tool==='pair'&&S.pairFrom?'Ahora elige el color destino en la referencia o en la paleta.':HINTS[S.tool]; }
+document.querySelectorAll('input[name=tool]').forEach(r=>r.onchange=()=>{ S.tool=r.value; S.pairFrom=null; toolHint(); drawOv('tgt'); });
+const imgOf=w=>w==='ref'?S.ref:S.prev;
+function ovXY(e,cv){ const r=cv.getBoundingClientRect(); return [clamp((e.clientX-r.left)/r.width*cv.width,0,cv.width-1),clamp((e.clientY-r.top)/r.height*cv.height,0,cv.height-1)]; }
+function pix(img,x,y){ const i=(Math.floor(y)*img.w+Math.floor(x))*4; return [img.data[i],img.data[i+1],img.data[i+2]]; }
+function avgPix(img,x,y){ let s=[0,0,0],n=0; for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){ const xx=clamp(Math.floor(x)+dx,0,img.w-1), yy=clamp(Math.floor(y)+dy,0,img.h-1), p=pix(img,xx,yy); s[0]+=p[0]; s[1]+=p[1]; s[2]+=p[2]; n++; } return s.map(v=>Math.round(v/n)); }
+function sampleLine(img,a,b){ const n=96, out=[]; for (let i=0;i<n;i++){ const t=i/(n-1); out.push(pix(img,a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t)); } return out; }
+function drawOv(w){
+  const cv=w==='ref'?$('#ovRef'):$('#ovTgt'); if (!imgOf(w)) return;
+  const ctx=cv.getContext('2d'), sc=cv.width/Math.max(1,cv.getBoundingClientRect().width); ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.lineWidth=1.6*sc;
+  if (w==='ref'&&(S.lasso||S.lassoDraw)){
+    const pts=S.lassoDraw||S.lasso.pts, path=new Path2D(); pts.forEach((q,i)=>i?path.lineTo(q[0],q[1]):path.moveTo(q[0],q[1]));
+    if (!S.lassoDraw||S.tool==='rect'){ path.closePath(); const dim=new Path2D(); dim.rect(0,0,cv.width,cv.height); dim.addPath(path); ctx.fillStyle='rgba(0,0,0,.5)'; ctx.fill(dim,'evenodd'); }
+    ctx.lineWidth=3.5*sc; ctx.strokeStyle='#000'; ctx.stroke(path); ctx.lineWidth=1.8*sc; ctx.setLineDash([6*sc,4*sc]); ctx.strokeStyle=css('--green'); ctx.stroke(path); ctx.setLineDash([]); }
+  if (S.line&&S.line.src===w){ ctx.strokeStyle='#fff'; ctx.beginPath(); ctx.moveTo(...S.line.a); ctx.lineTo(...S.line.b); ctx.stroke(); ctx.fillStyle='#fff'; for (const q of [S.line.a,S.line.b]){ ctx.beginPath(); ctx.arc(q[0],q[1],4*sc,0,7); ctx.fill(); } }
+  const mark=(x,y,col)=>{ ctx.strokeStyle='#000'; ctx.lineWidth=3.5*sc; ctx.beginPath(); ctx.arc(x,y,8*sc,0,7); ctx.stroke(); ctx.strokeStyle=col; ctx.lineWidth=1.8*sc; ctx.beginPath(); ctx.arc(x,y,8*sc,0,7); ctx.stroke(); };
+  if (S.probe&&S.probe.src===w&&S.probe.x!=null&&S.tool!=='node') mark(S.probe.x,S.probe.y,'#fff');
+  S.pins.forEach((pin,i)=>{ if (pin.src!==w) return; const sel=pin.id===S.pinSel, r=(sel?9:7)*sc;
+    if (sel){ ctx.strokeStyle=css('--green'); ctx.lineWidth=3*sc; ctx.beginPath(); ctx.arc(pin.x,pin.y,r+5*sc,0,7); ctx.stroke(); }
+    ctx.fillStyle=hex(pin.rgb); ctx.beginPath(); ctx.arc(pin.x,pin.y,r,0,7); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=2*sc; ctx.stroke();
+    ctx.font=`600 ${11*sc}px var(--mono)`; ctx.textAlign='center'; ctx.lineWidth=3*sc; ctx.strokeStyle='#000';
+    ctx.strokeText(i+1,pin.x,pin.y-r-5*sc); ctx.fillStyle='#fff'; ctx.fillText(i+1,pin.x,pin.y-r-5*sc); });
+  if (w==='tgt'&&S.pairFrom&&S.pairFromXY) mark(...S.pairFromXY,css('--yellow'));
+}
+const mag=$('#mag'), magCtx=mag.querySelector('canvas').getContext('2d');
+function showMag(e,srcCv,x,y){
+  if (!['probe','node','pair'].includes(S.tool)){ mag.style.display='none'; return; }
+  mag.style.display='block'; mag.style.left=(e.clientX+18)+'px'; mag.style.top=(e.clientY-146)+'px';
+  magCtx.imageSmoothingEnabled=false; magCtx.fillStyle='#000'; magCtx.fillRect(0,0,128,128);
+  magCtx.drawImage(srcCv,Math.floor(x)-7,Math.floor(y)-7,15,15,0,0,128,128);
+  magCtx.strokeStyle='#fff'; magCtx.lineWidth=1.5; magCtx.strokeRect(60,60,9,9);
+}
+function wireOverlay(w){
+  const cv=w==='ref'?$('#ovRef'):$('#ovTgt'); let drag=null;
+  cv.addEventListener('pointerdown',e=>{
+    const img=imgOf(w); if (!img) return; e.stopPropagation();
+    const [x,y]=ovXY(e,cv), rgb=avgPix(img,x,y);
+    if (S.tool==='rect'||S.tool==='lasso'){ if (w!=='ref'){ setStatus('La selección se dibuja sobre la referencia (la tarjeta de arriba)'); return; }
+      if (S.tool==='lasso'){ drag={t:'lasso'}; S.lassoDraw=[[x,y]]; } else { drag={t:'box',a:[x,y]}; S.lassoDraw=[[x,y],[x,y],[x,y],[x,y]]; } drawOv('ref'); }
+    else if (S.tool==='line'){ drag={t:'line',a:[x,y]}; S.line={src:w,a:[x,y],b:[x,y],rgb:[rgb]}; }
+    else if (S.tool==='pair'){
+      if (w==='tgt'){ S.pairFrom=rgb; S.pairFromXY=[x,y]; toolHint(); drawOv('tgt'); setStatus('Origen del par elegido'); }
+      else if (S.pairFrom) completePair(rgb); else setStatus('Primero elige en la vista previa el color a cambiar');
+      return;
+    }
+    else if (S.tool==='node'){
+      const hit=pinAt(w,e,cv);
+      const now=performance.now(), dbl=hit&&S.lastPinTap&&S.lastPinTap.id===hit.id&&now-S.lastPinTap.t<380; S.lastPinTap=hit?{id:hit.id,t:now}:null;
+      if (dbl){ S.undo.pop(); deletePin(hit.id); S.lastPinTap=null; return; }
+      if (hit){ pushUndo(); selectPin(hit.id); drag={t:'pin',id:hit.id}; }
+      else { pushUndo(); const pin=addPin(w,x,y,rgb,false); selectPin(pin.id); drag={t:'pin',id:pin.id}; }
+    }
+    else { drag={t:'probe'}; S.probe={rgb,src:w,x,y}; renderProbe(); drawEditors(); drawOv(w); }
+    cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener('pointermove',e=>{
+    const img=imgOf(w); if (!img) return; const [x,y]=ovXY(e,cv);
+    showMag(e,w==='ref'?$('#cvRef'):$('#cvOut'),x*(w==='tgt'?1:1),y);
+    if (!drag) return;
+    if (drag.t==='box'){ const [ax,ay]=drag.a; S.lassoDraw=[[ax,ay],[x,ay],[x,y],[ax,y],[ax,ay]]; drawOv('ref'); }
+    else if (drag.t==='lasso'){ const l=S.lassoDraw[S.lassoDraw.length-1]; if (Math.hypot(l[0]-x,l[1]-y)>2) S.lassoDraw.push([x,y]); drawOv('ref'); }
+    else if (drag.t==='line'){ S.line.b=[x,y]; S.line.rgb=sampleLine(img,S.line.a,S.line.b); drawOv(w); drawEditors(); }
+    else if (drag.t==='pin'){ movePin(drag.id,x,y,avgPix(img,x,y)); }
+    else if (drag.t==='probe'){ S.probe={rgb:avgPix(img,x,y),src:w,x,y}; renderProbe(); drawEditors(); drawOv(w); }
+  });
+  cv.addEventListener('pointerup',()=>{
+    if (drag&&(drag.t==='lasso'||drag.t==='box')){ finishLasso(); }
+    drag=null;
+  });
+  cv.addEventListener('pointerleave',()=>{ mag.style.display='none'; });
+}
+wireOverlay('ref'); wireOverlay('tgt');
+function finishLasso(){
+  const pts=S.lassoDraw; S.lassoDraw=null;
+  if (!pts||pts.length<3){ S.lasso=null; }
+  else {
+    const xs=pts.map(p=>p[0]), ys=pts.map(p=>p[1]), x0=Math.max(0,Math.floor(Math.min(...xs))), y0=Math.max(0,Math.floor(Math.min(...ys))), x1=Math.min(S.ref.w-1,Math.ceil(Math.max(...xs))), y1=Math.min(S.ref.h-1,Math.ceil(Math.max(...ys)));
+    if (x1-x0<4||y1-y0<4) S.lasso=null;
+    else {
+      const c=document.createElement('canvas'); c.width=S.ref.w; c.height=S.ref.h; const x=c.getContext('2d');
+      x.beginPath(); pts.forEach((q,i)=>i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1])); x.closePath(); x.fillStyle='#fff'; x.fill();
+      const d=x.getImageData(0,0,c.width,c.height).data, mask=new Uint8Array(c.width*c.height); let n=0;
+      for (let i=0;i<mask.length;i++){ if (d[i*4+3]>127){ mask[i]=1; n++; } }
+      S.lasso=n>20?{pts,mask,w:c.width,x0,y0,x1,y1}:null;
+    }
+  }
+  $('#btnClearRect').disabled=!S.lasso; refChanged(false); drawOv('ref');
+}
+function pinNodeX(rgb,A){
+  prep(); const ctx={}; proc(rgb[0]/255,rgb[1]/255,rgb[2]/255,ctx);
+  return q2(clamp(A===0?P.wr*rgb[0]+P.wg*rgb[1]+P.wb*rgb[2]:A<4?rgb[A-1]:(A===4?ctx.sp[0]:ctx.sp[1]),0,255));
+}
+function linkPin(pin){
+  const A=pin.ch, pts=S.pts[A], x=pinNodeX(pin.rgb,A), ex=pts.findIndex(p=>Math.abs(p[0]-x)<2);
+  if (ex>=0) pin.nx=pts[ex][0];
+  else { pts.push([x,q2(interp(evalCurve(pts),x))]); pts.sort((a,b)=>a[0]-b[0]); pin.nx=x; }
+}
+function addPin(src,x,y,rgb,auto){
+  const pin={id:++S.pinId,src,x,y,rgb,auto,ch:S.active,nx:null};
+  linkPin(pin); S.pins.push(pin); return pin;
+}
+function pinAt(w,e,cv){
+  const r=cv.getBoundingClientRect(), k=cv.width/r.width, px=(e.clientX-r.left)*k, py=(e.clientY-r.top)*k;
+  let best=null, bd=13*k; for (const p of S.pins){ if (p.src!==w) continue; const d=Math.hypot(p.x-px,p.y-py); if (d<bd){ bd=d; best=p; } } return best;
+}
+function pinNodeIndex(pin){ return S.pts[pin.ch].findIndex(p=>p[0]===pin.nx); }
+function selectPin(id){
+  const pin=S.pins.find(p=>p.id===id); if (!pin) return;
+  S.pinSel=id; S.probe={rgb:pin.rgb,src:pin.src,x:pin.x,y:pin.y};
+  if (S.active!==pin.ch){ S.active=pin.ch; document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',+b.dataset.c===pin.ch)); }
+  if (pinNodeIndex(pin)<0) linkPin(pin);
+  S.sel=pinNodeIndex(pin);
+  prep(); const ctx={}; proc(pin.rgb[0]/255,pin.rgb[1]/255,pin.rgb[2]/255,ctx);
+  let best=null,bd=1e9; for (let k=0;k<=NR;k++) for (let j=0;j<(k?NS:1);j++){ const q=abPos(k,j), d=(q[0]-ctx.ab[1])**2+(q[1]-ctx.ab[2])**2; if (d<bd){ bd=d; best=[k,j]; } } S.abSel=best;
+  best=null; bd=1e9; for (let iy=0;iy<=NY;iy++) for (let ix=0;ix<=NX;ix++){ const q=clPos(0,ix,iy), d=(q[0]-ctx.cl0[0])**2+(q[1]-ctx.cl0[1])**2; if (d<bd){ bd=d; best=[0,ix,iy]; } } S.clSel=best;
+  const n=S.pins.indexOf(pin)+1; setStatus('Muestra '+n+' → nodo '+CH[pin.ch]+' · x '+pin.nx+'. Arrástralo en el editor o mueve la muestra');
+  renderPins(); drawOv('ref'); drawOv('tgt'); changed();
+}
+function movePin(id,x,y,rgb){
+  const pin=S.pins.find(p=>p.id===id); if (!pin) return;
+  pin.x=x; pin.y=y; pin.rgb=rgb; S.probe={rgb,src:pin.src,x,y};
+  const pts=S.pts[pin.ch], i=pinNodeIndex(pin);
+  if (i>0&&i<pts.length-1){ const nx=clamp(pinNodeX(rgb,pin.ch),pts[i-1][0]+0.5,pts[i+1][0]-0.5); pts[i][0]=nx; pin.nx=nx; S.sel=i; }
+  else if (i<0) linkPin(pin);
+  renderPins(); drawOv(pin.src); changed();
+}
+function deletePin(id){
+  const pin=S.pins.find(p=>p.id===id); if (!pin) return; pushUndo();
+  const pts=S.pts[pin.ch], i=pinNodeIndex(pin), shared=S.pins.some(p=>p!==pin&&p.ch===pin.ch&&p.nx===pin.nx);
+  if (i>0&&i<pts.length-1&&!shared) pts.splice(i,1);
+  S.pins=S.pins.filter(p=>p!==pin); if (S.pinSel===id) S.pinSel=null; S.sel=-1;
+  renderPins(); drawOv('ref'); drawOv('tgt'); changed();
+}
+function renderPins(){
+  $('#pinCount').textContent=S.pins.length;
+  $('#pinList').innerHTML=S.pins.map((p,i)=>`<span class="pinchip${p.id===S.pinSel?' sel':''}" data-id="${p.id}"><i style="background:${hex(p.rgb)}"></i><b>${i+1}</b>${hex(p.rgb)} · ${CH[p.ch]} ${p.nx??'-'}${p.auto?' · auto':''}<button title="Borrar">×</button></span>`).join('')||'<span class="note" style="margin:0">Con la herramienta Nodo haz clic en la imagen para dejar muestras, o usa Auto</span>';
+}
+$('#pinList').addEventListener('click',e=>{
+  const c=e.target.closest('.pinchip'); if (!c) return; const id=+c.dataset.id;
+  if (e.target.tagName==='BUTTON') deletePin(id); else selectPin(id);
+});
+$('#btnClearPins').onclick=()=>{ if (!S.pins.length) return; pushUndo();
+  for (const pin of [...S.pins]){ const pts=S.pts[pin.ch], i=pinNodeIndex(pin); if (i>0&&i<pts.length-1) pts.splice(i,1); }
+  S.pins=[]; S.pinSel=null; S.sel=-1; renderPins(); drawOv('ref'); drawOv('tgt'); changed(); };
+function autoPins(){
+  const src=S.ref?'ref':S.prev?'tgt':null; if (!src){ setStatus('Carga una imagen primero'); return; }
+  const img=src==='ref'?S.ref:S.prev, N=+$('#autoN').value, strat=$('#autoStrat').value, pass=src==='ref'?passFn():null, [wr,wg,wb]=MODELS[S.model];
+  const step=Math.max(1,Math.floor(Math.sqrt(img.w*img.h/20000))), pts=[];
+  for (let y=0;y<img.h;y+=step) for (let x=0;x<img.w;x+=step){ const i=(y*img.w+x)*4, r=img.data[i],g=img.data[i+1],b=img.data[i+2];
+    if (pass&&!pass(x,y,r,g,b)) continue; const lab=oklabB(r,g,b); pts.push({x,y,rgb:[r,g,b],lab,L:wr*r+wg*g+wb*b}); }
+  if (pts.length<N){ setStatus('Muy pocos píxeles en el rango'); return; }
+  const d2=(a,b)=>(a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2;
+  const reps=[];
+  const nearest=(group,c)=>{ let best=null,bd=1e9; for (const q of group){ const d=d2(q.lab,c); if (d<bd){ bd=d; best=q; } } return best; };
+  const mean=g=>{ const m=[0,0,0]; for (const q of g){ m[0]+=q.lab[0]; m[1]+=q.lab[1]; m[2]+=q.lab[2]; } return m.map(v=>v/g.length); };
+  if (strat==='lum'){ const s=[...pts].sort((a,b)=>a.L-b.L); for (let k=0;k<N;k++){ const g=s.slice(Math.floor(k*s.length/N),Math.floor((k+1)*s.length/N)); if (g.length) reps.push(nearest(g,mean(g))); } }
+  else if (strat==='hue'){ const col=pts.filter(q=>Math.hypot(q.lab[1],q.lab[2])>0.03), gs=Array.from({length:N},()=>[]);
+    for (const q of col){ let h=Math.atan2(q.lab[2],q.lab[1]); if (h<0) h+=TAU; gs[Math.min(N-1,Math.floor(h/TAU*N))].push(q); }
+    gs.forEach(g=>{ if (g.length>col.length*0.01) reps.push(nearest(g,mean(g))); }); }
+  else { const {cen,as}=kmeansCore(pts.map(q=>q.lab),N); cen.forEach((c,k)=>{ const g=pts.filter((q,i)=>as[i]===k); if (g.length) reps.push(nearest(g,c)); }); }
+  if (!reps.length){ setStatus('No hubo grupos con suficientes píxeles'); return; }
+  pushUndo(); let last=null; for (const q of reps) last=addPin(src,q.x+step/2,q.y+step/2,q.rgb,true);
+  setStatus(reps.length+' muestras automáticas en '+CH[S.active]); selectPin(last.id);
+}
+$('#btnAutoPins').onclick=autoPins;
+
+/* ================= carga, pegado ================= */
+function wireDrop(zone,input,onData,max){
+  zone.addEventListener('click',()=>{ if (zone.classList.contains('empty')) input.click(); });
+  zone.addEventListener('dragover',e=>{ e.preventDefault(); zone.classList.add('over'); });
+  zone.addEventListener('dragleave',()=>zone.classList.remove('over'));
+  zone.addEventListener('drop',async e=>{ e.preventDefault(); zone.classList.remove('over'); const f=e.dataTransfer.files[0]; if (f) await handle(f,onData,max); });
+  input.addEventListener('change',async ()=>{ const f=input.files[0]; if (f) await handle(f,onData,max); input.value=''; });
+}
+async function handle(file,onData,max){
+  try { setStatus('Cargando '+(file.name||'imagen')+'...'); onData(await fileToData(file,max)); setStatus(file.name||'Imagen pegada'); }
+  catch(err){ console.error(err); setStatus(err.message==='HEIC'?'HEIC no soportado: exporta a JPG o PNG':'No se pudo decodificar la imagen. Prueba con JPG, PNG o WebP'); }
+}
+const loadRef=d=>setRef(d), loadTgt=d=>setTgt(d);
+wireDrop($('#dropRef'),$('#fileRef'),loadRef,1600);
+wireDrop($('#dropTgt'),$('#fileTgt'),loadTgt,4000);
+$('#cardRef').addEventListener('pointerenter',()=>S.pasteTarget='ref');
+$('#cardTgt').addEventListener('pointerenter',()=>S.pasteTarget='tgt');
+document.addEventListener('paste',e=>{
+  const items=e.clipboardData?e.clipboardData.items:[];
+  for (const it of items){ if (it.type&&it.type.startsWith('image/')){ const f=it.getAsFile(); if (f){ e.preventDefault(); S.pasteTarget==='tgt'?handle(f,loadTgt,4000):handle(f,loadRef,1600); return; } } }
+});
+async function pasteBtn(target){
+  try{
+    const items=await navigator.clipboard.read();
+    for (const it of items){ const t=it.types.find(x=>x.startsWith('image/')); if (t){ const blob=await it.getType(t); return handle(new File([blob],'pegado',{type:t}),target==='ref'?loadRef:loadTgt,target==='ref'?1600:4000); } }
+    setStatus('El portapapeles no contiene una imagen');
+  } catch(err){ S.pasteTarget=target; setStatus('El navegador bloqueó la lectura: pulsa Ctrl+V (Cmd+V) sobre esta tarjeta'); }
+}
+$('#btnPasteRef').onclick=()=>pasteBtn('ref');
+$('#btnPasteTgt').onclick=()=>pasteBtn('tgt');
+$('#btnLoadRef').onclick=()=>$('#fileRef').click();
+$('#btnLoadTgt').onclick=()=>$('#fileTgt').click();
+$('#btnUseRef').onclick=()=>{ if (S.ref) setTgt(S.ref); };
+$('#btnClearRect').onclick=()=>{ S.lasso=null; $('#btnClearRect').disabled=true; refChanged(false); };
+
+/* ================= controles ================= */
+$('#btnExtract').onclick=extract;
+$('#btnPng').onclick=()=>{ prep(); const out=applyLUT(S.tgt,S.lutHQ||buildLUT(65),65,false,S.dither), c=document.createElement('canvas'); c.width=S.tgt.w; c.height=S.tgt.h; c.getContext('2d').putImageData(out,0,0); c.toBlob(b=>download(fname('.png'),b),'image/png'); };
+$('#split').oninput=e=>$('#cvOut').style.clipPath=`inset(0 0 0 ${e.target.value}%)`;
+$('#desat').onchange=e=>{ S.desat=e.target.checked; drawBase(); changed(); };
+const INOTE={mono:'Hermite monótono: pasa por cada nodo sin sobrepasar',natural:'Spline cúbica natural, como Photoshop: más curva, puede sobrepasar entre nodos',linear:'Tramos rectos entre nodos, sin suavizado'};
+document.querySelectorAll('input[name=interp]').forEach(r=>r.onchange=()=>{ pushUndo(); S.interp=r.value; $('#interpNote').textContent=INOTE[S.interp]; changed(); });
+$('#dither').onchange=e=>{ S.dither=e.target.checked; render(); };
+const reex=()=>{ if (!S.ref) return; analyze(); if (S.autoEx) extract(); else changed(); };
+document.querySelectorAll('input[name=model]').forEach(r=>r.onchange=()=>{ S.model=r.value; drawBase(); if (S.ref) reex(); else changed(); });
+document.querySelectorAll('input[name=stat]').forEach(r=>r.onchange=()=>{ S.stat=r.value; reex(); });
+document.querySelectorAll('input[name=place]').forEach(r=>r.onchange=()=>{ S.place=r.value; if (S.ref&&S.autoEx) extract(); });
+const bindSlider=(id,out,fmt,fn)=>{ $(id).oninput=e=>{ const v=+e.target.value; $(out).textContent=fmt(v); fn(v); }; };
+bindSlider('#sigma','#oSigma',v=>v.toFixed(1),v=>{ S.sigma=v; if (S.ref&&S.autoEx) extract(); });
+bindSlider('#npts','#oNpts',v=>v,v=>{ S.npts=v; if (S.ref&&S.autoEx) extract(); });
+bindSlider('#strength','#oStrength',v=>v+'%',v=>{ S.strength=v/100; if (S.ref&&S.autoEx) extract(); });
+let rangeT=0; const rangeChanged=()=>{ clearTimeout(rangeT); rangeT=setTimeout(()=>refChanged(false),120); };
+bindSlider('#rL0','#oRL0',v=>v,v=>{ S.range.l0=v; rangeChanged(); });
+bindSlider('#rL1','#oRL1',v=>v,v=>{ S.range.l1=v; rangeChanged(); });
+bindSlider('#rH0','#oRH0',v=>v+'°',v=>{ S.range.h0=v; if (S.range.hOn) rangeChanged(); });
+bindSlider('#rH1','#oRH1',v=>v+'°',v=>{ S.range.h1=v; if (S.range.hOn) rangeChanged(); });
+bindSlider('#rC','#oRC',v=>v+'%',v=>{ S.range.cmin=v; rangeChanged(); });
+$('#rHOn').onchange=e=>{ S.range.hOn=e.target.checked; rangeChanged(); };
+$('#mono').onchange=e=>{ S.mono=e.target.checked; if (S.ref&&S.autoEx) extract(); };
+$('#autoEx').onchange=e=>{ S.autoEx=e.target.checked; };
+$('#band').onchange=e=>{ S.band=e.target.checked; drawCurves(); };
+document.querySelectorAll('.vis').forEach(c=>c.onchange=()=>{ S.vis[+c.dataset.c]=c.checked; drawCurves(); drawHist(); });
+function dropPins(fn){ S.pins=S.pins.filter(p=>!fn(p)); if (!S.pins.some(p=>p.id===S.pinSel)) S.pinSel=null; renderPins(); drawOv('ref'); drawOv('tgt'); }
+$('#btnResetC').onclick=()=>{ pushUndo(); S.pts[S.active]=defPts(S.active); S.sel=-1; dropPins(p=>p.ch===S.active); changed(); setStatus('Canal '+CH[S.active]+' reestablecido'); };
+$('#btnResetAll').onclick=()=>{ pushUndo(); S.pts=[0,1,2,3,4,5,6].map(defPts); S.sel=-1; dropPins(()=>true); changed(); setStatus('Curvas reestablecidas'); };
+$('#btnABReset').onclick=()=>{ pushUndo(); S.ab.fill(0); S.abSel=null; changed(); };
+$('#btnABSmooth').onclick=smoothAB;
+$('#abAfter').onchange=e=>{ S.abAfter=e.target.checked; drawAB(); };
+bindSlider('#abL','#oAbL',v=>v,v=>{ S.abL=v/100; drawAB(); });
+$('#btnCL0Reset').onclick=()=>{ pushUndo(); S.cl[0].fill(0); changed(); };
+$('#btnCL1Reset').onclick=()=>{ pushUndo(); S.cl[1].fill(0); changed(); };
+$('#btnCLSmooth').onclick=smoothCL;
+bindSlider('#clAngle','#oClAngle',v=>v+'°',v=>{ S.clAngle=v; $('#clName0').textContent=v?'rotado '+v+'°':'verde ↔ magenta'; $('#clName1').textContent=v?'rotado '+(v+90)+'°':'azul ↔ amarillo'; changed(); });
+$('#btnMatch').onclick=computeMatch;
+$('#btnMatchOff').onclick=()=>{ pushUndo(); S.match.on=false; updateMatchBtns(); changed(); };
+bindSlider('#matchAmt','#oMatchAmt',v=>v+'%',v=>{ S.match.amt=v/100; changed(); });
+$('#matchKeepL').onchange=e=>{ S.match.keepL=e.target.checked; changed(); };
+$('#pairL').onchange=e=>{ S.pairL=e.target.checked; };
+const M=S.mask;
+$('#mOn').onchange=e=>{ M.on=e.target.checked; changed(); };
+$('#mInv').onchange=e=>{ M.inv=e.target.checked; changed(); };
+$('#mShow').onchange=e=>{ M.show=e.target.checked; changed(); };
+bindSlider('#mHc','#oMHc',v=>v+'°',v=>{ M.hc=v; changed(); });
+bindSlider('#mHw','#oMHw',v=>v>=180?'todo':'±'+v+'°',v=>{ M.hw=v; changed(); });
+bindSlider('#mL0','#oML0',v=>v,v=>{ M.l0=v; changed(); });
+bindSlider('#mL1','#oML1',v=>v,v=>{ M.l1=v; changed(); });
+bindSlider('#mC','#oMC',v=>v+'%',v=>{ M.cmin=v; changed(); });
+bindSlider('#mF','#oMF',v=>v,v=>{ M.feather=v; changed(); });
+bindSlider('#opacity','#oOpacity',v=>v+'%',v=>{ S.opacity=v/100; changed(); });
+function updateMaskSub(){ $('#maskSub').textContent=(M.on?'máscara activa':'sin máscara')+' · opacidad '+Math.round(S.opacity*100)+'%'; }
+document.querySelectorAll('#edTabs button').forEach(b=>b.onclick=()=>{
+  S.tab=b.dataset.t; document.querySelectorAll('#edTabs button').forEach(x=>x.classList.toggle('on',x===b));
+  $('#pCurves').hidden=S.tab!=='curves'; $('#pAB').hidden=S.tab!=='ab'; $('#pCL').hidden=S.tab!=='cl'; $('#pVol').hidden=S.tab!=='vol';
+  $('#edSub').textContent={curves:'curvas por canal',ab:'tono y croma',cl:'croma y luz por eje',vol:'gamut 3D'}[S.tab];
+  requestAnimationFrame(drawEditors);
+});
+document.querySelectorAll('.card-menu').forEach(b=>b.onclick=()=>{ const c=b.closest('.card'); c.classList.toggle('collapsed'); if (!c.classList.contains('collapsed')) requestAnimationFrame(()=>{ drawEditors(); drawHist(); }); });
+
+/* ================= listas por nivel ================= */
+function renderLists(){
+  const ids=['#listR','#listG','#listB'];
+  if (!S.hist){ ids.forEach(id=>$(id).innerHTML='<span class="empty">Carga una referencia</span>'); return; }
+  ids.forEach((id,c)=>{ const rows=[]; for (let L=0;L<256;L++){ const n=S.count[L]; if (!n) continue; rows.push(`<div data-l="${L}"><span>(${L},${Math.round(S.raw[c][L])})</span><i>${Math.round(n)}</i></div>`); } $(id).innerHTML=rows.join('')||'<span class="empty">Sin píxeles en el rango</span>'; });
+}
+document.querySelectorAll('.list').forEach(l=>l.addEventListener('click',e=>{
+  const r=e.target.closest('[data-l]'); if (!r) return; const L=+r.dataset.l;
+  S.hoverX=L; drawCurves(); readout();
+  document.querySelectorAll('.list [data-l]').forEach(x=>{ const on=+x.dataset.l===L; x.classList.toggle('hl',on); if (on&&!x.parentNode.contains(r)) x.parentNode.scrollTop=x.offsetTop-x.parentNode.offsetTop-100; });
+}));
+
+/* ================= exportación ================= */
+function download(name,data,type){
+  const blob=data instanceof Blob?data:new Blob([data],{type}), a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+const pname=()=>($('#pname').value.trim()||'Color Matcher');
+const fname=ext=>pname().replace(/[^\w\- ]+/g,'').replace(/\s+/g,'_')+ext;
+const esc=s=>s.replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+const Pt=c=>S.pts[c].map(([x,y])=>[Math.round(x),Math.round(y)]);
+function curvesOnlyWarn(){
+  prep(); const extra=[P.match&&'Color Match',(P.sxl||P.sxs||P.lxs)&&'curvas especiales',P.abOn&&'rejilla A/B',(P.clOn[0]||P.clOn[1])&&'rejilla C/L',P.maskOn&&'máscara',P.opacity<1&&'opacidad',S.desat&&'desaturación'].filter(Boolean);
+  setStatus(extra.length?'Exportadas solo las curvas RGB. Quedan fuera: '+extra.join(', ')+'. Usa .cube para todo':'Curvas exportadas');
+}
+$('#exCube').onclick=()=>{
+  prep(); const N=+$('#cubeN').value, lut=buildLUT(N);
+  const L=['TITLE "'+pname().replace(/"/g,'')+'"','# Color Matcher','LUT_3D_SIZE '+N,'DOMAIN_MIN 0 0 0','DOMAIN_MAX 1 1 1'];
+  for (let i=0;i<lut.length;i+=3) L.push(lut[i].toFixed(6)+' '+lut[i+1].toFixed(6)+' '+lut[i+2].toFixed(6));
+  download(fname('.cube'),L.join('\n')+'\n','text/plain'); setStatus('LUT '+N+'³ exportada');
+};
+$('#exAcv').onclick=()=>{
+  const curves=[Pt(0),Pt(1),Pt(2),Pt(3),ident()], words=[4,curves.length];
+  for (const c of curves){ words.push(c.length); for (const [x,y] of c) words.push(y,x); }
+  const buf=new ArrayBuffer(words.length*2), dv=new DataView(buf); words.forEach((w,i)=>dv.setInt16(i*2,w,false));
+  download(fname('.acv'),new Blob([buf],{type:'application/octet-stream'})); curvesOnlyWarn();
+};
+$('#exXmp').onclick=()=>{
+  const seq=pts=>`<rdf:Seq>\n${pts.map(([x,y])=>`      <rdf:li>${x}, ${y}</rdf:li>`).join('\n')}\n     </rdf:Seq>`;
+  const uuid=(crypto.randomUUID?crypto.randomUUID():String(Date.now())).replace(/-/g,'').toUpperCase(), n=esc(pname());
+  const alt=v=>`<rdf:Alt><rdf:li xml:lang="x-default">${v}</rdf:li></rdf:Alt>`;
+  const xml=`<x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Color Matcher">
+ <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+  <rdf:Description rdf:about=""
+    xmlns:crs="http://ns.adobe.com/camera-raw-settings/1.0/"
+   crs:PresetType="Normal" crs:Cluster="" crs:UUID="${uuid}" crs:SupportsAmount="False" crs:SupportsColor="True" crs:SupportsMonochrome="True"
+   crs:SupportsHighDynamicRange="True" crs:SupportsNormalDynamicRange="True" crs:SupportsSceneReferred="True" crs:SupportsOutputReferred="True"
+   crs:CameraModelRestriction="" crs:Copyright="" crs:ContactInfo="" crs:Version="15.0" crs:ProcessVersion="11.0" crs:ToneCurveName2012="Custom" crs:HasSettings="True">
+   <crs:Name>${alt(n)}</crs:Name>
+   <crs:ShortName>${alt('')}</crs:ShortName>
+   <crs:SortName>${alt('')}</crs:SortName>
+   <crs:Group>${alt('Color Matcher')}</crs:Group>
+   <crs:Description>${alt('Curvas generadas con Color Matcher')}</crs:Description>
+   <crs:ToneCurvePV2012>
+     ${seq(Pt(0))}
+   </crs:ToneCurvePV2012>
+   <crs:ToneCurvePV2012Red>
+     ${seq(Pt(1))}
+   </crs:ToneCurvePV2012Red>
+   <crs:ToneCurvePV2012Green>
+     ${seq(Pt(2))}
+   </crs:ToneCurvePV2012Green>
+   <crs:ToneCurvePV2012Blue>
+     ${seq(Pt(3))}
+   </crs:ToneCurvePV2012Blue>
+  </rdf:Description>
+ </rdf:RDF>
+</x:xmpmeta>
+`;
+  download(fname('.xmp'),xml,'application/rdf+xml'); curvesOnlyWarn();
+};
+$('#exGimp').onclick=()=>{
+  const line=pts=>{ const a=[]; for (let i=0;i<17;i++){ const p=pts[i]; a.push(p?p[0]+' '+p[1]:'-1 -1'); } return a.join(' '); };
+  download(fname('_gimp.crv'),['# GIMP Curves File',line(Pt(0)),line(Pt(1)),line(Pt(2)),line(Pt(3)),line(ident())].join('\n')+'\n','text/plain'); curvesOnlyWarn();
+};
+$('#exCsv').onclick=()=>{ const T=luts(), rows=['entrada,R,G,B']; for (let x=0;x<256;x++) rows.push([x,T[0][x].toFixed(2),T[1][x].toFixed(2),T[2][x].toFixed(2)].join(',')); download(fname('.csv'),rows.join('\n'),'text/csv'); curvesOnlyWarn(); };
+$('#exJson').onclick=()=>{
+  download(fname('.json'),JSON.stringify({ app:'color-matcher', version:2, name:pname(), luminance:S.model, desaturate:S.desat,
+    interpolation:S.interp, points:{rgb:S.pts[0],r:S.pts[1],g:S.pts[2],b:S.pts[3],satByLum:S.pts[4],satBySat:S.pts[5],lumBySat:S.pts[6]},
+    abGrid:{rings:NR,sectors:NS,cmax:CMAX,disp:Array.from(S.ab,v=>+v.toFixed(5))},
+    clGrids:{nx:NX,ny:NY,umax:UM,angle:S.clAngle,disp:S.cl.map(a=>Array.from(a,v=>+v.toFixed(5)))},
+    match:S.match, mask:S.mask, opacity:S.opacity },null,1),'application/json');
+};
+$('#btnImport').onclick=()=>$('#fileJson').click();
+$('#fileJson').onchange=async e=>{
+  const f=e.target.files[0]; e.target.value=''; if (!f) return;
+  try{
+    const j=JSON.parse(await f.text()), p=j.points; if (!p) throw 0;
+    pushUndo();
+    const norm=(a,c)=>Array.isArray(a)&&a.length>=2?a.map(([x,y])=>[clamp(q2(+x),0,255),clamp(q2(+y),0,255)]).sort((a,b)=>a[0]-b[0]):defPts(c);
+    S.pts=[p.rgb,p.r,p.g,p.b,p.satByLum,p.satBySat,p.lumBySat].map(norm);
+    if (j.abGrid&&j.abGrid.disp&&j.abGrid.disp.length===S.ab.length) S.ab=Float32Array.from(j.abGrid.disp);
+    if (j.clGrids&&j.clGrids.disp) S.cl=j.clGrids.disp.map((a,i)=>a.length===S.cl[i].length?Float32Array.from(a):S.cl[i]);
+    if (j.clGrids&&typeof j.clGrids.angle==='number'){ S.clAngle=j.clGrids.angle; $('#clAngle').value=S.clAngle; $('#oClAngle').textContent=S.clAngle+'°'; }
+    if (j.match) Object.assign(S.match,j.match);
+    if (j.mask) Object.assign(S.mask,j.mask);
+    if (typeof j.opacity==='number') S.opacity=j.opacity;
+    if (typeof j.desaturate==='boolean'){ S.desat=j.desaturate; $('#desat').checked=S.desat; drawBase(); }
+    if (j.name) $('#pname').value=j.name;
+    if (j.interpolation){ S.interp=j.interpolation; const r=document.querySelector(`input[name=interp][value=${S.interp}]`); if (r) r.checked=true; }
+    S.sel=-1; updateMatchBtns(); changed(); setStatus('Proyecto importado');
+  } catch(err){ setStatus('JSON no válido'); }
+};
+
+
+/* ================= idioma ================= */
+const I18N_EXACT={"Par": "Pair", "Nodo": "Node", "Lazo": "Lasso", "Suave": "Smooth", "Lineal": "Linear", "Rango": "Box", "Tramado": "Dither", "Pegar": "Paste", "Media": "Mean", "Línea": "Line", "Motor": "Engine", "Listo": "Ready", "Sonda": "Probe", "Datos": "Data", "Ambos": "Both", "Antes": "Before", "Cargar": "Load", "Borrar": "Clear", "Curvas": "Curves", "Salida": "Output", "Quitar": "Remove", "Estado": "Status", "Plegar": "Collapse", "Mediana": "Median", "Volumen": "Volume", "Después": "After", "Activar": "Enable", "Calcular": "Compute", "Deshacer": "Undo", "Suavidad": "Feather", "Exportar": "Export", "Suavizar": "Smooth", "Invertir": "Invert", "Opciones": "Options", "opcional": "optional", "Resultado": "Result", "Intensidad": "Strength", "Referencia": "Reference", "Deshecho": "Undone", "todo": "all", "B/N": "B/W", "Muestras ·": "Samples ·", "desactivada": "off", "Original": "Original"};
+const I18N_PH=[["Hermite monótono: pasa por cada nodo sin sobrepasar", "Monotone Hermite: passes through every node without overshoot"],["Spline cúbica natural, como Photoshop: más curva, puede sobrepasar entre nodos", "Natural cubic spline, like Photoshop: rounder, can overshoot between nodes"],["Tramos rectos entre nodos, sin suavizado", "Straight segments between nodes, no smoothing"],["Interpolación", "Interpolation"],["Arrastra un rectángulo sobre la referencia: la extracción, la paleta, las muestras auto y el Color Match usan solo esa zona.", "Drag a box on the reference: extraction, the palette, auto samples and Color Match use only that area."],["La selección se dibuja sobre la referencia (la tarjeta de arriba)", "Selections are drawn on the reference (the card above)"],["Los rangos y la selección también filtran la paleta y el Color Match", "Ranges and the selection also filter the palette and Color Match"],[" · curvas RGB reseteadas para no aplicar el look dos veces (Ctrl+Z las recupera)", " · RGB curves reset so the look is not applied twice (Ctrl+Z brings them back)"],[" desde la selección", " from the selection"],[" de la selección", " from the selection"],["El match global iguala media y desviación de L, a y b en OKLab (transferencia de Reinhard en un espacio perceptual). Es una aproximación estadística de primer y segundo orden, no una inversa exacta: dos fotos con el mismo look y distinto contenido dan resultados distintos. Para afinar, usa la herramienta Par: clic en el color de la vista previa que quieres cambiar y luego en el color destino de la referencia o de la paleta. El par deforma la rejilla A/B y, si está activado, la C/L para la luminancia.", "Global match equalizes the mean and standard deviation of L, a and b in OKLab (Reinhard transfer in a perceptual space). It is a first and second order statistical approximation, not an exact inverse: two photos with the same look and different content give different results. To refine, use the Pair tool: click the color in the preview you want to change, then the target color in the reference or the palette. The pair warps the A/B grid and, if enabled, the C/L grid for luminance."], ["Las rejillas A/B y C/L, el Color Match, las curvas especiales y la máscara son funciones de los tres canales a la vez, así que solo una LUT 3D puede guardarlas: una curva por canal no puede representarlas. Los formatos .acv, .xmp y GIMP exportan únicamente las curvas RGB, y cada programa las interpola con su propio spline (diferencias de uno o dos niveles). Lightroom aplica la curva en su espacio interno, no en sRGB.", "The A/B and C/L grids, Color Match, special curves and the mask are functions of all three channels at once, so only a 3D LUT can store them: a per-channel curve cannot represent them. The .acv, .xmp and GIMP formats export only the RGB curves, and each program interpolates them with its own spline (one or two levels of difference). Lightroom applies the curve in its internal space, not in sRGB."], ["Cada curva dice qué valor de R, G o B tiene la referencia para cada nivel de luminancia. En una foto virada el ajuste es casi exacto (RMSE bajo). En una foto a color el RMSE alto refleja el color propio de la escena, y conviene usar Color Match o las rejillas.", "Each curve tells which R, G or B value the reference has at each luminance level. On a toned photo the fit is nearly exact (low RMSE). On a color photo a high RMSE reflects the scene's own color, and Color Match or the grids work better."], ["La máscara se evalúa sobre el color original de cada píxel y mezcla el resultado con el original. Como todo vive en la LUT 3D, la máscara viaja con la .cube; los formatos de curvas no pueden representarla.", "The mask is evaluated on each pixel's original color and blends the result with the original. Since everything lives in the 3D LUT, the mask travels with the .cube; curve formats cannot represent it."], ["Clic en una imagen: deja una muestra y crea un nodo en la curva activa. Clic sobre una muestra la selecciona y arrastrarla la mueve. Doble clic, Supr o × la borran junto con su nodo.", "Click an image: drops a sample and creates a node on the active curve. Click a sample to select it, drag it to move it. Double-click, Delete or × removes it along with its node."], ["Dibuja con el lápiz una forma libre sobre la referencia: al soltar se cierra sola. La extracción, la paleta, las muestras auto y el Color Match usan solo esa zona.", "Draw a freehand shape on the reference with the pencil: it closes on release. Extraction, the palette, auto samples and Color Match use only that area."], ["Para cada nivel de luminancia L, el valor del canal en la referencia y cuántos píxeles tienen esa luminancia. Clic en una fila para marcarla en las curvas.", "For each luminance level L, the channel value in the reference and how many pixels have that luminance. Click a row to mark it on the curves."], ["Eje horizontal: croma firmada sobre el eje. Eje vertical: luminancia. Arrastra nodos para mover colores en croma y en luz a la vez.", "Horizontal axis: signed chroma along the axis. Vertical axis: luminance. Drag nodes to move colors in chroma and light at once."], ["Arrastra los nodos: el ángulo es el tono y la distancia al centro la croma. El nodo central mueve los neutros (balance de blancos).", "Drag the nodes: the angle is hue and the distance from the center is chroma. The center node moves neutrals (white balance)."], ["Curvas, rejillas A/B y C/L, Color Match y máscaras sobre una LUT 3D. Exporta a Photoshop, Lightroom, Affinity y GIMP.", "Curves, A/B and C/L grids, Color Match and masks on a 3D LUT. Exports to Photoshop, Lightroom, Affinity and GIMP."], ["1) Clic en la vista previa sobre el color a cambiar. 2) Clic en la referencia o en la paleta sobre el color destino.", "1) Click the color to change in the preview. 2) Click the target color in the reference or the palette."], ["Saturación según luminancia: la línea central es 1×. Sube para saturar esas luces, baja para desaturar.", "Saturation by luminance: the center line is 1×. Raise to saturate those tones, lower to desaturate."], ["Clic o arrastra sobre la referencia o la vista previa para leer un color y verlo en el editor.", "Click or drag over the reference or the preview to read a color and see it in the editor."], ["Arrastra una línea sobre una imagen: su perfil de color se dibuja en curvas y rejillas.", "Drag a line over an image: its color profile is drawn on the curves and grids."], ["ideas de Guillermo Luijk y 3D LUT Creator · todo se procesa localmente en tu navegador", "ideas from Guillermo Luijk and 3D LUT Creator · everything runs locally in your browser"], ["Saturación según saturación: la diagonal es neutra. Comprime o expande la croma.", "Saturation by saturation: the diagonal is neutral. Compress or expand chroma."], ["Arrastra la foto cuyo look quieres capturar, haz clic para elegirla o pégala con", "Drop the photo whose look you want to capture, click to choose it, or paste it with"], ["Con la herramienta Nodo haz clic en la imagen para dejar muestras, o usa Auto", "With the Node tool click an image to drop samples, or use Auto"], ["Clic para añadir punto, arrastra para mover, doble clic o Supr para borrar", "Click to add a point, drag to move, double-click or Delete to remove"], ["El navegador bloqueó la lectura: pulsa Ctrl+V (Cmd+V) sobre esta tarjeta", "The browser blocked clipboard access: press Ctrl+V (Cmd+V) over this card"], ["Luminancia según saturación: aclara u oscurece colores según su croma.", "Luminance by saturation: lighten or darken colors by their chroma."], ["Arrastra para rotar. Ejes: L vertical, a y b horizontales (OKLab).", "Drag to rotate. Axes: L vertical, a and b horizontal (OKLab)."], ["Los rangos y el lazo también filtran la paleta y el Color Match", "Ranges and the lasso also filter the palette and Color Match"], ["El rango se dibuja sobre la referencia (la tarjeta de arriba)", "The lasso is drawn on the reference (the card above)"], ["Ahora elige el color destino en la referencia o en la paleta.", "Now pick the target color in the reference or the palette."], ["No se pudo decodificar la imagen. Prueba con JPG, PNG o WebP", "Could not decode the image. Try JPG, PNG or WebP"], ["Todo el ajuste · Affinity, Photoshop, Resolve, Premiere", "Full adjustment · Affinity, Photoshop, Resolve, Premiere"], ["Haz clic en una imagen con la sonda para leer un color", "Click an image with the probe to read a color"], ["Los extremos no se borran: muévelos o usa Reset canal", "Endpoints cannot be deleted: move them or use Reset channel"], ["Arrastra la imagen a corregir, haz clic o pégala con", "Drop the image to correct, click, or paste it with"], ["Primero elige en la vista previa el color a cambiar", "First pick the color to change in the preview"], ["Exportadas solo las curvas RGB. Quedan fuera: ", "Exported RGB curves only. Left out: "], [". Arrástralo en el editor o mueve la muestra", ". Drag it in the editor or move the sample"], ["El rango o la selección no contiene píxeles", "The range or selection has no pixels"], ["No hubo grupos con suficientes píxeles", "No groups had enough pixels"], ["El portapapeles no contiene una imagen", "The clipboard has no image"], ["HEIC no soportado: exporta a JPG o PNG", "HEIC not supported: export to JPG or PNG"], ["Solo curvas RGB · Ajustes › Importar", "RGB curves only · Presets › Import"], ["Solo curvas RGB · Curvas › Importar", "RGB curves only · Curves › Import"], ["Solo curvas RGB · Curvas › Cargar", "RGB curves only · Curves › Load"], ["Todo el estado, reimportable aquí", "Full state, re-importable here"], ["con el cursor sobre esta tarjeta", "with the pointer over this card"], ["Muy pocos píxeles en el rango", "Too few pixels in range"], ["Curvas, 256 valores por canal", "Curves, 256 values per channel"], ["(luminancia, valor) : píxeles", "(luminance, value) : pixels"], ["No hay píxeles para el match", "No pixels for the match"], ["Saturación según luminancia", "Saturation by luminance"], ["Saturación según saturación", "Saturation by saturation"], ["Luminancia según saturación", "Luminance by saturation"], ["CMTR-01 / Curvas + LUT 3D", "CMTR-01 / Curves + 3D LUT"], ["referencia → vista previa", "reference → preview"], [" muestras automáticas en ", " auto samples on "], ["Carga una imagen primero", "Load an image first"], ["Sin píxeles en el rango", "No pixels in range"], ["Paleta k-means (OKLab)", "K-means palette (OKLab)"], ["Usa la herramienta Par", "Use the Pair tool"], ["Origen del par elegido", "Pair source picked"], [" · croma sobre el eje ", " · chroma on axis "], [". Usa .cube para todo", ". Use .cube for everything"], ["Luminancia de entrada", "Input luminance"], ["Estadístico por nivel", "Per-level statistic"], ["Curvas reestablecidas", "Curves reset"], ["Color Match calculado", "Color Match computed"], ["Luminancia del fondo", "Background luminance"], ["Extracción de curvas", "Curve extraction"], ["Pares con luminancia", "Pairs include luminance"], ["Conservar luminancia", "Keep luminance"], ["Carga una referencia", "Load a reference"], ["Rango de luminancia", "Luminance range"], ["local, sin servidor", "local, no server"], ["croma y luz por eje", "chroma and light per axis"], ["luminancia → factor", "luminance → factor"], ["Ángulo de los ejes", "Axis angle"], ["Extraer al cambiar", "Extract on change"], ["Usar la referencia", "Use reference"], ["Máscara y opacidad", "Mask and opacity"], ["croma → luminancia", "chroma → luminance"], ["luminancia → canal", "luminance → channel"], ["Proyecto importado", "Project imported"], ["Nombre del preset", "Preset name"], ["Niveles cubiertos", "Levels covered"], ["Curvas exportadas", "Curves exported"], ["Nada que deshacer", "Nothing to undo"], ["Quitar selección", "Clear selection"], ["entrada → salida", "input → output"], ["Carga una imagen", "Load an image"], ["Filtrar por tono", "Filter by hue"], ["Máscara de color", "Color mask"], ["Luminancia desde", "Luminance from"], ["Luminancia hasta", "Luminance to"], ["Curvas extraídas", "Curves extracted"], ["Forzar monotonía", "Force monotonic"], ["curvas por canal", "per-channel curves"], ["Puntos por curva", "Points per curve"], ["Amplitud de tono", "Hue width"], ["Datos por nivel", "Per-level data"], ["Rejilla 1 · eje", "Grid 1 · axis"], ["Rejilla 2 · eje", "Grid 2 · axis"], ["Opacidad global", "Global opacity"], ["verde ↔ magenta", "green ↔ magenta"], ["azul ↔ amarillo", "blue ↔ yellow"], ["Desaturar antes", "Desaturate first"], [" · nodo anillo ", " · node ring "], ["Suavizar ambas", "Smooth both"], ["Pares de color", "Color pairs"], ["máscara activa", "mask on"], ["JSON no válido", "Invalid JSON"], ["Píxeles usados", "Pixels used"], ["Extraer curvas", "Extract curves"], ["Por luminancia", "By luminance"], [" reestablecido", " reset"], [" desde el lazo", " from the lasso"], [" → saturación ", " → saturation "], ["Ancho p10-p90", "p10-p90 width"], ["presets y LUT", "presets and LUT"], ["Descargar PNG", "Download PNG"], ["Por población", "By population"], ["Rango de tono", "Hue range"], ["Proyecto JSON", "Project JSON"], ["Importar JSON", "Import JSON"], ["Imagen pegada", "Pasted image"], ["Tamaño .cube", ".cube size"], ["Match global", "Global match"], ["Ubicar nodos", "Place nodes"], ["Tono central", "Center hue"], ["Reset curvas", "Reset curves"], ["Vista previa", "Preview"], ["desaturación", "desaturation"], ["Nube después", "Cloud after"], ["Croma mínima", "Min chroma"], ["Par aplicado", "Pair applied"], ["canal activo", "active channel"], [" · opacidad ", " · opacity "], ["tono y croma", "hue and chroma"], ["Suavizado σ", "Smoothing σ"], ["Reset canal", "Reset channel"], ["GIMP curvas", "GIMP curves"], ["sin máscara", "no mask"], ["Ver máscara", "Show mask"], ["luminancia ", "luminance "], [" del lazo", " from the lasso"], [" (centro)", " (center)"], [" · punto ", " · point "], ["exportada", "exported"], ["Cargando ", "Loading "], ["Por error", "By error"], [" · tono ", " · hue "], [" → nodo ", " → node "], ["Muestra ", "Sample "], ["Por tono", "By hue"], ["rejilla ", "grid "], ["entrada ", "input "], ["rotado ", "rotated "], ["Nodos ", "Nodes "], ["Canal ", "Channel "], ["croma ", "chroma "], [" niv.", " lvl"]];
+I18N_PH.sort((a,b)=>b[0].length-a[0].length);
+let LANG='en'; try{ LANG=localStorage.getItem('cm-lang')||'en'; }catch(e){}
+function trStr(t){
+  if (LANG==='es'||!t) return t;
+  const core=t.trim(); if (I18N_EXACT[core]) return t.replace(core,I18N_EXACT[core]);
+  let o=t; for (const [a,b] of I18N_PH) if (o.includes(a)) o=o.split(a).join(b);
+  return o;
+}
+const I18N_ORIG=new WeakMap(), I18N_DONE=new WeakMap();
+function trNode(n){
+  if (n.nodeType===3){
+    if (!n.nodeValue.trim()) return;
+    let orig=I18N_ORIG.get(n); if (orig===undefined||(n.nodeValue!==orig&&n.nodeValue!==I18N_DONE.get(n))){ orig=n.nodeValue; I18N_ORIG.set(n,orig); }
+    const v=trStr(orig); I18N_DONE.set(n,v); if (n.nodeValue!==v) n.nodeValue=v;
+  } else if (n.nodeType===1){
+    if (n.tagName==='SCRIPT'||n.tagName==='STYLE') return;
+    if (n.hasAttribute('title')){ if (!n.dataset.tes||(n.title!==n.dataset.ten)) { if (n.title!==n.dataset.ten) n.dataset.tes=n.title; } n.dataset.ten=trStr(n.dataset.tes); n.title=n.dataset.ten; }
+    for (const c of n.childNodes) trNode(c);
+  }
+}
+new MutationObserver(ms=>{ for (const m of ms){ if (m.type==='characterData') trNode(m.target); else m.addedNodes.forEach(trNode); } }).observe(document.body,{subtree:true,childList:true,characterData:true});
+function setLang(l){
+  LANG=l; try{ localStorage.setItem('cm-lang',l); }catch(e){}
+  document.documentElement.lang=l;
+  document.querySelectorAll('#lang button').forEach(b=>b.classList.toggle('on',b.dataset.l===l));
+  trNode(document.body); drawEditors();
+}
+document.querySelectorAll('#lang button').forEach(b=>b.onclick=()=>setLang(b.dataset.l));
+setLang(LANG);
+
+/* ================= inicio ================= */
+new ResizeObserver(()=>drawEditors()).observe($('#cardEd'));
+new ResizeObserver(()=>{ drawHist(); drawOv('ref'); drawOv('tgt'); }).observe($('#cardTgt'));
+toolHint(); renderPins(); renderPalette(); renderPairs(); renderLists(); renderNodes(); updateMaskSub(); prep(); drawEditors();
+</script>
+</body>
+</html>
