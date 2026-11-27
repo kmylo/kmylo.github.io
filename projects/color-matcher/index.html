@@ -19,7 +19,24 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0}
-body{background-color:var(--bg);background-image:linear-gradient(rgba(198,244,50,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(198,244,50,.045) 1px,transparent 1px);background-size:44px 44px;color:var(--ink);font:13px/1.55 var(--mono);padding:0 16px 48px;min-height:100vh}
+/*body{
+background-color:var(--bg);background-image:linear-gradient(rgba(198,244,50,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(198,244,50,.045) 1px,transparent 1px);background-size:44px 44px;color:var(--ink);font:13px/1.55 var(--mono);padding:0 16px 48px;min-height:100vh
+}*/
+body{
+     background-color: #000;
+  --dot-gap: 30px;
+  --dot-color: rgba(255, 255, 255, 0.14);
+  --dot-size: 1px;
+  background-image: radial-gradient(
+    var(--dot-color) var(--dot-size),
+    transparent var(--dot-size)
+  );
+  background-size: var(--dot-gap) var(--dot-gap);
+  color:var(--ink);
+  font:13px/1.55 var(--mono);
+  padding:0 16px 48px;
+  min-height:100vh
+}
 .wrap{max-width:1320px;margin:0 auto}
 .bar{display:flex;align-items:stretch;justify-content:space-between;border-bottom:1px solid var(--hair);margin:0 -16px 0;padding:0 16px;background:rgba(18,19,18,.85);backdrop-filter:blur(6px);position:sticky;top:0;z-index:40;min-height:64px;gap:12px}
 .brand{display:flex;align-items:center;gap:14px}
@@ -34,7 +51,7 @@ body{background-color:var(--bg);background-image:linear-gradient(rgba(198,244,50
 #status{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--ink-2);border:1px solid var(--hair);padding:8px 12px;max-width:520px;text-transform:uppercase}
 #status::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:8px;box-shadow:0 0 8px var(--green);vertical-align:1px}
 .hero{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin:26px 0 30px}
-h1{font-family:var(--tek);font-weight:900;font-size:clamp(46px,8.2vw,124px);line-height:.86;margin:0;letter-spacing:-.01em;color:var(--green);text-transform:uppercase;text-shadow:0 0 28px rgba(198,244,50,.35)}
+h1{font-family:var(--tek);font-weight:900;font-size:clamp(35px,7.2vw,44px);line-height:.86;margin:0;letter-spacing:-.01em;color:var(--green);text-transform:uppercase;text-shadow:0 0 28px rgba(198,244,50,.35)}
 .hero .meta{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);text-align:right;line-height:1.9}
 .hero .meta b{color:var(--ink-2);font-weight:400}
 .hero .tm{font-family:var(--tek);font-weight:800;font-size:24px;color:var(--ink);letter-spacing:.02em}
@@ -171,7 +188,7 @@ input[type=file]{display:none}
 </header>
 <section class="hero">
   <div>
-    <h1>Color<br>Matcher</h1>
+    <h1>Color Matcher</h1>
     <div class="sub">Curvas, rejillas A/B y C/L, Color Match y máscaras sobre una LUT 3D. Exporta a Photoshop, Lightroom, Affinity y GIMP.</div>
   </div>
   <div class="meta"><div class="tm">_CM.2K26&trade;</div><div>Motor <b>OKLab · LUT 33³</b></div><div>Salida <b>.cube · .acv · .xmp · gimp</b></div><div>Estado <b>local, sin servidor</b></div></div>
