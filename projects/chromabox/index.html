@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Cuarto Claro</title>
+<title>ChromaBox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -255,13 +255,13 @@ input[type=color]{width:28px;height:28px;padding:0;border:1px solid var(--line);
 </style>
 </head>
 <body>
-<input type="file" id="fImg" class="vh" accept="image/*" tabindex="-1">
+<input type="file" id="fImg" class="vh" accept=".jpg,.jpeg,.png,.webp,.avif,.heic,.heif,.gif,.bmp,.tif,.tiff" tabindex="-1">
 <input type="file" id="fJson" class="vh" accept=".json,application/json" tabindex="-1">
 <input type="file" id="fCurve" class="vh" accept=".json,.csv,.txt,.xmp,application/json,text/csv" tabindex="-1">
 <main class="app" id="app">
   <div class="work" id="work">
     <section class="card photo">
-      <header class="card-head"><div class="card-tab"><span class="dot"></span><div><h2>Cuarto Claro</h2><small id="phSub"></small></div></div></header>
+      <header class="card-head"><div class="card-tab"><span class="dot"></span><div><h2>ChromaBox</h2><small id="phSub"></small></div></div></header>
       <div class="card-body">
         <div class="view" id="view">
           <div class="toolbar">
@@ -317,6 +317,14 @@ input[type=color]{width:28px;height:28px;padding:0;border:1px solid var(--line);
               <button class="pill-btn" data-side="right" aria-pressed="false" data-i18n="right"></button>
               <button class="pill-btn" data-side="left" aria-pressed="false" data-i18n="left"></button>
             </div>
+            <div class="mx-head"><span data-i18n="prevQ"></span></div>
+            <div class="pill-group" id="qSeg">
+              <button class="pill-btn" data-q="auto" aria-pressed="false">Auto</button>
+              <button class="pill-btn" data-q="2048" aria-pressed="false" data-i18n="qHigh"></button>
+              <button class="pill-btn" data-q="1280" aria-pressed="false" data-i18n="qMed"></button>
+              <button class="pill-btn" data-q="800" aria-pressed="false" data-i18n="qLow"></button>
+            </div>
+            <p class="sp-small" id="qInfo"></p>
             <p class="sp-small" data-i18n="layoutHint"></p>
             <div><button class="mx-btn" id="bLayoutReset" data-i18n="resetLayout"></button></div>
           </div>
@@ -451,7 +459,7 @@ const CH=['rgb','r','g','b'];
 const NODES=['basic','chmix','mix','curve','grade','gmap','fx','masks'];
 const BASIC_KEYS=['temp','tint','exposure','contrast','highlights','shadows','whites','blacks','clarity','dehaze','vibrance','saturation','bw'];
 const mkEl=(tag,cls,txt)=>{const x=document.createElement(tag);if(cls)x.className=cls;if(txt!==undefined)x.textContent=txt;return x;};
-const LS_P='cuartoclaro.presets.v1', LS_C='cuartoclaro.current.v1', LS_L='cuartoclaro.layout.v2', LS_LANG='cuartoclaro.lang', LS_G='cuartoclaro.groups.v1';
+const LS_P='chromabox.presets.v1', LS_C='chromabox.current.v1', LS_L='chromabox.layout.v2', LS_LANG='chromabox.lang', LS_G='chromabox.groups.v1';
 const isMobile=()=>matchMedia('(max-width:920px)').matches;
 
 /* ---------- i18n: [English, Español] ---------- */
@@ -484,6 +492,10 @@ const TX={
  position:['Position','Posición'],cmpHint:['Before turns the comparison on. In Split you can also drag the line on the photo when no mask or tool is active.','Antes activa la comparación. En Dividir también podés arrastrar la línea sobre la foto cuando no hay máscara ni herramienta activa.'],
  expCsv:['Export .csv','Exportar .csv'],expXmp:['Export .xmp (Lightroom)','Exportar .xmp (Lightroom)'],impCurve:['Import curve','Importar curva'],curveBad:['That file has no curve data I can read','Ese archivo no tiene datos de curva que pueda leer'],curveOk:['Curve imported','Curva importada'],overPhoto:['Edit over photo','Editar sobre la foto'],
  groupPh:['Group (optional)','Grupo (opcional)'],addTag:['+ tag','+ etiqueta'],tagPh:['tag','etiqueta'],all:['All','Todos'],ungrouped:['Ungrouped','Sin grupo'],moveGroup:['Move to group','Mover a grupo'],
+ pickWait:['Choose a photo in the file dialog…','Elegí una foto en el diálogo de archivos…'],reading:['Reading {0}…','Leyendo {0}…'],preparing:['Preparing the preview…','Preparando la vista previa…'],
+ gfxPrep:['Preparing the graphics engine…','Preparando el motor gráfico…'],gfxReady:['Graphics engine ready','Motor gráfico listo'],prevQ:['Preview quality','Calidad de vista previa'],qHigh:['High','Alta'],qMed:['Medium','Media'],qLow:['Low','Baja'],
+ prevInfo:['Working preview: {0} × {1} px. Export is always full size.','Vista previa de trabajo: {0} × {1} px. La exportación siempre es a tamaño completo.'],
+ slowGfx:['Slow graphics on this computer: the preview was reduced to keep editing fluid. Export stays full size.','Gráficos lentos en este equipo: reduje la vista previa para que editar sea fluido. La exportación sigue a tamaño completo.'],
  stillWorking:['Still decoding the photo…','Sigo decodificando la foto…'],timeout:['decoding took too long','la decodificación tardó demasiado'],ctxLost:['The graphics context was lost, probably from low memory. Restoring…','Se perdió el contexto gráfico, probablemente por poca memoria. Restaurando…'],ctxBack:['Graphics restored','Gráficos restaurados'],
  errGeneric:['Something failed: {0}','Algo falló: {0}'],exportPrev:['Full size could not be decoded, exported from the preview','No se pudo decodificar a tamaño completo, se exportó desde la vista previa'],exporting:['Exporting…','Exportando…'],
  p_fx:['Effects','Efectos'],p_fx_s:['Vignette and grain','Viñeta y grano'],p_save:['Save preset','Guardar preset'],p_save_s:['All current adjustments','Todos los ajustes actuales'],
@@ -509,18 +521,19 @@ const TX={
  h_color:['Tap the photo to pick the reference color.','Tocá la foto para elegir el color de referencia.'],
  feather:['Feather','Difuminado'],size:['Size','Tamaño'],hardness:['Hardness','Dureza'],flow:['Flow','Flujo'],from:['From','Desde'],to:['To','Hasta'],softness:['Softness','Suavidad'],tolerance:['Tolerance','Tolerancia'],amount:['Amount','Cantidad'],
  maskAdj:['Adjustments inside the mask','Ajustes dentro de la máscara'],hide:['Hide','Ocultar'],show:['Show','Mostrar'],del:['Delete','Eliminar'],edit:['Edit','Editar'],
+ editing:['editing','editando'],maskDoneTip:['Stop editing this mask (Esc)','Dejar de editar esta máscara (Esc)'],maskSelHint:['Tap a mask to edit it. Press Done, Esc or the mask again to stop editing; the mask keeps working.','Tocá una máscara para editarla. Con Listo, Esc o tocándola de nuevo dejás de editarla; la máscara sigue aplicada.'],
  maxMasks:['There is a limit of 12 masks','Hay un máximo de 12 máscaras'],openFirst:['Open a photo first','Primero abrí una foto'],
  presetName:['Preset name','Nombre del preset'],save:['Save','Guardar'],saveHint:['Stored in this browser. Export them to .json as a backup. Masks are not part of a preset.','Se conservan en este navegador. Exportalos a .json para respaldarlos. Las máscaras no forman parte del preset.'],
  expJson:['Export .json','Exportar .json'],impJson:['Import .json','Importar .json'],toXmp:['Current to .xmp','Actual a .xmp'],xmpTip:['Current adjustments as a Lightroom preset (approximate)','Ajustes actuales como preset de Lightroom (aproximado)'],
  noneYet:['None yet','Ninguno todavía'],nSaved:['{0} saved','{0} guardados'],oneSaved:['1 saved','1 guardado'],mineEmpty:['Adjust the photo and press Save to create the first one.','Ajustá la foto y pulsá Guardar para crear el primero.'],
  apply:['Apply','Aplicar'],overwrite:['Overwrite with current adjustments','Sobrescribir con los ajustes actuales'],rename:['Rename','Renombrar'],newName:['New name','Nuevo nombre'],delAsk:['Delete?','¿Borrar?'],
  pUpdated:['Preset updated: {0}','Preset actualizado: {0}'],pSaved:['Preset saved: {0}','Preset guardado: {0}'],pDeleted:['Preset deleted','Preset eliminado'],noOwn:['There are no presets of your own to export','No hay presets propios para exportar'],
- nImported:['{0} presets imported','{0} presets importados'],badJson:['That file is not a Cuarto Claro presets .json','Ese archivo no es un .json de presets de Cuarto Claro'],
+ nImported:['{0} presets imported','{0} presets importados'],badJson:['That file is not a chromabox presets .json','Ese archivo no es un .json de presets de chromabox'],
  xmpDone:['XMP exported. Values are an approximation in Lightroom','XMP exportado. Los valores son una aproximación en Lightroom'],saveFail:['Could not save in this browser','No se pudo guardar en este navegador'],
  f0:['Warm film','Película cálida'],f1:['Teal and orange','Verde azulado y naranja'],f2:['Golden hour','Hora dorada'],f3:['Cool matte','Mate frío'],f4:['Punchy B&W','B&N contrastado'],f5:['Sepia','Sepia'],f6:['Cyanotype','Cianotipo'],f7:['iph15-byn','iph15-byn'],f8:['tuki','tuki'],
  opening:['Opening {0}…','Abriendo {0}…'],opened:['Photo opened in {0} s','Foto abierta en {0} s'],openFail:['Could not open the photo: {0}. Try JPG, PNG or WebP','No se pudo abrir la foto: {0}. Probá con JPG, PNG o WebP'],badFormat:['unsupported format','formato no compatible'],
  exported:['Photo exported at {0} × {1} px','Foto exportada a {0} × {1} px'],exportFail:['Could not export the photo','No se pudo exportar la foto'],
- noWebgl:['This browser does not provide WebGL2, which Cuarto Claro needs to process the photo. Try a recent Chrome, Firefox, Edge or Safari.','Este navegador no ofrece WebGL2, que Cuarto Claro necesita para procesar la foto. Probá con una versión reciente de Chrome, Firefox, Edge o Safari.']
+ noWebgl:['This browser does not provide WebGL2, which chromabox needs to process the photo. Try a recent Chrome, Firefox, Edge or Safari.','Este navegador no ofrece WebGL2, que chromabox necesita para procesar la foto. Probá con una versión reciente de Chrome, Firefox, Edge o Safari.']
 };
 var lang='en'; try{const l=localStorage.getItem(LS_LANG);if(l==='es'||l==='en')lang=l;}catch(e){}
 function t(k,...a){const e=TX[k];let s=e?e[lang==='es'?1:0]:k;a.forEach((v,i)=>{s=s.replace('{'+i+'}',v);});return s;}
@@ -663,11 +676,10 @@ void main(){vP=p*.5+.5; vUv=vec2(uCrop.x+vP.x*uCrop.z,1.-uCrop.y-uCrop.w+vP.y*uC
 const FS=`#version 300 es
 precision highp float;
 in vec2 vUv,vP; out vec4 o;
-uniform sampler2D uImg,uBlur,uLut,uGrad;
-uniform vec3 uWb,uTintS,uTintM,uTintH,uCmK,uAir,uSplit; uniform vec3 uHsl[8]; uniform mat3 uCm;
+uniform sampler2D uImg,uBlur,uLut,uGrad,uHslLut;
+uniform vec3 uWb,uTintS,uTintM,uTintH,uCmK,uAir,uSplit; uniform mat3 uCm;
 uniform float uExp,uCon,uHi,uSh,uWh,uBl,uCla,uDehaze,uVib,uSat,uBw,uVig,uGrain,uBal,uBypass,uAspect,uGlow,uGlowLod,uGAmt,uSplitOn;
 const vec3 W=vec3(.2126,.7152,.0722);
-const float CEN[9]=float[9](0.,30.,60.,120.,180.,240.,280.,320.,360.);
 vec3 rgb2hsl(vec3 c){
   float mx=max(c.r,max(c.g,c.b)),mn=min(c.r,min(c.g,c.b)),l=(mx+mn)*.5,d=mx-mn,h=0.,s=0.;
   if(d>1e-5){ s=d/(1.-abs(2.*l-1.)+1e-5);
@@ -684,7 +696,7 @@ vec3 hsl2rgb(vec3 x){
 void main(){
   vec3 src=texture(uImg,vUv).rgb, c=src;
   bool before=uBypass>.5||(uSplitOn>.5&&dot(vec3(vP,1.),uSplit)<0.);
-  if(!before){
+  {
     c=pow(max(pow(c,vec3(2.2))*uWb*uExp,0.),vec3(1./2.2));
     // dehaze: haze estimated from the blurred dark channel, removed against the airlight color
     vec3 hz=textureLod(uBlur,vUv,3.).rgb; float dark=min(hz.r,min(hz.g,hz.b));
@@ -700,23 +712,23 @@ void main(){
     float Ln=max(L+d,0.);
     c=clamp(mix(c+d,c*(Ln/max(L,1e-3)),.6*smoothstep(0.,.25,L)),0.,1.);
     c=clamp(uCm*c+uCmK,0.,1.);
-    vec3 h=rgb2hsl(c), adj=vec3(0.);
+    vec3 h=rgb2hsl(c);
     float ch=max(c.r,max(c.g,c.b))-min(c.r,min(c.g,c.b));
-    for(int i=0;i<8;i++){ if(h.x>=CEN[i]&&h.x<CEN[i+1]){ int j=i==7?0:i+1; adj=mix(uHsl[i],uHsl[j],(h.x-CEN[i])/(CEN[i+1]-CEN[i])); } }
+    vec3 adj=(textureLod(uHslLut,vec2((h.x/360.*255.+.5)/256.,.5),0.).rgb*255.-128.)/127.;   // per-hue adjustment, built in JS
     float sw=smoothstep(.02,.2,ch);
     h.x+=adj.x*30.*sw; h.y=clamp(h.y*(1.+adj.y),0.,1.); h.z=clamp(h.z+adj.z*.3*sw*(1.-abs(2.*h.z-1.)),0.,1.);
     c=hsl2rgb(h);
     L=dot(c,W); ch=max(c.r,max(c.g,c.b))-min(c.r,min(c.g,c.b));
     c=mix(vec3(L),c,(1.+uSat)*(1.+uVib*(1.-ch)));
     c=clamp(mix(c,vec3(dot(c,W)),uBw),0.,1.);
-    c=vec3(texture(uLut,vec2((c.r*255.+.5)/256.,.5)).r,texture(uLut,vec2((c.g*255.+.5)/256.,.5)).g,texture(uLut,vec2((c.b*255.+.5)/256.,.5)).b);
+    c=vec3(textureLod(uLut,vec2((c.r*255.+.5)/256.,.5),0.).r,textureLod(uLut,vec2((c.g*255.+.5)/256.,.5),0.).g,textureLod(uLut,vec2((c.b*255.+.5)/256.,.5),0.).b);
     // three-way grading: shadows, midtones, highlights
     L=dot(c,W);
     float Lb=clamp(L+uBal*.5,0.,1.), ws=(1.-Lb)*(1.-Lb), wh=Lb*Lb, wm=1.-ws-wh;
     c=clamp(c+(uTintS*ws+uTintM*wm+uTintH*wh)*(1.-pow(abs(2.*L-1.),3.)),0.,1.);
     // gradient map
     L=dot(c,W);
-    c=mix(c,texture(uGrad,vec2((L*255.+.5)/256.,.5)).rgb,uGAmt);
+    c=mix(c,textureLod(uGrad,vec2((L*255.+.5)/256.,.5),0.).rgb,uGAmt);
     // glow: blurred highlights screened over the image, tinted by the edited pixel so it never brings back removed color
     float gl=dot(textureLod(uBlur,vUv,uGlowLod).rgb,W); gl*=gl; L=dot(c,W);
   vec3 gt=mix(vec3(1.),min(c/max(L,.05),vec3(2.5)),smoothstep(.04,.3,L));
@@ -728,7 +740,7 @@ void main(){
     float n=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453);
     c+=(n-.5)*uGrain*.35*(1.-.6*abs(2.*L-1.));
   }
-  o=vec4(clamp(c,0.,1.),1.);
+  o=vec4(before?src:clamp(c,0.,1.),1.);
 }`;
 const FSM=`#version 300 es
 precision highp float;
@@ -739,10 +751,10 @@ uniform vec2 uA,uB,uC,uRad; uniform vec3 uWb,uCol,uSplit;
 uniform float uInv,uAmt,uOverlay,uAspect,uFeather,uRLo,uRHi,uSoft,uTol,uExp,uCon,uHi,uSh,uSat,uCla,uGlow,uGlowLod,uSplitOn;
 const vec3 W=vec3(.2126,.7152,.0722);
 float maskv(vec3 src){
-  vec2 p=vec2(vUv.x,1.-vUv.y); float m=0.;
+  vec2 p=vec2(vUv.x,1.-vUv.y); float m=0., br=textureLod(uBrush,vUv,0.).a;
   if(uType==0){ vec2 d=(uB-uA)*vec2(uAspect,1.), q=(p-uA)*vec2(uAspect,1.); m=1.-smoothstep(0.,1.,dot(q,d)/max(dot(d,d),1e-6)); }
   else if(uType==1){ float r=length((p-uC)/max(uRad,vec2(1e-4))); m=1.-smoothstep(1.-max(uFeather,.01),1.,r); }
-  else if(uType==2){ m=texture(uBrush,vUv).a; }
+  else if(uType==2){ m=br; }
   else if(uType==3){ float L=dot(src,W), sf=max(uSoft,.004); m=smoothstep(uRLo-sf,uRLo,L)*(1.-smoothstep(uRHi,uRHi+sf,L)); }
   else { float Y=dot(src,W), Yc=dot(uCol,W); float dist=length(vec2(src.r-Y,src.b-Y)-vec2(uCol.r-Yc,uCol.b-Yc))*2.+abs(Y-Yc)*.35; float t=uTol*.8; m=1.-smoothstep(t*.5,t,dist); }
   if(uSplitOn>.5&&dot(vec3(vP,1.),uSplit)<0.) return 0.;
@@ -767,7 +779,7 @@ void main(){
   r=mix(r,vec3(1.,.16,.34),uOverlay*m*.55);
   o=vec4(clamp(r,0.,1.),1.);
 }`;
-var U={}, UM={}, P={}, texImg, texBlur, texLut, texGrad, floatOK=false;
+var U={}, UM={}, P={}, texImg, texBlur, texLut, texGrad, texHsl, floatOK=false, glOK=false, perfEdge=2048, slowN=0;
 const FB=256;
 /* full = original bitmap (kept only for export); prev = reduced canvas everything else is derived from */
 const img={file:null,full:null,prev:null,pick:null,air:[.95,.95,.95],ow:0,oh:0,w:0,h:0,pw:0,ph:0,name:''};
@@ -777,22 +789,33 @@ const pools={small:mkPool(),thumb:mkPool(),main:mkPool()};
 function mkTex(){const tx=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tx);
   for(const [k,v] of [[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]]) gl.texParameteri(gl.TEXTURE_2D,k,v);
   return tx;}
-function initGL(){
-  if(!gl) return false;
-  const mk=(ty,src)=>{const s=gl.createShader(ty);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;};
-  const prog=fs=>{const pr=gl.createProgram();gl.attachShader(pr,mk(gl.VERTEX_SHADER,VS));gl.attachShader(pr,mk(gl.FRAGMENT_SHADER,fs));gl.bindAttribLocation(pr,0,'p');gl.linkProgram(pr);
-    if(!gl.getProgramParameter(pr,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(pr));
-    const u={},n=gl.getProgramParameter(pr,gl.ACTIVE_UNIFORMS);
-    for(let i=0;i<n;i++){const a=gl.getActiveUniform(pr,i);u[a.name.replace('[0]','')]=gl.getUniformLocation(pr,a.name);}
-    return [pr,u];};
-  [P.main,U]=prog(FS); [P.mask,UM]=prog(FSM);
+/* Programs are compiled in the background when the browser supports it (KHR_parallel_shader_compile),
+   so a slow driver delays the first photo instead of freezing the page. */
+async function initGL(){
+  if(!gl) throw new Error('no WebGL2');
+  const par=gl.getExtension('KHR_parallel_shader_compile');
+  const start=fs=>{const mk=(ty,src)=>{const sh=gl.createShader(ty);gl.shaderSource(sh,src);gl.compileShader(sh);return sh;};
+    const pr=gl.createProgram(),a=mk(gl.VERTEX_SHADER,VS),b=mk(gl.FRAGMENT_SHADER,fs);gl.attachShader(pr,a);gl.attachShader(pr,b);gl.bindAttribLocation(pr,0,'p');gl.linkProgram(pr);return {pr,a,b};};
+  const A=start(FS), B=start(FSM);
+  if(par) while(!(gl.getProgramParameter(A.pr,par.COMPLETION_STATUS_KHR)&&gl.getProgramParameter(B.pr,par.COMPLETION_STATUS_KHR))) await new Promise(r=>setTimeout(r,50));
+  const finish=x=>{
+    if(!gl.getProgramParameter(x.pr,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(x.pr)||gl.getShaderInfoLog(x.b)||gl.getShaderInfoLog(x.a)||'shader error');
+    const u={},n=gl.getProgramParameter(x.pr,gl.ACTIVE_UNIFORMS);
+    for(let i=0;i<n;i++){const q=gl.getActiveUniform(x.pr,i);u[q.name.replace('[0]','')]=gl.getUniformLocation(x.pr,q.name);}
+    return u;};
+  U=finish(A); UM=finish(B); P.main=A.pr; P.mask=B.pr;
   const buf=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,buf); gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
   gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);
-  texImg=mkTex(); texBlur=mkTex(); texLut=mkTex(); texGrad=mkTex();
+  texImg=mkTex(); texBlur=mkTex(); texLut=mkTex(); texGrad=mkTex(); texHsl=mkTex();
   floatOK=!!gl.getExtension('EXT_color_buffer_float');
-  gl.useProgram(P.main); gl.uniform1i(U.uImg,0); gl.uniform1i(U.uBlur,1); gl.uniform1i(U.uLut,2); gl.uniform1i(U.uGrad,5);
+  gl.useProgram(P.main); gl.uniform1i(U.uImg,0); gl.uniform1i(U.uBlur,1); gl.uniform1i(U.uLut,2); gl.uniform1i(U.uGrad,5); gl.uniform1i(U.uHslLut,6);
   gl.useProgram(P.mask); gl.uniform1i(UM.uImg,0); gl.uniform1i(UM.uBlur,1); gl.uniform1i(UM.uPrev,3); gl.uniform1i(UM.uBrush,4);
-  return true;
+}
+function hslLUT(s){   // adjustment per hue: R = hue shift, G = saturation, B = luminance, 128 = none
+  const px=new Uint8Array(1024);
+  for(let i=0;i<256;i++){const [a,b,u]=bandAt(Math.min(359.999,i/255*360));
+    ['hue','sat','lum'].forEach((k,c)=>{px[i*4+c]=128+Math.round((s.hsl[k][a]+(s.hsl[k][b]-s.hsl[k][a])*u)/100*127);}); px[i*4+3]=255;}
+  return px;
 }
 /* intermediate buffers: one hop per chained mask; 16-bit float when the device supports it */
 function ensurePool(pl,w,h,f){
@@ -824,7 +847,7 @@ function pipeline(s,pl,w,h,toScreen,o={}){
 function upload(tx,src,mip){gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.bindTexture(gl.TEXTURE_2D,tx);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,src);
   if(mip){gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.generateMipmap(gl.TEXTURE_2D);}}
 function scaled(src,w,h,q,rf){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',rf?{willReadFrequently:true}:undefined);x.imageSmoothingQuality=q||'high';x.drawImage(src,0,0,w,h);return c;}
-const PREV_MAX=()=>Math.min(2048,Math.max(1280,Math.round(Math.max(screen.width,screen.height)*Math.min(2,devicePixelRatio||1))));
+const PREV_MAX=()=>L.q!=='auto'?+L.q:Math.min(perfEdge,2048,Math.max(1280,Math.round(Math.max(screen.width,screen.height)*Math.min(2,devicePixelRatio||1))));
 function uploadSources(){   // preview, mipmapped blur pyramid (clarity, dehaze, glow), color-picker copy, airlight estimate
   cv.width=img.pw; cv.height=img.ph; gl.activeTexture(gl.TEXTURE0); upload(texImg,img.prev,true);
   const m=Math.max(img.pw,img.ph), sm=(side,rf)=>scaled(img.prev,Math.max(2,Math.round(img.pw*side/m)),Math.max(2,Math.round(img.ph*side/m)),'medium',rf);
@@ -850,7 +873,11 @@ function setSource(d,file){
   cv.hidden=false; $('#empty').hidden=true;
   photoSub(); syncCrop(); render(); fillThumbs();
 }
-function photoSub(){$('#phSub').textContent=img.prev?img.name+' · '+img.ow+' × '+img.oh+' px':t('noPhoto');}
+function photoSub(){$('#phSub').textContent=img.prev?img.name+' · '+img.ow+' × '+img.oh+' px':t('noPhoto');$('#qInfo').textContent=img.prev?t('prevInfo',img.pw,img.ph):'';}
+function shrinkPreview(){   // editing is too slow on this machine: work on a smaller preview, export stays full size
+  const k=.7; img.pw=Math.max(1,Math.round(img.pw*k)); img.ph=Math.max(1,Math.round(img.ph*k)); img.prev=scaled(img.prev,img.pw,img.ph,'medium');
+  perfEdge=Math.max(img.pw,img.ph); uploadSources(); brushes.forEach(b=>gl.deleteTexture(b.tex)); brushes.clear(); photoSub(); toast(t('slowGfx'),7000); requestRender();
+}
 function setUniforms(s,bypass){
   gl.useProgram(P.main);
   const a=s.temp/100, ti=s.tint/100; let r=1+.4*a, g=1-.25*ti, b=1-.4*a; const l=.2126*r+.7152*g+.0722*b;
@@ -864,13 +891,12 @@ function setUniforms(s,bypass){
   gl.uniform1f(U.uBw,s.bw?1:0); gl.uniform1f(U.uBypass,bypass?1:0); gl.uniform1f(U.uAspect,(img.ow*cr[2])/(img.oh*cr[3]));
   gl.uniform1f(U.uSplitOn,curO.split?1:0); if(curO.split){const v=splitVec();gl.uniform3f(U.uSplit,v[0],v[1],v[2]);}
   gl.uniform1f(U.uGAmt,s.gmap.amt/100);
-  const h=new Float32Array(24); for(let i=0;i<8;i++){h[i*3]=s.hsl.hue[i]/100;h[i*3+1]=s.hsl.sat[i]/100;h[i*3+2]=s.hsl.lum[i]/100;}
-  gl.uniform3fv(U.uHsl,h);
   const m=s.cm; gl.uniformMatrix3fv(U.uCm,false,[m.r[0],m.g[0],m.b[0],m.r[1],m.g[1],m.b[1],m.r[2],m.g[2],m.b[2]].map(v=>v/100)); gl.uniform3f(U.uCmK,m.r[3]/100,m.g[3]/100,m.b[3]/100);
   for(const [u,k] of [['uTintS','sh'],['uTintM','mid'],['uTintH','hi']]){const c=hsl2rgb(s.grade[k][0],1,.5),q=s.grade[k][1]/100*.5;gl.uniform3f(U[u],(c[0]-.5)*q,(c[1]-.5)*q,(c[2]-.5)*q);}
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
   gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D,texLut); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,256,1,0,gl.RGBA,gl.UNSIGNED_BYTE,buildLut(s));
   gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D,texGrad); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,256,1,0,gl.RGBA,gl.UNSIGNED_BYTE,gradLUT(s.gmap.stops));
+  gl.activeTexture(gl.TEXTURE6); gl.bindTexture(gl.TEXTURE_2D,texHsl); gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,256,1,0,gl.RGBA,gl.UNSIGNED_BYTE,hslLUT(s));
   gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D,texBlur);
   gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,texImg);
 }
@@ -905,13 +931,16 @@ function drawSmall(s,max,pl){
 var comparing=false, rq=0, H=null;
 function requestRender(){ if(!rq) rq=requestAnimationFrame(()=>{rq=0;render();}); }
 function render(){
-  if(!gl||!img.prev){drawCurve();drawOverlay();return;}
+  if(!gl||!glOK||!img.prev){drawCurve();drawOverlay();return;}
+  const tR=performance.now();
   const [W0,H0]=outDims(); if(cv.width!==W0||cv.height!==H0){cv.width=W0;cv.height=H0;} view.style.setProperty('--ar',(W0/H0).toFixed(4));
   const {px}=drawSmall(S,FB,pools.small);
   H=[new Uint32Array(256),new Uint32Array(256),new Uint32Array(256),new Uint32Array(256)];
   for(let i=0;i<px.length;i+=4){H[0][px[i]]++;H[1][px[i+1]]++;H[2][px[i+2]]++;H[3][Math.round(.2126*px[i]+.7152*px[i+1]+.0722*px[i+2])]++;}
   pipeline(S,pools.main,cv.width,cv.height,true,{bypass:comparing,float:true,overlay:showOv&&!cropMode?selMask:null,split:splitOn()&&!cropMode});
   drawHist(); drawCurve(); drawOverlay();
+  slowN=performance.now()-tR>260?slowN+1:0;
+  if(slowN>=3&&L.q==='auto'&&!opening&&Math.max(img.pw,img.ph)>700){slowN=0;setTimeout(shrinkPreview,0);}
 }
 
 /* ---------- histogram ---------- */
@@ -1003,7 +1032,7 @@ function curveOver(on){
 }
 function curveBtn(){const b=$('#bCurveOv');b.textContent=t(curveOv?'done':'overPhoto');b.classList.toggle('on',curveOv);}
 $('#bCurveOv').onclick=()=>curveOver(!curveOv);
-const curveJson=()=>download('curve.json',JSON.stringify({app:'Cuarto Claro',type:'curve',curves:S.curves},null,1),'application/json');
+const curveJson=()=>download('curve.json',JSON.stringify({app:'chromabox',type:'curve',curves:S.curves},null,1),'application/json');
 const curveCsv=()=>{const L4=CH.map(c=>curveLUT(S.curves[c])),rows=['in,rgb,r,g,b'];for(let i=0;i<256;i++)rows.push([i,...L4.map(l=>+(l[i]*255).toFixed(2))].join(','));download('curve.csv',rows.join('\n')+'\n','text/csv');};
 function lutToPts(xs,ys){   // a sampled curve reduced to at most 16 points
   const n=xs.length; if(n<=16) return xs.map((x,i)=>[x,ys[i]]);
@@ -1040,8 +1069,8 @@ function curveXmp(){
    crs:PresetType="Normal" crs:Cluster="" crs:UUID="${id}" crs:SupportsAmount="False" crs:SupportsColor="True" crs:SupportsMonochrome="True"
    crs:SupportsHighDynamicRange="True" crs:SupportsNormalDynamicRange="True" crs:SupportsSceneReferred="True" crs:SupportsOutputReferred="True"
    crs:Version="15.0" crs:ProcessVersion="11.0" crs:ToneCurveName2012="Custom" crs:HasSettings="True">
-   <crs:Name>\n    <rdf:Alt>\n     <rdf:li xml:lang="x-default">Cuarto Claro curve</rdf:li>\n    </rdf:Alt>\n   </crs:Name>
-   <crs:Group>\n    <rdf:Alt>\n     <rdf:li xml:lang="x-default">Cuarto Claro</rdf:li>\n    </rdf:Alt>\n   </crs:Group>
+   <crs:Name>\n    <rdf:Alt>\n     <rdf:li xml:lang="x-default">chromabox curve</rdf:li>\n    </rdf:Alt>\n   </crs:Name>
+   <crs:Group>\n    <rdf:Alt>\n     <rdf:li xml:lang="x-default">chromabox</rdf:li>\n    </rdf:Alt>\n   </crs:Group>
 ${seq('ToneCurvePV2012',S.curves.rgb)}\n${seq('ToneCurvePV2012Red',S.curves.r)}\n${seq('ToneCurvePV2012Green',S.curves.g)}\n${seq('ToneCurvePV2012Blue',S.curves.b)}
   </rdf:Description>
  </rdf:RDF>
@@ -1218,19 +1247,20 @@ function renderMasks(){
   S.masks.forEach(m=>{
     const row=el('div','prow'+(m.id===selMask?' act':''));
     const ic=(txt,title,fn)=>{const b=el('button','ic',txt);b.type='button';b.title=title;b.setAttribute('aria-label',title+' '+m.name);b.onclick=fn;return b;};
-    const go=el('button','go'); go.type='button'; go.title=t('edit')+' '+m.name; go.append(el('span','',m.name),el('small','',m.invert?t('inverted'):''));
+    const go=el('button','go'); go.type='button'; go.title=t('edit')+' '+m.name; go.append(el('span','',m.name),el('small','',m.id===selMask?t('editing'):m.invert?t('inverted'):''));
     go.onclick=()=>{selMask=selMask===m.id?null:m.id;showOv=true;renderMasks();requestRender();};
     row.append(ic(m.on?'●':'○',m.on?t('hide'):t('show'),()=>{m.on=!m.on;renderMasks();requestRender();commit();}),go,
       ic('✕',t('del'),()=>{S.masks=S.masks.filter(x=>x!==m);const b=brushes.get(m.id);if(b){gl.deleteTexture(b.tex);brushes.delete(m.id);}renderMasks();requestRender();commit();}));
     list.appendChild(row);
   });
   const ed=$('#maskEd'); ed.textContent=''; mSync.length=0;
-  const m=curMask(); if(!m){drawOverlay();return;}
+  const m=curMask(); if(!m){ if(S.masks.length) ed.appendChild(el('p','sp-small',t('maskSelHint'))); drawOverlay();return;}
   const P0='masks.'+S.masks.indexOf(m)+'.';
   const pg=el('div','pill-group'), wrap=el('div'); wrap.appendChild(pg); ed.appendChild(wrap);
   const pill=(txt,on,fn)=>{const b=el('button','pill-btn'+(on?' active':''),txt);b.type='button';b.setAttribute('aria-pressed',on);b.onclick=fn;pg.appendChild(b);return b;};
   const bOv=pill(t('showMask'),showOv,()=>{showOv=!showOv;renderMasks();requestRender();});
   pill(t('invert'),m.invert,()=>{m.invert=!m.invert;renderMasks();requestRender();commit();});
+  const dn=el('button','mx-btn on',t('done')); dn.type='button'; dn.style.marginLeft='6px'; dn.title=t('maskDoneTip'); dn.onclick=()=>{selMask=null;renderMasks();requestRender();}; wrap.appendChild(dn);
   const sl=o=>slider(ed,Object.assign({list:mSync},o,{path:P0+o.path}));
   if(m.type==='brush'){
     const pg2=el('div','pill-group'), w2=el('div'); w2.appendChild(pg2); ed.appendChild(w2);
@@ -1498,7 +1528,7 @@ $('#saveForm').addEventListener('submit',e=>{
 });
 function download(name,data,type){const blob=data instanceof Blob?data:new Blob([data],{type});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),4000);}
 $('#bExpJson').onclick=()=>{ if(!presets.length){toast(t('noOwn'));return;}
-  download('cuarto-claro-presets.json',JSON.stringify({app:'Cuarto Claro',version:1,groups:G,presets:presets.map(({name,group,s})=>({name,group:group||'',s}))},null,1),'application/json'); };
+  download('chromabox-presets.json',JSON.stringify({app:'chromabox',version:1,groups:G,presets:presets.map(({name,group,s})=>({name,group:group||'',s}))},null,1),'application/json'); };
 $('#fJson').addEventListener('change',async e=>{
   const f=e.target.files[0]; e.target.value=''; if(!f) return;
   try{ const d=JSON.parse(await f.text()), list=Array.isArray(d)?d:Array.isArray(d.presets)?d.presets:null; if(!list) throw 0;
@@ -1527,13 +1557,13 @@ function toXmp(s,name){
    crs:SupportsHighDynamicRange="True" crs:SupportsNormalDynamicRange="True" crs:SupportsSceneReferred="True" crs:SupportsOutputReferred="True"
 ${Object.entries(A).map(([k,v])=>`   crs:${k}="${v}"`).join('\n')}>
    <crs:Name>\n    <rdf:Alt>\n     <rdf:li xml:lang="x-default">${esc(name)}</rdf:li>\n    </rdf:Alt>\n   </crs:Name>
-   <crs:Group>\n    <rdf:Alt>\n     <rdf:li xml:lang="x-default">Cuarto Claro</rdf:li>\n    </rdf:Alt>\n   </crs:Group>
+   <crs:Group>\n    <rdf:Alt>\n     <rdf:li xml:lang="x-default">chromabox</rdf:li>\n    </rdf:Alt>\n   </crs:Group>
 ${seq('ToneCurvePV2012',s.curves.rgb)}\n${seq('ToneCurvePV2012Red',s.curves.r)}\n${seq('ToneCurvePV2012Green',s.curves.g)}\n${seq('ToneCurvePV2012Blue',s.curves.b)}
   </rdf:Description>
  </rdf:RDF>
 </x:xmpmeta>\n`;
 }
-$('#bXmp').onclick=()=>{const act=[...presets,...FACTORY].find(p=>JSON.stringify(p.s)===gkey(S)),name=act?pname(act):($('#pName').value.trim()||'Cuarto Claro');
+$('#bXmp').onclick=()=>{const act=[...presets,...FACTORY].find(p=>JSON.stringify(p.s)===gkey(S)),name=act?pname(act):($('#pName').value.trim()||'chromabox');
   download(name.replace(/[^\w\- áéíóúñÁÉÍÓÚÑ&]/g,'').trim().replace(/\s+/g,'-')+'.xmp',toXmp(S,name),'application/rdf+xml');toast(t('xmpDone'));};
 
 /* ---------- open photo ----------
@@ -1581,14 +1611,18 @@ async function fullSource(){   // full-size pixels for export
   return null;
 }
 const view=$('#view'); var opening=false;
-async function openFile(file){
-  if(!file||opening) return; opening=true;
-  const t0=performance.now(); view.classList.add('busy'); toast(t('opening',file.name||''),60000);
+async function openFile(file,keepCrop){
+  if(!file||opening) return; opening=true; picking=false;
+  const t0=performance.now(), paint=()=>new Promise(r=>setTimeout(r,40));   // each stage shows its message before it starts working
+  view.classList.add('busy'); toast(t('reading',file.name||''),60000);
   const slow=setTimeout(()=>toast(t('stillWorking'),60000),7000);
-  await new Promise(r=>setTimeout(r,40));   // let the spinner paint before decoding
+  await paint();
   try{
+    if(!glOK){toast(t('gfxPrep'),120000);await glReady;}
+    toast(t('opening',file.name||''),60000); await paint();
     const d=await withTimeout(decodePreview(file),45000,t('timeout')); if(!d.ow||!d.oh) throw new Error(t('badFormat'));
-    setSource(d,file);
+    clearTimeout(slow); toast(t('preparing'),60000); await paint();
+    setSource(d,file); if(keepCrop){S.crop=normCrop(keepCrop);syncCrop();requestRender();}
     toast(t('opened',((performance.now()-t0)/1000).toFixed(1)));
   }catch(e){ console.error(e); toast(t('openFail',e&&e.message?e.message:t('badFormat')),9000); }
   finally{ clearTimeout(slow); view.classList.remove('busy'); opening=false; }
@@ -1598,9 +1632,17 @@ addEventListener('error',e=>{ if(e.message) toast(t('errGeneric',e.message),9000
 addEventListener('unhandledrejection',e=>{ toast(t('errGeneric',(e.reason&&e.reason.message)||String(e.reason)),9000); });
 cv.addEventListener('webglcontextlost',e=>{e.preventDefault();toast(t('ctxLost'),9000);});
 cv.addEventListener('webglcontextrestored',()=>{
-  try{ for(const k in pools) pools[k]=mkPool(); brushes.clear(); initGL(); if(img.prev){uploadSources();render();fillThumbs();} toast(t('ctxBack')); }catch(err){ toast(t('errGeneric',err.message),9000); }
+  for(const k in pools) pools[k]=mkPool(); brushes.clear(); glOK=false;
+  initGL().then(()=>{glOK=true; if(img.prev){uploadSources();render();fillThumbs();} toast(t('ctxBack'));},err=>toast(t('errGeneric',err.message),9000));
 });
-$('#fImg').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];openFile(f);e.target.value='';});
+$('#fImg').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)openFile(f);else pickDone();e.target.value='';});
+/* feedback from the very first press, before the system dialog opens */
+var picking=false;
+function pickHint(){ if(opening) return; picking=true; view.classList.add('busy'); toast(t('pickWait'),60000); }
+function pickDone(){ if(!picking) return; picking=false; if(!opening){view.classList.remove('busy');$('#toast').hidden=true;} }
+for(const id of ['bOpen','empty']) $('#'+id).addEventListener('pointerdown',pickHint);
+$('#fImg').addEventListener('cancel',pickDone);
+addEventListener('focus',()=>setTimeout(pickDone,1500));   // dialog closed without a file, where the cancel event is missing
 for(const id of ['bOpen','bImpJson']) $('#'+id).addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();document.getElementById(e.currentTarget.htmlFor).click();}});
 addEventListener('dragover',e=>{ if(![...(e.dataTransfer?e.dataTransfer.types:[])].includes('Files')) return; e.preventDefault();view.classList.add('over');});
 addEventListener('dragleave',e=>{if(!e.relatedTarget)view.classList.remove('over');});
@@ -1640,7 +1682,7 @@ $('#cmpSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(
 $('#dirSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;splitDir=b.dataset.d;if(cmpMode!=='split'){cmpMode='split';}setCmp(true);syncCmp();});
 $('#splitPos').addEventListener('input',e=>{splitPos=e.target.value/100;requestRender();});
 addEventListener('keydown',e=>{
-  if(e.key==='Escape'){closeMenu();$('#pop').hidden=true;$('#popCmp').hidden=true;}
+  if(e.key==='Escape'){closeMenu();$('#pop').hidden=true;$('#popCmp').hidden=true; if(selMask&&!mdrag){selMask=null;renderMasks();requestRender();}}
   const typing=/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)&&e.target.type!=='range';
   if(typing) return;
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){e.preventDefault();jump(e.shiftKey?1:-1);}
@@ -1673,13 +1715,13 @@ const PANELS=[
 const IDS=PANELS.map(p=>p.id), ZONES=['side','bottom','float','bar'];
 const app=$('#app'), work=$('#work'), dockS=$('#dockSide'), dockB=$('#dockBottom'), floats=$('#floats'), flyout=$('#flyout'), stash=$('#stash'), bar=$('#bar');
 const cardOf=id=>document.querySelector(`.card[data-id="${id}"]`);
-const LDEF=()=>({f:.667,side:'right',bh:260,order:IDS.slice(),
+const LDEF=()=>({f:.667,side:'right',bh:260,q:'auto',order:IDS.slice(),
   p:Object.fromEntries(IDS.map((id,i)=>[id,{z:['save','mine','factory'].includes(id)?'bottom':'side',c:['chmix','grade','gmap','fx','crop','nodes'].includes(id),x:90+i*26,y:110+i*18}]))});
 var L=LDEF(), flyOpen=null;
 try{
   const o=JSON.parse(localStorage.getItem(LS_L));
   if(o&&typeof o==='object'){
-    L.f=num(o.f,L.f); L.bh=num(o.bh,L.bh); if(o.side==='left') L.side='left';
+    L.f=num(o.f,L.f); L.bh=num(o.bh,L.bh); if(o.side==='left') L.side='left'; if(['2048','1280','800'].includes(String(o.q))) L.q=String(o.q);
     if(Array.isArray(o.order)){const ord=o.order.filter(id=>IDS.includes(id));L.order=[...new Set([...ord,...IDS])];}
     for(const id of IDS){const s=o.p&&o.p[id]; if(s&&typeof s==='object'){ if(ZONES.includes(s.z)) L.p[id].z=s.z; L.p[id].c=!!s.c; L.p[id].x=num(s.x,L.p[id].x); L.p[id].y=num(s.y,L.p[id].y); }}
   }
@@ -1718,7 +1760,7 @@ function applyLayout(){
     b.innerHTML=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${p.icon}"/></svg>`; bar.appendChild(b);
   }
   press('#fSeg',$$('#fSeg button').find(x=>Math.abs(+x.dataset.f-L.f)<.005)||null);
-  press('#sideSeg',$(`#sideSeg [data-side="${L.side}"]`));
+  press('#sideSeg',$(`#sideSeg [data-side="${L.side}"]`)); press('#qSeg',$(`#qSeg [data-q="${L.q}"]`));
   saveLayout(); placeFlyout();
   requestAnimationFrame(()=>{drawHist();drawCurve();drawOverlay();});
 }
@@ -1819,6 +1861,7 @@ document.addEventListener('click',e=>{
 $('#bLayout').onclick=()=>{const p=$('#pop');p.hidden=!p.hidden;$('#bLayout').setAttribute('aria-expanded',String(!p.hidden));};
 $('#fSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b){L.f=+b.dataset.f;applyLayout();}});
 $('#sideSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b){L.side=b.dataset.side;applyLayout();}});
+$('#qSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;L.q=b.dataset.q;applyLayout();if(img.file)openFile(img.file,S.crop.slice());});
 $('#bLayoutReset').onclick=()=>{L=LDEF();flyOpen=null;applyLayout();};
 function dragSplit(el,fn){
   el.addEventListener('pointerdown',e=>{
@@ -1842,16 +1885,35 @@ function applyLang(){
 }
 $('#langSeg').addEventListener('click',e=>{const b=e.target.closest('[data-lang]');if(!b)return;lang=b.dataset.lang;try{localStorage.setItem(LS_LANG,lang);}catch(err){}applyLang();});
 
+/* The graphics driver may postpone the real shader compilation to the first draw. Do that draw on a
+   2 px dummy shortly after load, so the cost is not paid when the first photo opens. */
+function warmUp(){
+  if(img.prev||opening) return;
+  try{
+    const c=document.createElement('canvas'); c.width=c.height=2; gl.activeTexture(gl.TEXTURE0); upload(texImg,c,true); upload(texBlur,c,true);
+    img.ow=img.oh=img.pw=img.ph=2;
+    const base=Object.assign({},S,{off:{},masks:[]});
+    const run=n=>{pipeline(base,pools.thumb,n,n,false,{crop:[0,0,1,1]});gl.bindFramebuffer(gl.FRAMEBUFFER,pools.thumb.fbo[0]);gl.readPixels(0,0,1,1,gl.RGBA,gl.UNSIGNED_BYTE,new Uint8Array(4));gl.bindFramebuffer(gl.FRAMEBUFFER,null);};
+    const time=n=>{let best=1e9;for(let i=0;i<2;i++){const t0=performance.now();run(n);best=Math.min(best,performance.now()-t0);}return best;};
+    pipeline(Object.assign({},base,{masks:normMasks([{type:'lum'}])}),pools.thumb,2,2,false,{crop:[0,0,1,1]}); run(64);   // first draws, where drivers finish compiling
+    // speed in ms per megapixel, from two sizes so fixed costs cancel; the preview is sized to render in about 45 ms
+    const a=time(128), b=a>200?a*16:time(512), slope=(b-a)/((512*512-128*128)/1e6);
+    if(slope>0) perfEdge=clamp(Math.round(Math.sqrt(45/slope*1e6*1.5)),640,2048);
+  }catch(e){ console.warn(e); }
+  img.ow=img.oh=img.pw=img.ph=0;
+}
+
 /* ---------- boot ---------- */
+const glFail=err=>{ console.error(err);
+  $('#view').innerHTML='<div class="fit" style="display:grid;place-items:center"><p style="max-width:40ch;text-align:center;color:var(--ink-2)">'+t('noWebgl')+'<br><br><span class="sp-small">'+String(err&&err.message||'').slice(0,300)+'</span></p></div>'; };
+const glReady=initGL().then(()=>{ glOK=true; if(gfxMsg){gfxMsg=false;toast(t('gfxReady'));} });
+var gfxMsg=false; setTimeout(()=>{ if(!glOK&&gl){gfxMsg=true;toast(t('gfxPrep'),120000);} },600);
+glReady.then(()=>setTimeout(warmUp,150),glFail);
 try{
-  if(!initGL()) throw new Error('no WebGL2');
   syncers.forEach(f=>f()); applyLang(); afterChange();
   const ro=new ResizeObserver(()=>{drawHist();drawCurve();drawOverlay();}); ro.observe($('#curve')); ro.observe($('#hist')); ro.observe(ovc);
   new ResizeObserver(()=>app.style.setProperty('--ph',$('.card.photo').offsetHeight+'px')).observe($('.card.photo'));
-}catch(err){
-  console.error(err);
-  $('#view').innerHTML='<div class="fit" style="display:grid;place-items:center"><p style="max-width:34ch;text-align:center;color:var(--ink-2)">'+t('noWebgl')+'</p></div>';
-}
+}catch(err){ console.error(err); toast(t('errGeneric',err.message),9000); }
 </script>
 </body>
 </html>
