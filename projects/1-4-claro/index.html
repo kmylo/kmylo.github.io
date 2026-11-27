@@ -20,6 +20,17 @@
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font:12px/1.4 'Inter',system-ui,sans-serif}
+body{
+     background-color: #000;
+  --dot-gap: 30px;
+  --dot-color: rgba(255, 255, 255, 0.14);
+  --dot-size: 1px;
+  background-image: radial-gradient(
+    var(--dot-color) var(--dot-size),
+    transparent var(--dot-size)
+  );
+  background-size: var(--dot-gap) var(--dot-gap);
+}
 button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent,var(--green));outline-offset:2px}
 [hidden]{display:none!important}
