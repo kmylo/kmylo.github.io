@@ -521,7 +521,7 @@ const TX={
  stillWorking:['Still decoding the photo…','Sigo decodificando la foto…'],timeout:['decoding took too long','la decodificación tardó demasiado'],ctxLost:['The graphics context was lost, probably from low memory. Restoring…','Se perdió el contexto gráfico, probablemente por poca memoria. Restaurando…'],ctxBack:['Graphics restored','Gráficos restaurados'],
  errGeneric:['Something failed: {0}','Algo falló: {0}'],exportPrev:['Full size could not be decoded, exported from the preview','No se pudo decodificar a tamaño completo, se exportó desde la vista previa'],exporting:['Exporting…','Exportando…'],
  p_calib:['Calibration','Calibración'],p_calib_s:['Primaries and shadows tint','Primarios y tinte de sombras'],calSh:['Shadows tint','Tinte de sombras'],calR:['Red primary','Primario rojo'],calG:['Green primary','Primario verde'],calB:['Blue primary','Primario azul'],
- calHint:['Moves the red, green and blue primaries the photo is read with. Grays stay neutral. An approximation of Camera Raw Calibration, not the same math.','Mueve los primarios rojo, verde y azul con que se lee la foto. Los grises quedan neutros. Es una aproximación a Calibration de Camera Raw, no la misma matemática.'],
+ calHint:['Moves the red, green and blue primaries the photo is read with; each one also shifts the other colors. Grays stay neutral. Fitted to Camera Raw measurements, not identical to it.','Mueve los primarios rojo, verde y azul con que se lee la foto; cada uno arrastra también a los otros colores. Los grises quedan neutros. Ajustado a mediciones de Camera Raw, no idéntico.'],
  p_fx:['Effects','Efectos'],p_fx_s:['Vignette, grain and glow','Viñeta, grano y glow'],p_save:['Save preset','Guardar preset'],p_save_s:['All current adjustments','Todos los ajustes actuales'],
  p_mine:['My presets','Mis presets'],p_factory:['Built-in','De fábrica'],p_factory_s:['Starting points','Puntos de partida'],
  mReset:['Reset this panel','Restablecer este panel'],mSide:['Dock in side column','Acoplar en la columna lateral'],mBottom:['Dock in bottom row','Acoplar en la fila inferior'],mFloat:['Float','Flotar'],mBar:['Send to icon bar','Enviar a la barra de íconos'],
@@ -710,8 +710,8 @@ const FS=`#version 300 es
 precision highp float;
 in vec2 vUv,vP; out vec4 o;
 uniform sampler2D uImg,uBlur,uLut,uGrad,uHslLut,uGlowTex;
-uniform vec3 uWb,uTintS,uTintM,uTintH,uCmK,uAir,uSplit; uniform mat3 uCm,uCal; uniform float uCalSh;
-uniform float uExp,uCon,uHi,uSh,uWh,uBl,uCla,uDehaze,uVib,uSat,uBw,uVig,uGrain,uBal,uBypass,uAspect,uGlow,uGlowLod,uGAmt,uSplitOn;
+uniform vec3 uWb,uTintS,uTintM,uTintH,uCmK,uAir,uSplit; uniform mat3 uCm,uCal,uS2W; uniform vec3 uWbClip; uniform float uCalSh;
+uniform float uExp,uCon,uHi,uSh,uWh,uBl,uCla,uDehaze,uVib,uSat,uBw,uVig,uGrain,uBal,uBypass,uAspect,uGlow,uGlowLod,uGAmt,uSplitOn,uKey;
 const vec3 W=vec3(.2126,.7152,.0722);
 vec3 rgb2hsl(vec3 c){
   float mx=max(c.r,max(c.g,c.b)),mn=min(c.r,min(c.g,c.b)),l=(mx+mn)*.5,d=mx-mn,h=0.,s=0.;
@@ -731,7 +731,7 @@ void main(){
   bool before=uBypass>.5||(uSplitOn>.5&&dot(vec3(vP,1.),uSplit)<0.);
   {
     // calibration: the photo's RGB is read as if its primaries had been moved, in linear light; neutrals stay neutral
-    c=pow(max(uCal*(pow(c,vec3(2.2))*uWb)*uExp,0.),vec3(1./2.2));
+    c=pow(max(uCal*min(uS2W*pow(c,vec3(2.2)),uWbClip)*uExp,0.),vec3(1./2.2));   // to linear ProPhoto, clip at the camera white, then white balance + calibration back to sRGB
     { float l0=clamp(dot(c,W),0.,1.); c=max(c+uCalSh*.1*vec3(.5,-.5,.5)*l0*pow(1.-l0,3.)*9.48,0.); }
     // dehaze: haze estimated from the blurred dark channel, removed against the airlight color
     vec3 hz=textureLod(uBlur,vUv,3.).rgb; float dark=min(hz.r,min(hz.g,hz.b));
@@ -741,7 +741,8 @@ void main(){
     d+=uSh*.3*Lc*pow(1.-Lc,3.)*9.48;
     d+=uHi*.3*(1.-Lc)*pow(Lc,3.)*9.48;
     d+=uWh*.2*Lc*Lc; d+=uBl*.2*(1.-Lc)*(1.-Lc);
-    d+=uCon*.9*(Lc*Lc*(3.-2.*Lc)-Lc);
+    { float tc=Lc<uKey?Lc/(2.*uKey):(1.-Lc)/(2.*(1.-uKey)), sc=2.*tc*tc*(3.-2.*tc);   // S-curve pivoting on the photo's own middle brightness
+      d+=uCon*.9*((Lc<uKey?uKey*sc:1.-(1.-uKey)*sc)-Lc); }
     float det=dot(src,W)-dot(textureLod(uBlur,vUv,2.4).rgb,W);
     d+=uCla*1.2*det*(1.-pow(abs(2.*Lc-1.),2.));
     float Ln=max(L+d,0.);
@@ -753,8 +754,11 @@ void main(){
     float sw=smoothstep(.02,.2,ch);
     h.x+=adj.x*30.*sw; h.y=clamp(h.y*(1.+adj.y),0.,1.); h.z=clamp(h.z+adj.z*.3*sw*(1.-abs(2.*h.z-1.)),0.,1.);
     c=hsl2rgb(h);
-    L=dot(c,W); ch=max(c.r,max(c.g,c.b))-min(c.r,min(c.g,c.b));
-    c=mix(vec3(L),c,(1.+uSat)*(1.+uVib*(1.-ch)));
+    L=dot(c,W); float mxc=max(c.r,max(c.g,c.b)); ch=mxc-min(c.r,min(c.g,c.b));
+    { /* vibrance: stronger on dull colors, half strength on skin hues (around 25 degrees); when lowering, it spares the dull ones */
+      float sv=ch/max(mxc,1e-4), hd=abs(mod(h.x,360.)-25.); hd=min(hd,360.-hd);
+      float vf=uVib>0.?uVib*1.5*pow(max(1.-sv,0.),1.25)*mix(1.,.5,1.-smoothstep(12.,38.,hd)):uVib*smoothstep(.05,.75,sv);
+      c=mix(vec3(L),c,max(1.+uSat,0.)*max(1.+vf,0.)); }
     c=clamp(mix(c,vec3(dot(c,W)),uBw),0.,1.);
     c=vec3(textureLod(uLut,vec2((c.r*255.+.5)/256.,.5),0.).r,textureLod(uLut,vec2((c.g*255.+.5)/256.,.5),0.).g,textureLod(uLut,vec2((c.b*255.+.5)/256.,.5),0.).b);
     // three-way grading: shadows, midtones, highlights
@@ -885,22 +889,81 @@ function updGlow(th){
   gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,px);
   gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR); gl.generateMipmap(gl.TEXTURE_2D);
 }
-/* Calibration matrix. Each sRGB primary is moved in the xy chromaticity plane around the D65 white point:
-   hue rotates it, saturation changes its distance from white. The photo's RGB is then read as written in
-   those primaries and converted back to sRGB. The structure is the standard one for changing primaries;
-   how far each slider moves a primary is an estimate, not Adobe's numbers. */
+/* Calibration matrix, modeled on Camera Raw and fitted to measurements of it (color patches and hue wheels
+   read from a screen recording, Camera Raw 17.4, sliders at +100 / -100).
+   The work happens in linear ProPhoto RGB, which is what makes one primary's slider also move the other colors:
+   - Hue rotates that primary in the xy chromaticity plane around the D50 white point (20, 30 and 14 degrees
+     per 100 for red, green and blue), and the photo is re-read with the moved primaries.
+   - Saturation pushes the other two channels away from that primary (0.15, 0.32, 0.25 per 100).
+   Grays stay neutral in both. It is a fit, not Adobe's code: Camera Raw is not purely linear, so expect
+   differences, mostly in pastel colors and in the saturation sliders. */
 const inv3=m=>{const [a,b,c,d,e,f,g,h,i]=m,A=e*i-f*h,B=-(d*i-f*g),C=d*h-e*g,det=a*A+b*B+c*C;return [A,-(b*i-c*h),b*f-c*e,B,a*i-c*g,-(a*f-c*d),C,-(a*h-b*g),a*e-b*d].map(v=>v/det);};
 const mul3=(p,q)=>{const r=[];for(let i=0;i<3;i++)for(let j=0;j<3;j++)r.push(p[i*3]*q[j]+p[i*3+1]*q[3+j]+p[i*3+2]*q[6+j]);return r;};
-function rgb2xyz(P){   // row-major matrix from primaries [[x,y]*3], white D65
-  const X=P.map(([x,y])=>[x/y,1,(1-x-y)/y]), M=[X[0][0],X[1][0],X[2][0],X[0][1],X[1][1],X[2][1],X[0][2],X[1][2],X[2][2]], wx=.3127, wy=.329, Wt=[wx/wy,1,(1-wx-wy)/wy], I=inv3(M);
+const CAL_W=[.3457,.3585], CAL_P=[[.7347,.2653],[.1596,.8404],[.0366,.0001]], CAL_ANG=[20,30,14], CAL_SAT=[.15,.32,.25];
+function rgb2xyz(P){   // row-major RGB to XYZ matrix for primaries [[x,y]*3] and the D50 white
+  const X=P.map(([x,y])=>[x/y,1,(1-x-y)/y]), M=[X[0][0],X[1][0],X[2][0],X[0][1],X[1][1],X[2][1],X[0][2],X[1][2],X[2][2]], Wt=[CAL_W[0]/CAL_W[1],1,(1-CAL_W[0]-CAL_W[1])/CAL_W[1]], I=inv3(M);
   const S=[0,1,2].map(i=>I[i*3]*Wt[0]+I[i*3+1]*Wt[1]+I[i*3+2]*Wt[2]); return M.map((v,i)=>v*S[i%3]);
 }
-const SRGB_P=[[.64,.33],[.3,.6],[.15,.06]];
-function calMatrix(cal){
-  const P=['r','g','b'].map((k,i)=>{const [hu,sa]=cal[k], an=hu/100*25*Math.PI/180, sc=sa>=0?1+sa/100*.4:1+sa/100*.6, dx=SRGB_P[i][0]-.3127, dy=SRGB_P[i][1]-.329;
-    return [Math.max(.02,.3127+(dx*Math.cos(an)-dy*Math.sin(an))*sc),Math.max(.02,.329+(dx*Math.sin(an)+dy*Math.cos(an))*sc)];});
-  return mul3(inv3(rgb2xyz(SRGB_P)),rgb2xyz(P));
+/* linear sRGB (D65) to linear ProPhoto (D50), Bradford adapted */
+const S2W=[.5292804,.330153,.1405666,.0983662,.873464,.0281698,.0168753,.1176594,.8654652], W2S=inv3(S2W), CAL_BASE=inv3(rgb2xyz(CAL_P));
+function calCore(cal){   // calibration as a matrix in linear ProPhoto
+  const P=['r','g','b'].map((k,i)=>{const an=cal[k][0]/100*CAL_ANG[i]*Math.PI/180, dx=CAL_P[i][0]-CAL_W[0], dy=CAL_P[i][1]-CAL_W[1];
+    let y=CAL_W[1]+dx*Math.sin(an)+dy*Math.cos(an); if(Math.abs(y)<1e-4) y=1e-4;
+    return [CAL_W[0]+dx*Math.cos(an)-dy*Math.sin(an),y];});
+  let C=mul3(CAL_BASE,rgb2xyz(P));
+  ['r','g','b'].forEach((k,i)=>{const q=cal[k][1]/100*CAL_SAT[i]; if(!q) return; const A=[1,0,0,0,1,0,0,0,1];
+    for(let j=0;j<3;j++) if(j!==i){A[j*3+j]+=q;A[j*3+i]-=q;} C=mul3(A,C);});
+  return C;
 }
+const calMatrix=cal=>mul3(W2S,mul3(calCore(cal),S2W));
+/* ---- White balance for an already rendered photo (JPEG, PNG), following how Camera Raw treats it ----
+   Sources: Adobe's public DNG SDK (dng_temperature: temperature and tint <-> xy with Robertson's isotherms,
+   kTintScale = -3000; white mapping with a Bradford matrix whose cone scales are held to 0.1..10) and the
+   measurements published by the rawmakase project against Camera Raw / Lightroom:
+   - the photo is treated as a camera whose RGB is linear ProPhoto with a D50 white;
+   - Temp moves only the DNG temperature, Tint only the DNG tint; Temp -100 is 500 mired (2000 K), Tint +-100 is +-150;
+   - channels are clipped at the camera white, the Bradford matrix is applied, and the result is normalised
+     like a camera neutral (this is what changes the brightness); each gain is capped at 16.
+   Not measured on Camera Raw: the temperatures between 0 and -100 (taken linear in mired), and the positive
+   side, which uses 1.5 mired per slider unit, the step the open-source editor RapidRAW uses for its
+   relative temperature (with its 50000 K ceiling). */
+const ROB=[[0,.18006,.26352,-.24341],[10,.18066,.26589,-.25479],[20,.18133,.26846,-.26876],[30,.18208,.27119,-.28539],[40,.18293,.27407,-.3047],[50,.18388,.27709,-.32675],[60,.18494,.28021,-.35156],[70,.18611,.28342,-.37915],[80,.1874,.28668,-.40955],[90,.1888,.28997,-.44278],[100,.19032,.29326,-.47888],[125,.19462,.30141,-.58204],[150,.19962,.30921,-.70471],[175,.20525,.31647,-.84901],[200,.21142,.32312,-1.0182],[225,.21807,.32909,-1.2168],[250,.22511,.33439,-1.4512],[275,.23247,.33904,-1.7298],[300,.2401,.34308,-2.0637],[325,.24792,.34655,-2.4681],[350,.25591,.34951,-2.9641],[375,.264,.352,-3.5814],[400,.27218,.35407,-4.3633],[425,.28039,.35577,-5.3762],[450,.28863,.35714,-6.7262],[475,.29685,.35823,-8.5955],[500,.30505,.35907,-11.324],[525,.3132,.35968,-15.628],[550,.32129,.36011,-23.325],[575,.32931,.36038,-40.77],[600,.33724,.36051,-116.45]];
+function xy2tt([x,y]){   // dng_temperature::Set_xy_coord
+  const u=2*x/(1.5-x+6*y), v=3*y/(1.5-x+6*y); let ldt=0,ldu=0,ldv=0;
+  for(let i=1;i<=30;i++){
+    let du=1,dv=ROB[i][3]; const len=Math.hypot(du,dv); du/=len; dv/=len;
+    let dt=-(u-ROB[i][1])*dv+(v-ROB[i][2])*du;
+    if(dt<=0||i===30){
+      if(dt>0) dt=0; dt=-dt; const f=i===1?0:dt/(ldt+dt), T=1e6/(ROB[i-1][0]*f+ROB[i][0]*(1-f));
+      const uu=u-(ROB[i-1][1]*f+ROB[i][1]*(1-f)), vv=v-(ROB[i-1][2]*f+ROB[i][2]*(1-f));
+      du=du*(1-f)+ldu*f; dv=dv*(1-f)+ldv*f; const l2=Math.hypot(du,dv);
+      return [T,(uu*du/l2+vv*dv/l2)*-3000];
+    }
+    ldt=dt; ldu=du; ldv=dv;
+  }
+}
+function tt2xy(T,tint){   // dng_temperature::Get_xy_coord
+  const r=1e6/T, off=tint/-3000;
+  for(let i=0;i<=29;i++) if(r<ROB[i+1][0]||i===29){
+    const f=(ROB[i+1][0]-r)/(ROB[i+1][0]-ROB[i][0]); let u=ROB[i][1]*f+ROB[i+1][1]*(1-f), v=ROB[i][2]*f+ROB[i+1][2]*(1-f);
+    const l1=Math.hypot(1,ROB[i][3]), l2=Math.hypot(1,ROB[i+1][3]); let uu=f/l1+(1-f)/l2, vv=ROB[i][3]*f/l1+ROB[i+1][3]*(1-f)/l2; const l3=Math.hypot(uu,vv);
+    u+=uu/l3*off; v+=vv/l3*off; return [1.5*u/(u-4*v+2),v/(u-4*v+2)];
+  }
+}
+const PP2X=rgb2xyz(CAL_P), X2PP=inv3(PP2X), BRAD=[.8951,.2664,-.1614,-.7502,1.7135,.0367,.0389,-.0685,1.0296], BRADI=inv3(BRAD), WB0=xy2tt(CAL_W);
+const mv3=(m,v)=>[0,1,2].map(i=>m[i*3]*v[0]+m[i*3+1]*v[1]+m[i*3+2]*v[2]);
+function wbStage(temp,tint){   // {clip, M}: clip in ProPhoto, then M (ProPhoto to ProPhoto)
+  if(!temp&&!tint) return {clip:[1,1,1],M:[1,0,0,0,1,0,0,0,1]};
+  const a=temp/100, q=tint/100, m0=1e6/WB0[0], mired=a<0?m0+(500-m0)*-a:Math.max(20,m0-150*a), tn=WB0[1]+150*q-WB0[1]*q*q;
+  const [x,y]=tt2xy(1e6/mired,tn), Xw=[x/y,1,(1-x-y)/y], Xd=[CAL_W[0]/CAL_W[1],1,(1-CAL_W[0]-CAL_W[1])/CAL_W[1]];
+  let cw=mv3(X2PP,Xw); const k=Math.max(cw[0],cw[1],cw[2]); cw=cw.map(v=>v/k);
+  const sW=mv3(BRAD,Xw), sD=mv3(BRAD,Xd), sc=[0,1,2].map(i=>clamp(sW[i]>0?sD[i]/sW[i]:10,.1,10));
+  let M=mul3(X2PP,mul3(mul3(BRADI,mul3([sc[0],0,0,0,sc[1],0,0,0,sc[2]],BRAD)),PP2X));
+  const n=mv3(M,cw), g=1/Math.max(n[0],n[1],n[2]), cap=cw.map(v=>clamp(v*16,0,1));
+  M=M.map((v,i)=>v*g*cap[i%3]);
+  return {clip:cw.map(v=>Math.max(v,1/16)),M};
+}
+
 function hslLUT(s){   // adjustment per hue: R = hue shift, G = saturation, B = luminance, 128 = none
   const px=new Uint8Array(1024);
   for(let i=0;i<256;i++){const [a,b,u]=bandAt(Math.min(359.999,i/255*360));
@@ -949,6 +1012,7 @@ function uploadSources(){   // preview, mipmapped blur pyramid (clarity, dehaze,
   const bd=bl.getContext('2d').getImageData(0,0,bl.width,bl.height).data, lum=new Uint8Array(bl.width*bl.height);
   for(let i=0;i<lum.length;i++) lum[i]=Math.round(.2126*bd[i*4]+.7152*bd[i*4+1]+.0722*bd[i*4+2]);
   img.lum={w:bl.width,h:bl.height,d:lum}; img.lumId=(img.lumId||0)+1;
+  { let sl=0; for(let i=0;i<lum.length;i++) sl+=Math.log(Math.pow(lum[i]/255,2.2)+1e-4); img.key=clamp(Math.pow(Math.exp(sl/lum.length),1/2.2),.15,.6); }   // middle brightness: log-average of linear light, back in display terms
   const d=img.pick.getContext('2d').getImageData(0,0,img.pick.width,img.pick.height).data; let best=-1,bi=0;
   for(let i=0;i<d.length;i+=16){const l=d[i]+d[i+1]+d[i+2]; if(l>best){best=l;bi=i;}}
   img.air=[0,1,2].map(k=>.5+.5*d[bi+k]/255);
@@ -978,17 +1042,17 @@ function shrinkPreview(){   // editing is too slow on this machine: work on a sm
 function setUniforms(s,bypass){
   gl.useProgram(P.main);
   const a=s.temp/100, ti=s.tint/100; let r=1+.4*a, g=1-.25*ti, b=1-.4*a; const l=.2126*r+.7152*g+.0722*b;
-  gl.uniform3f(U.uWb,r/l,g/l,b/l);
   gl.uniform1f(U.uExp,Math.pow(2,s.exposure));
   const f=(u,v)=>gl.uniform1f(U[u],v/100);
   f('uCon',s.contrast);f('uHi',s.highlights);f('uSh',s.shadows);f('uWh',s.whites);f('uBl',s.blacks);f('uCla',s.clarity);
   f('uVib',s.vibrance);f('uSat',s.saturation);f('uVig',s.vignette);f('uGrain',s.grain);f('uBal',s.grade.balance);
-  f('uDehaze',s.dehaze); f('uGlow',s.glow); gl.uniform1f(U.uGlowLod,1+s.glowR/100*4.5); gl.uniform3f(U.uAir,img.air[0],img.air[1],img.air[2]);
+  gl.uniform1f(U.uKey,img.key||.5); f('uDehaze',s.dehaze); f('uGlow',s.glow); gl.uniform1f(U.uGlowLod,1+s.glowR/100*4.5); gl.uniform3f(U.uAir,img.air[0],img.air[1],img.air[2]);
   const cr=curO.crop||curCrop(); gl.uniform4f(U.uCrop,cr[0],cr[1],cr[2],cr[3]);
   gl.uniform1f(U.uBw,s.bw?1:0); gl.uniform1f(U.uBypass,bypass?1:0); gl.uniform1f(U.uAspect,(img.ow*cr[2])/(img.oh*cr[3]));
   gl.uniform1f(U.uSplitOn,curO.split?1:0); if(curO.split){const v=splitVec();gl.uniform3f(U.uSplit,v[0],v[1],v[2]);}
   gl.uniform1f(U.uGAmt,s.gmap.amt/100);
-  { const c=calMatrix(s.cal); gl.uniformMatrix3fv(U.uCal,false,[c[0],c[3],c[6],c[1],c[4],c[7],c[2],c[5],c[8]]); gl.uniform1f(U.uCalSh,s.cal.sh/100); }
+  { const wb=wbStage(s.temp,s.tint), c=mul3(W2S,mul3(calCore(s.cal),wb.M)), tr=m=>[m[0],m[3],m[6],m[1],m[4],m[7],m[2],m[5],m[8]];
+    gl.uniformMatrix3fv(U.uS2W,false,tr(S2W)); gl.uniform3f(U.uWbClip,wb.clip[0],wb.clip[1],wb.clip[2]); gl.uniformMatrix3fv(U.uCal,false,[c[0],c[3],c[6],c[1],c[4],c[7],c[2],c[5],c[8]]); gl.uniform1f(U.uCalSh,s.cal.sh/100); }
   const m=s.cm; gl.uniformMatrix3fv(U.uCm,false,[m.r[0],m.g[0],m.b[0],m.r[1],m.g[1],m.b[1],m.r[2],m.g[2],m.b[2]].map(v=>v/100)); gl.uniform3f(U.uCmK,m.r[3]/100,m.g[3]/100,m.b[3]/100);
   for(const [u,k] of [['uTintS','sh'],['uTintM','mid'],['uTintH','hi']]){const c=hsl2rgb(s.grade[k][0],1,.5),q=s.grade[k][1]/100*.5;gl.uniform3f(U[u],(c[0]-.5)*q,(c[1]-.5)*q,(c[2]-.5)*q);}
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false);
